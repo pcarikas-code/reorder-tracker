@@ -1,0 +1,1 @@
+ALTER TABLE `purchaseLines` MODIFY COLUMN `productType` enum('standard','mesh_top','long_drop','other') DEFAULT 'other';
