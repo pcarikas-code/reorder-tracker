@@ -50,3 +50,4 @@
 - [x] Add progress indicator for data cleanup
 - [x] Optimize cleanup to use bulk deletes (500 records per query)
 - [x] Fix duplicate pending matches - added unique constraint on unleashOrderGuid and cleaned up duplicates
+- [x] Auto-refresh cleanup preview after sync completes

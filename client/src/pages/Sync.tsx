@@ -64,7 +64,7 @@ export default function Sync() {
     refetchInterval: isRunning ? 2000 : false,
   });
   
-  // When sync completes, invalidate all data
+  // When sync completes, invalidate all data and refresh cleanup preview
   useEffect(() => {
     if (wasRunning.current && !isRunning && syncStatus?.status === 'completed') {
       toast.success(`Sync completed! Processed ${syncStatus.recordsProcessed || 0} records.`);
@@ -73,9 +73,11 @@ export default function Sync() {
       utils.reorders.statuses.invalidate();
       utils.forecasts.list.invalidate();
       utils.matches.pending.invalidate();
+      // Refresh cleanup preview to check for orphan records
+      refetchCleanup();
     }
     wasRunning.current = isRunning;
-  }, [isRunning, syncStatus?.status, syncStatus?.recordsProcessed, utils]);
+  }, [isRunning, syncStatus?.status, syncStatus?.recordsProcessed, utils, refetchCleanup]);
 
   // Calculate progress percentage from step string
   const getProgressPercent = (step: string | undefined): number => {
