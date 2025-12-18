@@ -39,3 +39,4 @@
 - [x] Combine Match to Area and New Area dialogs into single Resolve Match dialog with tabs
 - [x] Filter area dropdown in Resolve Match dialog to only show areas from current hospital
 - [x] Add "Confirm Match" and "Confirm & Next" buttons to Resolve Match dialog
+- [x] Order pending matches by hospital name, then by area text

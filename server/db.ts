@@ -395,7 +395,7 @@ export async function getPendingMatches() {
     .innerJoin(purchases, eq(pendingMatches.purchaseId, purchases.id))
     .innerJoin(hospitals, eq(purchases.hospitalId, hospitals.id))
     .where(eq(pendingMatches.status, 'pending'))
-    .orderBy(desc(pendingMatches.createdAt));
+    .orderBy(hospitals.customerName, pendingMatches.rawAreaText);
   
   return results;
 }
