@@ -208,8 +208,12 @@ export const appRouter = router({
     byHospital: protectedProcedure.input(z.object({ hospitalId: z.number() })).query(async ({ input }) => db.getAreasByHospital(input.hospitalId)),
     create: protectedProcedure.input(z.object({ hospitalId: z.number(), name: z.string(), normalizedName: z.string().optional() })).mutation(async ({ input }) => db.createArea({ hospitalId: input.hospitalId, name: input.name, normalizedName: input.normalizedName })),
     update: protectedProcedure.input(z.object({ id: z.number(), name: z.string().optional(), normalizedName: z.string().optional(), isConfirmed: z.boolean().optional() })).mutation(async ({ input }) => { const { id, ...data } = input; await db.updateArea(id, data); return { success: true }; }),
+    rename: protectedProcedure.input(z.object({ areaId: z.number(), newName: z.string() })).mutation(async ({ input }) => { await db.updateAreaName(input.areaId, input.newName); return { success: true }; }),
     addAlias: protectedProcedure.input(z.object({ areaId: z.number(), alias: z.string() })).mutation(async ({ input }) => { await db.addAreaAlias({ areaId: input.areaId, alias: input.alias }); return { success: true }; }),
     getAliases: protectedProcedure.input(z.object({ areaId: z.number() })).query(async ({ input }) => db.getAliasesForArea(input.areaId)),
+    getPurchases: protectedProcedure.input(z.object({ areaId: z.number() })).query(async ({ input }) => db.getPurchasesForArea(input.areaId)),
+    unlinkPurchase: protectedProcedure.input(z.object({ purchaseId: z.number() })).mutation(async ({ input }) => { await db.unlinkPurchaseFromArea(input.purchaseId); return { success: true }; }),
+    movePurchase: protectedProcedure.input(z.object({ purchaseId: z.number(), newAreaId: z.number() })).mutation(async ({ input }) => { await db.movePurchaseToArea(input.purchaseId, input.newAreaId); return { success: true }; }),
   }),
 
   reorders: router({

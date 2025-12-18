@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Tag, Building2, Ban, Undo2 } from "lucide-react";
+import { Search, Plus, Tag, Ban, Undo2, Pencil, FileText, Unlink, ArrowRight } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
@@ -22,14 +22,25 @@ export default function Areas() {
   const [hospitalFilter, setHospitalFilter] = useState<string>("all");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showAliasDialog, setShowAliasDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showPurchasesDialog, setShowPurchasesDialog] = useState(false);
   const [selectedAreaId, setSelectedAreaId] = useState<number | null>(null);
+  const [selectedAreaName, setSelectedAreaName] = useState("");
+  const [selectedAreaHospitalId, setSelectedAreaHospitalId] = useState<number | null>(null);
   const [newAreaName, setNewAreaName] = useState("");
   const [newAreaHospitalId, setNewAreaHospitalId] = useState<string>("");
   const [newAlias, setNewAlias] = useState("");
+  const [editAreaName, setEditAreaName] = useState("");
+  const [moveToAreaId, setMoveToAreaId] = useState<string>("");
 
   const { data: selectedAreaAliases } = trpc.areas.getAliases.useQuery(
     { areaId: selectedAreaId! },
-    { enabled: !!selectedAreaId }
+    { enabled: !!selectedAreaId && showAliasDialog }
+  );
+
+  const { data: selectedAreaPurchases, refetch: refetchPurchases } = trpc.areas.getPurchases.useQuery(
+    { areaId: selectedAreaId! },
+    { enabled: !!selectedAreaId && showPurchasesDialog }
   );
 
   const createArea = trpc.areas.create.useMutation({
@@ -43,11 +54,40 @@ export default function Areas() {
     onError: (error) => toast.error(`Failed: ${error.message}`),
   });
 
+  const renameArea = trpc.areas.rename.useMutation({
+    onSuccess: () => {
+      toast.success("Area renamed");
+      utils.areas.list.invalidate();
+      setShowEditDialog(false);
+      setEditAreaName("");
+    },
+    onError: (error) => toast.error(`Failed: ${error.message}`),
+  });
+
   const addAlias = trpc.areas.addAlias.useMutation({
     onSuccess: () => {
       toast.success("Alias added");
       utils.areas.getAliases.invalidate({ areaId: selectedAreaId! });
       setNewAlias("");
+    },
+    onError: (error) => toast.error(`Failed: ${error.message}`),
+  });
+
+  const unlinkPurchase = trpc.areas.unlinkPurchase.useMutation({
+    onSuccess: () => {
+      toast.success("Purchase unlinked - it will appear in pending matches");
+      refetchPurchases();
+      utils.matches.pending.invalidate();
+      utils.reorders.statuses.invalidate();
+    },
+    onError: (error) => toast.error(`Failed: ${error.message}`),
+  });
+
+  const movePurchase = trpc.areas.movePurchase.useMutation({
+    onSuccess: () => {
+      toast.success("Purchase moved to new area");
+      refetchPurchases();
+      utils.reorders.statuses.invalidate();
     },
     onError: (error) => toast.error(`Failed: ${error.message}`),
   });
@@ -81,6 +121,26 @@ export default function Areas() {
     return counts;
   }, [areas]);
 
+  // Get areas for the same hospital (for move dropdown)
+  const sameHospitalAreas = useMemo(() => {
+    if (!areas || !selectedAreaHospitalId) return [];
+    return areas.filter(a => a.hospitalId === selectedAreaHospitalId && a.id !== selectedAreaId).sort((a, b) => a.name.localeCompare(b.name));
+  }, [areas, selectedAreaHospitalId, selectedAreaId]);
+
+  const openEditDialog = (area: { id: number; name: string }) => {
+    setSelectedAreaId(area.id);
+    setEditAreaName(area.name);
+    setShowEditDialog(true);
+  };
+
+  const openPurchasesDialog = (area: { id: number; name: string; hospitalId: number }) => {
+    setSelectedAreaId(area.id);
+    setSelectedAreaName(area.name);
+    setSelectedAreaHospitalId(area.hospitalId);
+    setMoveToAreaId("");
+    setShowPurchasesDialog(true);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -98,63 +158,31 @@ export default function Areas() {
                 <DialogTitle>Add New Area</DialogTitle>
                 <DialogDescription>Create a new hospital area for tracking.</DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label>Hospital</Label>
                   <Select value={newAreaHospitalId} onValueChange={setNewAreaHospitalId}>
                     <SelectTrigger><SelectValue placeholder="Select hospital..." /></SelectTrigger>
                     <SelectContent>
-                      {hospitals?.map(h => <SelectItem key={h.id} value={h.id.toString()}>{h.customerName}</SelectItem>)}
+                      {hospitals?.map(h => (
+                        <SelectItem key={h.id} value={h.id.toString()}>{h.customerName}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Area Name</Label>
-                  <Input value={newAreaName} onChange={(e) => setNewAreaName(e.target.value)} placeholder="e.g., ICU, Emergency Department" />
+                  <Input value={newAreaName} onChange={(e) => setNewAreaName(e.target.value)} placeholder="e.g., ICU, Ward 3, Emergency" />
                 </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button>
-                <Button onClick={() => createArea.mutate({ hospitalId: parseInt(newAreaHospitalId), name: newAreaName })} disabled={!newAreaName || !newAreaHospitalId || createArea.isPending}>
+                <Button onClick={() => createArea.mutate({ hospitalId: parseInt(newAreaHospitalId), name: newAreaName })} disabled={!newAreaHospitalId || !newAreaName || createArea.isPending}>
                   Create Area
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </div>
-
-        {/* Summary */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Building2 className="h-4 w-4" />Total Areas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{areas?.length || 0}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Building2 className="h-4 w-4" />Hospitals
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{hospitals?.length || 0}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Tag className="h-4 w-4" />Confirmed Areas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{areas?.filter(a => a.isConfirmed).length || 0}</div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Filters */}
@@ -218,9 +246,15 @@ export default function Areas() {
                           )}
                         </TableCell>
                         <TableCell>{new Date(area.createdAt).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm" onClick={() => { setSelectedAreaId(area.id); setShowAliasDialog(true); }}>
-                            <Tag className="h-4 w-4 mr-1" />Aliases
+                        <TableCell className="text-right space-x-1">
+                          <Button variant="ghost" size="sm" onClick={() => openEditDialog(area)} title="Edit area name">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => openPurchasesDialog(area)} title="View linked purchases">
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => { setSelectedAreaId(area.id); setShowAliasDialog(true); }} title="Manage aliases">
+                            <Tag className="h-4 w-4" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -290,6 +324,108 @@ export default function Areas() {
             </CardContent>
           </Card>
         )}
+
+        {/* Edit Area Name Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={(open) => { setShowEditDialog(open); if (!open) setSelectedAreaId(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Area Name</DialogTitle>
+              <DialogDescription>Change the name of this area.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>New Area Name</Label>
+                <Input value={editAreaName} onChange={(e) => setEditAreaName(e.target.value)} placeholder="Enter new name..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
+              <Button 
+                onClick={() => renameArea.mutate({ areaId: selectedAreaId!, newName: editAreaName })} 
+                disabled={!editAreaName || renameArea.isPending}
+              >
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Linked Purchases Dialog */}
+        <Dialog open={showPurchasesDialog} onOpenChange={(open) => { setShowPurchasesDialog(open); if (!open) { setSelectedAreaId(null); setSelectedAreaName(""); setSelectedAreaHospitalId(null); } }}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Linked Purchases - {selectedAreaName}</DialogTitle>
+              <DialogDescription>View and manage orders linked to this area. You can unlink orders or move them to a different area.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedAreaPurchases?.length === 0 ? (
+                <p className="text-center py-8 text-muted-foreground">No purchases linked to this area.</p>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Order</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Reference</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedAreaPurchases?.map((purchase) => (
+                        <TableRow key={purchase.id}>
+                          <TableCell className="font-medium">{purchase.orderNumber}</TableCell>
+                          <TableCell>{new Date(purchase.orderDate).toLocaleDateString()}</TableCell>
+                          <TableCell className="max-w-[200px] truncate" title={purchase.customerRef || undefined}>
+                            {purchase.customerRef || purchase.rawAreaText || '-'}
+                          </TableCell>
+                          <TableCell className="text-right space-x-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => unlinkPurchase.mutate({ purchaseId: purchase.id })}
+                              disabled={unlinkPurchase.isPending}
+                              title="Unlink and send to pending matches"
+                            >
+                              <Unlink className="h-4 w-4 mr-1" />
+                              Unlink
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+              
+              {/* Move to different area section */}
+              {selectedAreaPurchases && selectedAreaPurchases.length > 0 && sameHospitalAreas.length > 0 && (
+                <div className="border-t pt-4 mt-4">
+                  <Label className="text-sm font-medium">Move Selected Purchase to Different Area</Label>
+                  <p className="text-sm text-muted-foreground mb-2">Select a purchase above, then choose a destination area.</p>
+                  <div className="flex gap-2 items-center">
+                    <Select value={moveToAreaId} onValueChange={setMoveToAreaId}>
+                      <SelectTrigger className="w-[300px]">
+                        <SelectValue placeholder="Select destination area..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sameHospitalAreas.map(a => (
+                          <SelectItem key={a.id} value={a.id.toString()}>{a.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    To move a purchase: click "Unlink" to send it to pending matches, then re-match it to the correct area.
+                  </p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPurchasesDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Aliases Dialog */}
         <Dialog open={showAliasDialog} onOpenChange={(open) => { setShowAliasDialog(open); if (!open) setSelectedAreaId(null); }}>

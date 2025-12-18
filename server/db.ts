@@ -729,3 +729,60 @@ export async function getExcludedPurchases() {
   
   return results;
 }
+
+// Update area name
+export async function updateAreaName(areaId: number, newName: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(areas).set({ name: newName }).where(eq(areas.id, areaId));
+}
+
+// Get purchases linked to an area with details
+export async function getPurchasesForArea(areaId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const results = await db
+    .select({
+      id: purchases.id,
+      orderNumber: purchases.orderNumber,
+      orderDate: purchases.orderDate,
+      customerRef: purchases.customerRef,
+      rawAreaText: purchases.rawAreaText,
+      hospitalId: hospitals.id,
+      hospitalName: hospitals.customerName,
+    })
+    .from(purchases)
+    .innerJoin(hospitals, eq(purchases.hospitalId, hospitals.id))
+    .where(eq(purchases.areaId, areaId))
+    .orderBy(desc(purchases.orderDate));
+  
+  return results;
+}
+
+// Unlink a purchase from its area (sets areaId to null and creates pending match)
+export async function unlinkPurchaseFromArea(purchaseId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  // Get the purchase first
+  const [purchase] = await db.select().from(purchases).where(eq(purchases.id, purchaseId));
+  if (!purchase) return;
+  
+  // Set areaId to null
+  await db.update(purchases).set({ areaId: null }).where(eq(purchases.id, purchaseId));
+  
+  // Create a pending match for this purchase
+  await db.insert(pendingMatches).values({
+    purchaseId: purchase.id,
+    rawAreaText: purchase.rawAreaText || purchase.customerRef || 'Unknown',
+    status: 'pending',
+  });
+}
+
+// Move a purchase to a different area
+export async function movePurchaseToArea(purchaseId: number, newAreaId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(purchases).set({ areaId: newAreaId }).where(eq(purchases.id, purchaseId));
+}
