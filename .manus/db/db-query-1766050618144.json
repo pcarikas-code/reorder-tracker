@@ -1,0 +1,14 @@
+{
+  "query": "SELECT COUNT(*) as total, COUNT(DISTINCT purchaseId) as unique_purchases FROM pendingMatches WHERE status = 'pending'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT COUNT(*) as total, COUNT(DISTINCT purchaseId) as unique_purchases FROM pendingMatches WHERE status = 'pending'",
+  "rows": [
+    {
+      "total": "2328",
+      "unique_purchases": "2328"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\tunique_purchases\n2328\t2328\n",
+  "stderr": "",
+  "execution_time_ms": 1520
+}

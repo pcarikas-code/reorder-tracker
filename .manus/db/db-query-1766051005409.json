@@ -1,0 +1,15 @@
+{
+  "query": "SELECT COUNT(*) as total_purchases, COUNT(DISTINCT unleashOrderGuid) as unique_orders, (SELECT COUNT(*) FROM pendingMatches WHERE status = 'pending') as pending_matches FROM purchases",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT COUNT(*) as total_purchases, COUNT(DISTINCT unleashOrderGuid) as unique_orders, (SELECT COUNT(*) FROM pendingMatches WHERE status = 'pending') as pending_matches FROM purchases",
+  "rows": [
+    {
+      "total_purchases": "745",
+      "unique_orders": "745",
+      "pending_matches": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_purchases\tunique_orders\tpending_matches\n745\t745\t0\n",
+  "stderr": "",
+  "execution_time_ms": 1584
+}

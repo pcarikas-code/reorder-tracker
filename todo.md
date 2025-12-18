@@ -49,3 +49,4 @@
 - [x] Optimize batch upsert operations to use true bulk inserts (hospitals, purchases, purchase lines)
 - [x] Add progress indicator for data cleanup
 - [x] Optimize cleanup to use bulk deletes (500 records per query)
+- [x] Fix duplicate pending matches - added unique constraint on unleashOrderGuid and cleaned up duplicates

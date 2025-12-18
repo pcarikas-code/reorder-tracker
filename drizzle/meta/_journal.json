@@ -36,6 +36,13 @@
       "when": 1766049503454,
       "tag": "0004_petite_wong",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1766051013297,
+      "tag": "0005_mighty_master_chief",
+      "breakpoints": true
     }
   ]
 }

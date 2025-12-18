@@ -1,0 +1,30 @@
+{
+  "query": "SELECT orderNumber, COUNT(*) as cnt FROM purchases GROUP BY orderNumber ORDER BY cnt DESC LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT orderNumber, COUNT(*) as cnt FROM purchases GROUP BY orderNumber ORDER BY cnt DESC LIMIT 5",
+  "rows": [
+    {
+      "orderNumber": "SO-U-00000070",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000614",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000094",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000915",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000551",
+      "cnt": "7"
+    }
+  ],
+  "messages": [],
+  "stdout": "orderNumber\tcnt\nSO-U-00000070\t7\nSO-U-00000614\t7\nSO-U-00000094\t7\nSO-U-00000915\t7\nSO-U-00000551\t7\n",
+  "stderr": "",
+  "execution_time_ms": 1543
+}

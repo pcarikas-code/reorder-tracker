@@ -57,7 +57,7 @@ export type InsertAreaAlias = typeof areaAliases.$inferInsert;
 // Purchases synced from Unleashed
 export const purchases = mysqlTable("purchases", {
   id: int("id").autoincrement().primaryKey(),
-  unleashOrderGuid: varchar("unleashOrderGuid", { length: 64 }).notNull(),
+  unleashOrderGuid: varchar("unleashOrderGuid", { length: 64 }).notNull().unique(),
   orderNumber: varchar("orderNumber", { length: 50 }).notNull(),
   orderDate: timestamp("orderDate").notNull(),
   hospitalId: int("hospitalId").notNull(),

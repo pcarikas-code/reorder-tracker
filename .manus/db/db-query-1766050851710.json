@@ -1,0 +1,50 @@
+{
+  "query": "SELECT orderNumber, COUNT(*) as cnt FROM purchases GROUP BY orderNumber HAVING cnt > 1 LIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT orderNumber, COUNT(*) as cnt FROM purchases GROUP BY orderNumber HAVING cnt > 1 LIMIT 10",
+  "rows": [
+    {
+      "orderNumber": "SO-U-00000583",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000526",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000563",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000902",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000175",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000377",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000045",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000350",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000044",
+      "cnt": "7"
+    },
+    {
+      "orderNumber": "SO-U-00000623",
+      "cnt": "7"
+    }
+  ],
+  "messages": [],
+  "stdout": "orderNumber\tcnt\nSO-U-00000583\t7\nSO-U-00000526\t7\nSO-U-00000563\t7\nSO-U-00000902\t7\nSO-U-00000175\t7\nSO-U-00000377\t7\nSO-U-00000045\t7\nSO-U-00000350\t7\nSO-U-00000044\t7\nSO-U-00000623\t7\n",
+  "stderr": "",
+  "execution_time_ms": 1525
+}

@@ -1,0 +1,15 @@
+{
+  "query": "SELECT (SELECT COUNT(*) FROM pendingMatches WHERE status = 'pending') as pending_count, (SELECT COUNT(*) FROM purchases) as purchase_count, (SELECT COUNT(*) FROM purchases WHERE areaId IS NULL) as unmatched_purchases",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT (SELECT COUNT(*) FROM pendingMatches WHERE status = 'pending') as pending_count, (SELECT COUNT(*) FROM purchases) as purchase_count, (SELECT COUNT(*) FROM purchases WHERE areaId IS NULL) as unmatched_purchases",
+  "rows": [
+    {
+      "pending_count": "2328",
+      "purchase_count": "5215",
+      "unmatched_purchases": "5119"
+    }
+  ],
+  "messages": [],
+  "stdout": "pending_count\tpurchase_count\tunmatched_purchases\n2328\t5215\t5119\n",
+  "stderr": "",
+  "execution_time_ms": 1531
+}
