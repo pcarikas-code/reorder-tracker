@@ -8,6 +8,11 @@ import * as synchub from "./synchub";
 import { invokeLLM } from "./_core/llm";
 import { notifyOwner } from "./_core/notification";
 
+// Helper to update sync progress
+async function updateSyncProgress(syncLogId: number, step: string, detail: string): Promise<void> {
+  await db.updateSyncLog(syncLogId, { progressStep: step, progressDetail: detail });
+}
+
 // Background sync function
 async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise<void> {
   let recordsProcessed = 0;
@@ -15,13 +20,16 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
   console.log(`[Sync ${syncLogId}] Starting ${syncType} sync...${sinceDate ? ` (since ${sinceDate.toISOString()})` : ''}`);
   try {
     // Step 1: Sync customers (hospitals)
+    await updateSyncProgress(syncLogId, 'Step 1/6', 'Fetching customers from Synchub...');
     console.log(`[Sync ${syncLogId}] Step 1: Fetching customers...`);
     const customers = await synchub.fetchCustomers();
     console.log(`[Sync ${syncLogId}] Fetched ${customers.length} customers`);
+    await updateSyncProgress(syncLogId, 'Step 1/6', `Saving ${customers.length} customers...`);
     await db.batchUpsertHospitals(customers.map(c => ({ unleashGuid: c.Guid, customerCode: c.CustomerCode, customerName: c.CustomerName })));
     recordsProcessed += customers.length;
     
     // Step 2: Get reference data once
+    await updateSyncProgress(syncLogId, 'Step 2/6', 'Loading reference data...');
     console.log(`[Sync ${syncLogId}] Step 2: Getting reference data...`);
     const allHospitals = await db.getAllHospitals();
     const hospitalMap = new Map<string, number>();
@@ -31,15 +39,19 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     console.log(`[Sync ${syncLogId}] Reference data: ${allHospitals.length} hospitals, ${allAreas.length} areas, ${allAliases.length} aliases`);
     
     // Step 3: Fetch orders and order lines together to filter for Endurocide products
+    await updateSyncProgress(syncLogId, 'Step 3/6', 'Fetching sales orders from Synchub...');
     console.log(`[Sync ${syncLogId}] Step 3: Fetching orders${sinceDate ? ` modified since ${sinceDate.toISOString()}` : ''}...`);
     const orders = await synchub.fetchSalesOrders(sinceDate);
     console.log(`[Sync ${syncLogId}] Fetched ${orders.length} orders`);
+    await updateSyncProgress(syncLogId, 'Step 3/6', `Found ${orders.length} orders, fetching product lines...`);
     
     // Step 3b: Fetch order lines FIRST to identify which orders have Endurocide products
+    await updateSyncProgress(syncLogId, 'Step 3/6', `Fetching order lines for ${orders.length} orders (this may take a while)...`);
     console.log(`[Sync ${syncLogId}] Step 3b: Fetching order lines to filter for Endurocide products...`);
     const orderGuids = orders.map(o => o.Guid);
     const allLines = orderGuids.length > 0 ? await synchub.fetchSalesOrderLines(orderGuids) : [];
     console.log(`[Sync ${syncLogId}] Fetched ${allLines.length} Endurocide product lines`);
+    await updateSyncProgress(syncLogId, 'Step 3/6', `Found ${allLines.length} Endurocide product lines`);
     
     // Build set of order GUIDs that have at least one Endurocide product
     const ordersWithEndurocide = new Set<string>();
@@ -76,12 +88,14 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     console.log(`[Sync ${syncLogId}] Order processing: ${skippedNoEndurocide} skipped (no Endurocide products), ${skippedNoHospital} skipped (no hospital), ${skippedNoRawArea} skipped (no area text), ${matchedToArea} matched to existing areas, ${pendingMatchesToCreate.length} need matching`);
     
     // Step 4: Batch upsert purchases
+    await updateSyncProgress(syncLogId, 'Step 4/6', `Saving ${purchasesToUpsert.length} purchases...`);
     console.log(`[Sync ${syncLogId}] Step 4: Upserting ${purchasesToUpsert.length} purchases...`);
     await db.batchUpsertPurchases(purchasesToUpsert);
     recordsProcessed += purchasesToUpsert.length;
     console.log(`[Sync ${syncLogId}] Purchases upserted`);
     
     // Step 5: Get all purchases for mapping and create pending matches
+    await updateSyncProgress(syncLogId, 'Step 5/6', 'Creating pending matches...');
     console.log(`[Sync ${syncLogId}] Step 5: Creating pending matches...`);
     const allPurchases = await db.getAllPurchases();
     const purchaseMap = new Map<string, number>();
@@ -99,8 +113,10 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     console.log(`[Sync ${syncLogId}] Created ${pendingMatchInserts.length} pending matches`);
     
     // Step 6: Process order lines (already fetched in Step 3b)
+    await updateSyncProgress(syncLogId, 'Step 6/6', `Processing ${allLines.length} order lines...`);
     console.log(`[Sync ${syncLogId}] Step 6: Processing ${allLines.length} order lines...`);
     if (allLines.length > 0) {
+      await updateSyncProgress(syncLogId, 'Step 6/6', 'Fetching product catalog...');
       const products = await synchub.fetchProducts();
       const productMap = new Map<string, typeof products[0]>();
       for (const p of products) productMap.set(p.Guid, p);
@@ -118,6 +134,7 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
       }
       console.log(`[Sync ${syncLogId}] Line processing: ${lineInserts.length} to insert, skipped: ${skippedNoPurchase} no purchase, ${skippedNoProduct} no product`);
       if (lineInserts.length > 0) {
+        await updateSyncProgress(syncLogId, 'Step 6/6', `Saving ${lineInserts.length} purchase lines...`);
         console.log(`[Sync ${syncLogId}] Inserting ${lineInserts.length} purchase lines...`);
         await db.createPurchaseLines(lineInserts);
         console.log(`[Sync ${syncLogId}] Purchase lines inserted`);
@@ -125,6 +142,7 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
       recordsProcessed += lineInserts.length;
     }
     
+    await updateSyncProgress(syncLogId, 'Complete', `Processed ${recordsProcessed} records`);
     await db.updateSyncLog(syncLogId, { status: 'completed', recordsProcessed, completedAt: new Date() });
     console.log(`Sync completed: ${recordsProcessed} records processed`);
   } catch (error) {

@@ -44,3 +44,4 @@
 - [x] Fix "Match not found" error when using Confirm & Next (use next item from current list)
 - [x] Exclude orders without Endurocide products from sync (don't create purchase records for non-curtain orders)
 - [x] Add cleanup script to remove orphan purchases (no product lines) and their pending matches
+- [x] Add live progress indicator to sync status card showing current step and errors

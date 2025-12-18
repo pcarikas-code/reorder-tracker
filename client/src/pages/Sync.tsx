@@ -4,7 +4,8 @@ import { useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, CheckCircle, XCircle, Clock, Database, Trash2, AlertTriangle } from "lucide-react";
+import { RefreshCw, CheckCircle, XCircle, Clock, Database, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 
 export default function Sync() {
@@ -62,6 +63,19 @@ export default function Sync() {
     wasRunning.current = isRunning;
   }, [isRunning, syncStatus?.status, syncStatus?.recordsProcessed, utils]);
 
+  // Calculate progress percentage from step string
+  const getProgressPercent = (step: string | undefined): number => {
+    if (!step) return 0;
+    if (step === 'Complete') return 100;
+    const match = step.match(/Step (\d+)\/(\d+)/);
+    if (match) {
+      const current = parseInt(match[1]);
+      const total = parseInt(match[2]);
+      return Math.round((current / total) * 100);
+    }
+    return 10; // Default to 10% if can't parse
+  };
+
   const getStatusBadge = (status: string | undefined) => {
     switch (status) {
       case 'completed':
@@ -105,6 +119,28 @@ export default function Sync() {
                     <span className="text-sm text-muted-foreground">Status</span>
                     {getStatusBadge(syncStatus.status)}
                   </div>
+                  
+                  {/* Progress indicator when running */}
+                  {syncStatus.status === 'running' && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                        <span className="text-sm font-medium text-blue-800">
+                          {(syncStatus as any).progressStep || 'Starting...'}
+                        </span>
+                      </div>
+                      {(syncStatus as any).progressDetail && (
+                        <p className="text-xs text-blue-600">
+                          {(syncStatus as any).progressDetail}
+                        </p>
+                      )}
+                      <Progress 
+                        value={getProgressPercent((syncStatus as any).progressStep)} 
+                        className="h-2" 
+                      />
+                    </div>
+                  )}
+                  
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Started</span>
                     <span className="text-sm">{new Date(syncStatus.startedAt).toLocaleString()}</span>
@@ -115,7 +151,7 @@ export default function Sync() {
                       <span className="text-sm">{new Date(syncStatus.completedAt).toLocaleString()}</span>
                     </div>
                   )}
-                  {syncStatus.recordsProcessed !== null && (
+                  {syncStatus.recordsProcessed !== null && syncStatus.status !== 'running' && (
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Records Processed</span>
                       <span className="text-sm font-medium">{syncStatus.recordsProcessed}</span>
@@ -123,7 +159,7 @@ export default function Sync() {
                   )}
                   {syncStatus.errorMessage && (
                     <div className="mt-2 p-2 bg-destructive/10 rounded text-sm text-destructive">
-                      {syncStatus.errorMessage}
+                      <strong>Error:</strong> {syncStatus.errorMessage}
                     </div>
                   )}
                 </div>

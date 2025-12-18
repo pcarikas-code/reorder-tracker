@@ -129,6 +129,8 @@ export const syncLogs = mysqlTable("syncLogs", {
   syncType: varchar("syncType", { length: 50 }).notNull(),
   status: mysqlEnum("status", ["running", "completed", "failed"]).notNull(),
   recordsProcessed: int("recordsProcessed").default(0),
+  progressStep: varchar("progressStep", { length: 100 }),
+  progressDetail: text("progressDetail"),
   errorMessage: text("errorMessage"),
   startedAt: timestamp("startedAt").defaultNow().notNull(),
   completedAt: timestamp("completedAt"),
