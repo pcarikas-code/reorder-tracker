@@ -296,6 +296,61 @@ export const appRouter = router({
         };
       }
       
+      // STEP 1: Try simple string matching first (faster and more reliable)
+      const refText = (input.customerRef || input.rawAreaText).toLowerCase();
+      const rawText = input.rawAreaText.toLowerCase();
+      
+      // Score each existing area based on string matching
+      const matches: { area: typeof input.existingAreas[0]; score: number; reason: string }[] = [];
+      
+      for (const area of input.existingAreas) {
+        const areaName = area.name.toLowerCase();
+        const areaWords = areaName.split(/[\s-]+/).filter(w => w.length > 2);
+        
+        // Check for exact area name in reference
+        if (refText.includes(areaName)) {
+          matches.push({ area, score: 100, reason: `Exact match: "${area.name}" found in reference` });
+          continue;
+        }
+        
+        // Check if area name contains the raw text or vice versa
+        if (areaName.includes(rawText) || rawText.includes(areaName)) {
+          matches.push({ area, score: 95, reason: `Strong match: "${area.name}" matches extracted text` });
+          continue;
+        }
+        
+        // Check for significant word matches (e.g., PACU, ICU, Ward, ED)
+        let wordMatches = 0;
+        let matchedWords: string[] = [];
+        for (const word of areaWords) {
+          if (refText.includes(word)) {
+            wordMatches++;
+            matchedWords.push(word);
+          }
+        }
+        
+        if (wordMatches > 0) {
+          const score = Math.min(90, 60 + (wordMatches * 15));
+          matches.push({ area, score, reason: `Word match: "${matchedWords.join(', ')}" found in reference` });
+        }
+      }
+      
+      // If we found good string matches, return the best one without calling AI
+      if (matches.length > 0) {
+        matches.sort((a, b) => b.score - a.score);
+        const best = matches[0];
+        if (best.score >= 70) {
+          return {
+            bestMatchId: best.area.id,
+            confidence: best.score,
+            reasoning: best.reason,
+            isNewArea: false,
+            suggestedName: best.area.name
+          };
+        }
+      }
+      
+      // STEP 2: Fall back to AI for complex matching
       // Build a more detailed prompt with customerRef context
       const prompt = `You are matching a hospital order to an existing area. Your job is to find the BEST match from the existing areas list.
 

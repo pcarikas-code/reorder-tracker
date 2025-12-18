@@ -63,3 +63,4 @@
 - [x] Add merge areas feature to combine duplicate areas
 - [x] Redesign Stock Forecast to use table/list format organized by SKU code
 - [x] Fix AI suggestion matching - improved prompt to match partial strings like PACU to Kenepuru PACU
+- [x] Add simple string matching fallback before AI call (faster, more reliable)
