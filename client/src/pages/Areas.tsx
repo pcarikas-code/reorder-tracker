@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Tag, Building2 } from "lucide-react";
+import { Search, Plus, Tag, Building2, Ban, Undo2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
@@ -16,6 +16,7 @@ export default function Areas() {
   const utils = trpc.useUtils();
   const { data: areas, isLoading } = trpc.areas.list.useQuery();
   const { data: hospitals } = trpc.hospitals.list.useQuery();
+  const { data: excludedOrders } = trpc.matches.excluded.useQuery();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [hospitalFilter, setHospitalFilter] = useState<string>("all");
@@ -47,6 +48,15 @@ export default function Areas() {
       toast.success("Alias added");
       utils.areas.getAliases.invalidate({ areaId: selectedAreaId! });
       setNewAlias("");
+    },
+    onError: (error) => toast.error(`Failed: ${error.message}`),
+  });
+
+  const unexclude = trpc.matches.unexclude.useMutation({
+    onSuccess: () => {
+      toast.success("Order re-included - it will appear in pending matches");
+      utils.matches.excluded.invalidate();
+      utils.matches.pending.invalidate();
     },
     onError: (error) => toast.error(`Failed: ${error.message}`),
   });
@@ -221,6 +231,65 @@ export default function Areas() {
             )}
           </CardContent>
         </Card>
+
+        {/* Excluded Orders Section */}
+        {excludedOrders && excludedOrders.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Ban className="h-5 w-5 text-red-500" />
+                Excluded Orders ({excludedOrders.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                These orders have been excluded from matching. They remain in the database to prevent re-download on sync.
+              </p>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Hospital</TableHead>
+                      <TableHead>Order</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Reference</TableHead>
+                      <TableHead>Reason</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {excludedOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{order.hospitalName}</TableCell>
+                        <TableCell>{order.orderNumber}</TableCell>
+                        <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
+                        <TableCell className="max-w-[200px] truncate" title={order.customerRef || undefined}>
+                          {order.customerRef || '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-red-600">
+                            {order.excludeReason || 'No reason'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => unexclude.mutate({ purchaseId: order.id })}
+                            disabled={unexclude.isPending}
+                          >
+                            <Undo2 className="h-4 w-4 mr-1" />
+                            Re-include
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Aliases Dialog */}
         <Dialog open={showAliasDialog} onOpenChange={(open) => { setShowAliasDialog(open); if (!open) setSelectedAreaId(null); }}>

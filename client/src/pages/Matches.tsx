@@ -259,7 +259,7 @@ export default function Matches() {
 
         {/* Combined Resolve Match Dialog */}
         <Dialog open={!!selectedMatch} onOpenChange={(open) => { if (!open) closeDialog(); }}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Resolve Match</DialogTitle>
               <DialogDescription>
