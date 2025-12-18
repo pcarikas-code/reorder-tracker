@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Search, Download, ChevronDown, ChevronRight } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, Fragment } from "react";
 import { toast } from "sonner";
 
 export default function Forecast() {
@@ -163,9 +163,8 @@ export default function Forecast() {
                   </TableHeader>
                   <TableBody>
                     {skuAggregates.map((sku) => (
-                      <>
+                      <Fragment key={sku.sku}>
                         <TableRow 
-                          key={sku.sku} 
                           className="cursor-pointer hover:bg-muted/50"
                           onClick={() => toggleSku(sku.sku)}
                         >
@@ -212,7 +211,7 @@ export default function Forecast() {
                             </TableCell>
                           </TableRow>
                         )}
-                      </>
+                      </Fragment>
                     ))}
                   </TableBody>
                 </Table>
