@@ -66,3 +66,4 @@
 - [x] Add simple string matching fallback before AI call (faster, more reliable)
 - [x] Fix matching to prefer exact area name matches over partial contains
 - [x] Fix alias checkbox text to update when different area is selected
+- [x] Add auto-suggest on dialog open

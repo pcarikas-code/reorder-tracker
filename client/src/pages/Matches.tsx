@@ -127,6 +127,34 @@ export default function Matches() {
     }
     // Default to "new" tab if no existing areas
     setActiveTab(areas && areas.length > 0 ? "existing" : "new");
+    
+    // Auto-run suggestion when dialog opens
+    const hospitalId = (match as any)?.hospitalId;
+    const hospitalAreas = (areas || []).filter(a => a.hospitalId === hospitalId);
+    if (hospitalAreas.length > 0) {
+      setIsGettingSuggestion(true);
+      getLlmSuggestion.mutateAsync({
+        rawAreaText: match.rawAreaText || "",
+        customerRef: (match as any)?.customerRef || "",
+        hospitalName: (match as any)?.hospitalName || "",
+        existingAreas: hospitalAreas.map(a => ({ id: a.id, name: a.name, hospitalName: a.hospitalName })),
+      }).then(result => {
+        if (result) {
+          setLlmSuggestion(result);
+          if (result.bestMatchId && !result.isNewArea) {
+            setSelectedAreaId(result.bestMatchId.toString());
+            setActiveTab("existing");
+          } else if (result.isNewArea && result.suggestedName) {
+            setNewAreaName(result.suggestedName);
+            setActiveTab("new");
+          }
+        }
+      }).catch(() => {
+        // Silently fail - user can still manually select
+      }).finally(() => {
+        setIsGettingSuggestion(false);
+      });
+    }
   };
 
   const handleGetSuggestion = async () => {
