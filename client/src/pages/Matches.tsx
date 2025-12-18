@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Check, X, Sparkles, Plus, Link } from "lucide-react";
+import { AlertTriangle, Check, X, Sparkles, Plus, Link, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -28,12 +28,18 @@ export default function Matches() {
   const [llmSuggestion, setLlmSuggestion] = useState<{ bestMatchId: number | null; confidence: number; reasoning: string; isNewArea: boolean; suggestedName: string } | null>(null);
   const [isGettingSuggestion, setIsGettingSuggestion] = useState(false);
 
+  const [goToNextAfterConfirm, setGoToNextAfterConfirm] = useState(false);
+
   const confirmMatch = trpc.matches.confirm.useMutation({
     onSuccess: () => {
       toast.success("Match confirmed");
       utils.matches.pending.invalidate();
       utils.reorders.statuses.invalidate();
-      closeDialog();
+      if (goToNextAfterConfirm) {
+        goToNextMatch();
+      } else {
+        closeDialog();
+      }
     },
     onError: (error) => toast.error(`Failed: ${error.message}`),
   });
@@ -44,7 +50,11 @@ export default function Matches() {
       utils.matches.pending.invalidate();
       utils.areas.list.invalidate();
       utils.reorders.statuses.invalidate();
-      closeDialog();
+      if (goToNextAfterConfirm) {
+        goToNextMatch();
+      } else {
+        closeDialog();
+      }
     },
     onError: (error) => toast.error(`Failed: ${error.message}`),
   });
@@ -66,6 +76,32 @@ export default function Matches() {
     setNewAreaHospitalId("");
     setLlmSuggestion(null);
     setActiveTab("existing");
+    setGoToNextAfterConfirm(false);
+  };
+
+  const goToNextMatch = () => {
+    // Find the next pending match after the current one
+    if (!pendingMatches || !selectedMatch) {
+      closeDialog();
+      return;
+    }
+    const currentIndex = pendingMatches.findIndex(m => m.id === selectedMatch.id);
+    // Get next match (skip current one which will be removed after invalidation)
+    // Since the list will refresh, we just open the first item
+    // But we need to wait for invalidation, so we'll reset and let the user see the updated list
+    setSelectedAreaId("");
+    setLlmSuggestion(null);
+    setGoToNextAfterConfirm(false);
+    // The list will refresh, so we'll select the first remaining match
+    // We use a small delay to let the invalidation complete
+    setTimeout(() => {
+      const updatedMatches = utils.matches.pending.getData();
+      if (updatedMatches && updatedMatches.length > 0) {
+        openDialog(updatedMatches[0]);
+      } else {
+        closeDialog();
+      }
+    }, 100);
   };
 
   const openDialog = (match: NonNullable<typeof pendingMatches>[number]) => {
@@ -107,8 +143,9 @@ export default function Matches() {
     }
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = (goToNext: boolean = false) => {
     if (!selectedMatch) return;
+    setGoToNextAfterConfirm(goToNext);
     
     if (activeTab === "existing" && selectedAreaId) {
       confirmMatch.mutate({
@@ -342,15 +379,26 @@ export default function Matches() {
               </TabsContent>
             </Tabs>
 
-            <DialogFooter>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
               <Button variant="outline" onClick={closeDialog}>Cancel</Button>
-              <Button 
-                onClick={handleConfirm} 
-                disabled={!canConfirm() || confirmMatch.isPending || createNewArea.isPending}
-              >
-                <Check className="h-4 w-4 mr-2" />
-                {activeTab === "existing" ? "Confirm Match" : "Create & Match"}
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="secondary"
+                  onClick={() => handleConfirm(false)} 
+                  disabled={!canConfirm() || confirmMatch.isPending || createNewArea.isPending}
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  {activeTab === "existing" ? "Confirm" : "Create"}
+                </Button>
+                <Button 
+                  onClick={() => handleConfirm(true)} 
+                  disabled={!canConfirm() || confirmMatch.isPending || createNewArea.isPending}
+                >
+                  <Check className="h-4 w-4 mr-1" />
+                  <ChevronRight className="h-4 w-4" />
+                  Next
+                </Button>
+              </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>

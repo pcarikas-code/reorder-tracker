@@ -38,3 +38,4 @@
 - [x] Show original CustomerRef in both Match to Area and New Area dialogs
 - [x] Combine Match to Area and New Area dialogs into single Resolve Match dialog with tabs
 - [x] Filter area dropdown in Resolve Match dialog to only show areas from current hospital
+- [x] Add "Confirm Match" and "Confirm & Next" buttons to Resolve Match dialog
