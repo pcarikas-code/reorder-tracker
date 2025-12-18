@@ -267,6 +267,15 @@ export const appRouter = router({
       
       return { success: true, message: `${syncType.charAt(0).toUpperCase() + syncType.slice(1)} sync started`, syncId: syncLog.id };
     }),
+    previewCleanup: protectedProcedure.query(async () => {
+      // Preview orphan purchases without deleting
+      return db.previewOrphanPurchases();
+    }),
+    runCleanup: protectedProcedure.mutation(async () => {
+      // Delete orphan purchases and their pending matches
+      const result = await db.cleanupOrphanPurchases();
+      return { success: true, ...result };
+    }),
   }),
 
   notifications: router({

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, CheckCircle, XCircle, Clock, Database } from "lucide-react";
+import { RefreshCw, CheckCircle, XCircle, Clock, Database, Trash2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Sync() {
@@ -23,6 +23,20 @@ export default function Sync() {
     onError: (error) => {
       toast.error(`Sync failed: ${error.message}`);
       utils.sync.status.invalidate();
+    },
+  });
+
+  const { data: cleanupPreview, refetch: refetchCleanup } = trpc.sync.previewCleanup.useQuery();
+  
+  const runCleanup = trpc.sync.runCleanup.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Cleanup complete! Removed ${data.purchasesDeleted} orphan purchases and ${data.pendingMatchesDeleted} pending matches.`);
+      refetchCleanup();
+      utils.matches.pending.invalidate();
+      utils.reorders.statuses.invalidate();
+    },
+    onError: (error) => {
+      toast.error(`Cleanup failed: ${error.message}`);
     },
   });
 
@@ -183,6 +197,58 @@ export default function Sync() {
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Trash2 className="h-5 w-5" />
+              Data Cleanup
+            </CardTitle>
+            <CardDescription>
+              Remove orphan records that don't have any Endurocide products
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {cleanupPreview && cleanupPreview.count > 0 ? (
+              <>
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-amber-800 mb-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="font-medium">Found {cleanupPreview.count} orphan purchases</span>
+                  </div>
+                  <p className="text-sm text-amber-700 mb-2">
+                    These orders have no Endurocide product lines and should be removed.
+                  </p>
+                  {cleanupPreview.samples.length > 0 && (
+                    <div className="text-xs text-amber-600 space-y-1">
+                      <div className="font-medium">Sample records:</div>
+                      {cleanupPreview.samples.slice(0, 5).map((s, i) => (
+                        <div key={i}>• {s.orderNumber} - {s.hospitalName}</div>
+                      ))}
+                      {cleanupPreview.count > 5 && <div>...and {cleanupPreview.count - 5} more</div>}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  onClick={() => runCleanup.mutate()}
+                  disabled={runCleanup.isPending}
+                  variant="destructive"
+                >
+                  {runCleanup.isPending ? (
+                    <><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Cleaning...</>
+                  ) : (
+                    <><Trash2 className="h-4 w-4 mr-2" />Remove {cleanupPreview.count} Orphan Records</>
+                  )}
+                </Button>
+              </>
+            ) : (
+              <div className="flex items-center gap-2 text-green-700">
+                <CheckCircle className="h-4 w-4" />
+                <span>No orphan records found. Database is clean!</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

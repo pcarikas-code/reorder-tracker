@@ -601,3 +601,79 @@ export async function getStockForecasts(): Promise<StockForecast[]> {
 
   return forecasts;
 }
+
+// Cleanup: Remove orphan purchases (no product lines) and their pending matches
+export interface CleanupResult {
+  orphanPurchasesFound: number;
+  pendingMatchesDeleted: number;
+  purchasesDeleted: number;
+}
+
+export async function cleanupOrphanPurchases(): Promise<CleanupResult> {
+  const db = await getDb();
+  if (!db) return { orphanPurchasesFound: 0, pendingMatchesDeleted: 0, purchasesDeleted: 0 };
+
+  // Find purchases that have no product lines
+  const allPurchases = await db.select({ id: purchases.id }).from(purchases);
+  const allLines = await db.select({ purchaseId: purchaseLines.purchaseId }).from(purchaseLines);
+  
+  const purchasesWithLines = new Set(allLines.map(l => l.purchaseId));
+  const orphanPurchaseIds = allPurchases
+    .filter(p => !purchasesWithLines.has(p.id))
+    .map(p => p.id);
+
+  if (orphanPurchaseIds.length === 0) {
+    return { orphanPurchasesFound: 0, pendingMatchesDeleted: 0, purchasesDeleted: 0 };
+  }
+
+  console.log(`[Cleanup] Found ${orphanPurchaseIds.length} orphan purchases (no product lines)`);
+
+  // Delete pending matches for orphan purchases
+  let pendingMatchesDeleted = 0;
+  for (const purchaseId of orphanPurchaseIds) {
+    const result = await db.delete(pendingMatches).where(eq(pendingMatches.purchaseId, purchaseId));
+    pendingMatchesDeleted += Number(result[0]?.affectedRows || 0);
+  }
+  console.log(`[Cleanup] Deleted ${pendingMatchesDeleted} pending matches`);
+
+  // Delete orphan purchases
+  let purchasesDeleted = 0;
+  for (const purchaseId of orphanPurchaseIds) {
+    const result = await db.delete(purchases).where(eq(purchases.id, purchaseId));
+    purchasesDeleted += Number(result[0]?.affectedRows || 0);
+  }
+  console.log(`[Cleanup] Deleted ${purchasesDeleted} orphan purchases`);
+
+  return {
+    orphanPurchasesFound: orphanPurchaseIds.length,
+    pendingMatchesDeleted,
+    purchasesDeleted,
+  };
+}
+
+// Preview cleanup without deleting (dry run)
+export async function previewOrphanPurchases(): Promise<{ count: number; samples: { id: number; orderNumber: string; hospitalName: string; customerRef: string | null }[] }> {
+  const db = await getDb();
+  if (!db) return { count: 0, samples: [] };
+
+  // Find purchases that have no product lines with hospital info
+  const allPurchasesWithInfo = await db
+    .select({
+      id: purchases.id,
+      orderNumber: purchases.orderNumber,
+      customerRef: purchases.customerRef,
+      hospitalName: hospitals.customerName,
+    })
+    .from(purchases)
+    .innerJoin(hospitals, eq(purchases.hospitalId, hospitals.id));
+  
+  const allLines = await db.select({ purchaseId: purchaseLines.purchaseId }).from(purchaseLines);
+  const purchasesWithLines = new Set(allLines.map(l => l.purchaseId));
+  
+  const orphans = allPurchasesWithInfo.filter(p => !purchasesWithLines.has(p.id));
+
+  return {
+    count: orphans.length,
+    samples: orphans.slice(0, 10), // Return first 10 as samples
+  };
+}
