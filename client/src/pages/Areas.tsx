@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Tag, Ban, Undo2, Pencil, FileText, Unlink, ArrowRight } from "lucide-react";
+import { Search, Plus, Tag, Ban, Undo2, Pencil, FileText, Unlink, Merge } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
@@ -24,9 +24,11 @@ export default function Areas() {
   const [showAliasDialog, setShowAliasDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showPurchasesDialog, setShowPurchasesDialog] = useState(false);
+  const [showMergeDialog, setShowMergeDialog] = useState(false);
   const [selectedAreaId, setSelectedAreaId] = useState<number | null>(null);
   const [selectedAreaName, setSelectedAreaName] = useState("");
   const [selectedAreaHospitalId, setSelectedAreaHospitalId] = useState<number | null>(null);
+  const [mergeTargetAreaId, setMergeTargetAreaId] = useState<string>("");
   const [newAreaName, setNewAreaName] = useState("");
   const [newAreaHospitalId, setNewAreaHospitalId] = useState<string>("");
   const [newAlias, setNewAlias] = useState("");
@@ -92,6 +94,17 @@ export default function Areas() {
     onError: (error) => toast.error(`Failed: ${error.message}`),
   });
 
+  const mergeAreas = trpc.areas.merge.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Areas merged - ${data.purchasesMoved} purchases moved`);
+      utils.areas.list.invalidate();
+      utils.reorders.statuses.invalidate();
+      setShowMergeDialog(false);
+      setMergeTargetAreaId("");
+    },
+    onError: (error) => toast.error(`Failed: ${error.message}`),
+  });
+
   const unexclude = trpc.matches.unexclude.useMutation({
     onSuccess: () => {
       toast.success("Order re-included - it will appear in pending matches");
@@ -139,6 +152,14 @@ export default function Areas() {
     setSelectedAreaHospitalId(area.hospitalId);
     setMoveToAreaId("");
     setShowPurchasesDialog(true);
+  };
+
+  const openMergeDialog = (area: { id: number; name: string; hospitalId: number }) => {
+    setSelectedAreaId(area.id);
+    setSelectedAreaName(area.name);
+    setSelectedAreaHospitalId(area.hospitalId);
+    setMergeTargetAreaId("");
+    setShowMergeDialog(true);
   };
 
   return (
@@ -252,6 +273,9 @@ export default function Areas() {
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => openPurchasesDialog(area)} title="View linked purchases">
                             <FileText className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => openMergeDialog(area)} title="Merge into another area">
+                            <Merge className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => { setSelectedAreaId(area.id); setShowAliasDialog(true); }} title="Manage aliases">
                             <Tag className="h-4 w-4" />
@@ -423,6 +447,46 @@ export default function Areas() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowPurchasesDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Merge Areas Dialog */}
+        <Dialog open={showMergeDialog} onOpenChange={(open) => { setShowMergeDialog(open); if (!open) { setSelectedAreaId(null); setSelectedAreaName(""); setSelectedAreaHospitalId(null); } }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Merge Area</DialogTitle>
+              <DialogDescription>
+                Merge "{selectedAreaName}" into another area. All linked purchases and aliases will be moved to the target area, and this area will be deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Merge into:</Label>
+                <Select value={mergeTargetAreaId} onValueChange={setMergeTargetAreaId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select target area..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sameHospitalAreas.map(a => (
+                      <SelectItem key={a.id} value={a.id.toString()}>{a.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {sameHospitalAreas.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No other areas exist for this hospital.</p>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMergeDialog(false)}>Cancel</Button>
+              <Button 
+                variant="destructive"
+                onClick={() => mergeAreas.mutate({ sourceAreaId: selectedAreaId!, targetAreaId: parseInt(mergeTargetAreaId) })}
+                disabled={!mergeTargetAreaId || mergeAreas.isPending}
+              >
+                {mergeAreas.isPending ? "Merging..." : "Merge & Delete"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

@@ -214,6 +214,7 @@ export const appRouter = router({
     getPurchases: protectedProcedure.input(z.object({ areaId: z.number() })).query(async ({ input }) => db.getPurchasesForArea(input.areaId)),
     unlinkPurchase: protectedProcedure.input(z.object({ purchaseId: z.number() })).mutation(async ({ input }) => { await db.unlinkPurchaseFromArea(input.purchaseId); return { success: true }; }),
     movePurchase: protectedProcedure.input(z.object({ purchaseId: z.number(), newAreaId: z.number() })).mutation(async ({ input }) => { await db.movePurchaseToArea(input.purchaseId, input.newAreaId); return { success: true }; }),
+    merge: protectedProcedure.input(z.object({ sourceAreaId: z.number(), targetAreaId: z.number() })).mutation(async ({ input }) => { const result = await db.mergeAreas(input.sourceAreaId, input.targetAreaId); return { success: true, ...result }; }),
   }),
 
   reorders: router({

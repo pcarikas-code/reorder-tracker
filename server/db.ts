@@ -786,3 +786,24 @@ export async function movePurchaseToArea(purchaseId: number, newAreaId: number):
   if (!db) return;
   await db.update(purchases).set({ areaId: newAreaId }).where(eq(purchases.id, purchaseId));
 }
+
+// Merge two areas - move all purchases from source to target, then delete source
+export async function mergeAreas(sourceAreaId: number, targetAreaId: number): Promise<{ purchasesMoved: number }> {
+  const db = await getDb();
+  if (!db) return { purchasesMoved: 0 };
+  
+  // Move all purchases from source to target
+  const result = await db.update(purchases)
+    .set({ areaId: targetAreaId })
+    .where(eq(purchases.areaId, sourceAreaId));
+  
+  // Move any aliases from source to target
+  await db.update(areaAliases)
+    .set({ areaId: targetAreaId })
+    .where(eq(areaAliases.areaId, sourceAreaId));
+  
+  // Delete the source area
+  await db.delete(areas).where(eq(areas.id, sourceAreaId));
+  
+  return { purchasesMoved: result[0]?.affectedRows || 0 };
+}
