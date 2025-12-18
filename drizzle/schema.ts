@@ -68,6 +68,8 @@ export const purchases = mysqlTable("purchases", {
   isReorder: boolean("isReorder"),
   reorderConfirmed: boolean("reorderConfirmed").default(false).notNull(),
   linkedPurchaseId: int("linkedPurchaseId"),
+  isExcluded: boolean("isExcluded").default(false).notNull(),
+  excludeReason: varchar("excludeReason", { length: 255 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

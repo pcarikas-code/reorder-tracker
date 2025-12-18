@@ -52,3 +52,4 @@
 - [x] Fix duplicate pending matches - added unique constraint on unleashOrderGuid and cleaned up duplicates
 - [x] Auto-refresh cleanup preview after sync completes
 - [x] Add "Skip & Next" button to Resolve Match dialog
+- [x] Add "Exclude" feature to flag and hide unwanted orders (without deleting)

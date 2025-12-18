@@ -43,6 +43,13 @@
       "when": 1766051013297,
       "tag": "0005_mighty_master_chief",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1766052081840,
+      "tag": "0006_late_sage",
+      "breakpoints": true
     }
   ]
 }

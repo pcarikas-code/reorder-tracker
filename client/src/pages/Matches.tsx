@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Check, X, Sparkles, Plus, Link, ChevronRight } from "lucide-react";
+import { AlertTriangle, Check, X, Sparkles, Plus, Link, ChevronRight, Ban } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -63,6 +63,15 @@ export default function Matches() {
     onSuccess: () => {
       toast.success("Match rejected");
       utils.matches.pending.invalidate();
+    },
+    onError: (error) => toast.error(`Failed: ${error.message}`),
+  });
+
+  const excludeMatch = trpc.matches.exclude.useMutation({
+    onSuccess: () => {
+      toast.success("Order excluded - it won't appear again");
+      utils.matches.pending.invalidate();
+      goToNextMatch();
     },
     onError: (error) => toast.error(`Failed: ${error.message}`),
   });
@@ -383,12 +392,22 @@ export default function Matches() {
             </Tabs>
 
             <DialogFooter className="flex-col sm:flex-row gap-2">
-              <Button variant="outline" onClick={closeDialog}>Cancel</Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={closeDialog}>Cancel</Button>
+                <Button 
+                  variant="destructive"
+                  onClick={() => selectedMatch && excludeMatch.mutate({ matchId: selectedMatch.id, reason: "Not a curtain order" })}
+                  disabled={excludeMatch.isPending || confirmMatch.isPending || createNewArea.isPending}
+                >
+                  <Ban className="h-4 w-4 mr-2" />
+                  Exclude
+                </Button>
+              </div>
               <div className="flex gap-2">
                 <Button 
                   variant="ghost"
                   onClick={goToNextMatch}
-                  disabled={confirmMatch.isPending || createNewArea.isPending}
+                  disabled={confirmMatch.isPending || createNewArea.isPending || excludeMatch.isPending}
                 >
                   Skip
                   <ChevronRight className="h-4 w-4 ml-1" />

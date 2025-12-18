@@ -400,7 +400,7 @@ export async function getPendingMatches() {
     .from(pendingMatches)
     .innerJoin(purchases, eq(pendingMatches.purchaseId, purchases.id))
     .innerJoin(hospitals, eq(purchases.hospitalId, hospitals.id))
-    .where(eq(pendingMatches.status, 'pending'))
+    .where(and(eq(pendingMatches.status, 'pending'), eq(purchases.isExcluded, false)))
     .orderBy(hospitals.customerName, pendingMatches.rawAreaText);
   
   return results;
@@ -692,4 +692,40 @@ export async function previewOrphanPurchases(): Promise<{ count: number; samples
     count: orphans.length,
     samples: orphans.slice(0, 10), // Return first 10 as samples
   };
+}
+
+// Exclude purchase operations
+export async function excludePurchase(purchaseId: number, reason?: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(purchases).set({ isExcluded: true, excludeReason: reason || null }).where(eq(purchases.id, purchaseId));
+}
+
+export async function unexcludePurchase(purchaseId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(purchases).set({ isExcluded: false, excludeReason: null }).where(eq(purchases.id, purchaseId));
+}
+
+export async function getExcludedPurchases() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const results = await db
+    .select({
+      id: purchases.id,
+      orderNumber: purchases.orderNumber,
+      orderDate: purchases.orderDate,
+      customerRef: purchases.customerRef,
+      rawAreaText: purchases.rawAreaText,
+      excludeReason: purchases.excludeReason,
+      hospitalId: hospitals.id,
+      hospitalName: hospitals.customerName,
+    })
+    .from(purchases)
+    .innerJoin(hospitals, eq(purchases.hospitalId, hospitals.id))
+    .where(eq(purchases.isExcluded, true))
+    .orderBy(desc(purchases.orderDate));
+  
+  return results;
 }

@@ -255,6 +255,19 @@ export const appRouter = router({
       return { success: true, areaId: area.id };
     }),
     reject: protectedProcedure.input(z.object({ matchId: z.number() })).mutation(async ({ input }) => { await db.updatePendingMatch(input.matchId, { status: 'rejected', resolvedAt: new Date() }); return { success: true }; }),
+    exclude: protectedProcedure.input(z.object({ matchId: z.number(), reason: z.string().optional() })).mutation(async ({ input }) => {
+      const matches = await db.getPendingMatches();
+      const match = matches.find(m => m.id === input.matchId);
+      if (!match) throw new Error("Match not found");
+      await db.excludePurchase(match.purchaseId, input.reason);
+      await db.updatePendingMatch(input.matchId, { status: 'rejected', resolvedAt: new Date() });
+      return { success: true };
+    }),
+    excluded: protectedProcedure.query(async () => db.getExcludedPurchases()),
+    unexclude: protectedProcedure.input(z.object({ purchaseId: z.number() })).mutation(async ({ input }) => {
+      await db.unexcludePurchase(input.purchaseId);
+      return { success: true };
+    }),
     getLlmSuggestion: protectedProcedure.input(z.object({ rawAreaText: z.string(), existingAreas: z.array(z.object({ id: z.number(), name: z.string(), hospitalName: z.string() })) })).mutation(async ({ input }) => {
       // If no existing areas, suggest creating a new one
       if (!input.existingAreas || input.existingAreas.length === 0) {
