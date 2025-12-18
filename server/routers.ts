@@ -307,15 +307,18 @@ export const appRouter = router({
         const areaName = area.name.toLowerCase();
         const areaWords = areaName.split(/[\s-]+/).filter(w => w.length > 2);
         
-        // Check for exact area name in reference
+        // Check for exact area name in reference (full name match is best)
         if (refText.includes(areaName)) {
-          matches.push({ area, score: 100, reason: `Exact match: "${area.name}" found in reference` });
+          // Bonus for longer area names (more specific matches are better)
+          const lengthBonus = Math.min(10, areaName.length / 3);
+          matches.push({ area, score: 100 + lengthBonus, reason: `Exact match: "${area.name}" found in reference` });
           continue;
         }
         
         // Check if area name contains the raw text or vice versa
         if (areaName.includes(rawText) || rawText.includes(areaName)) {
-          matches.push({ area, score: 95, reason: `Strong match: "${area.name}" matches extracted text` });
+          const lengthBonus = Math.min(10, areaName.length / 3);
+          matches.push({ area, score: 95 + lengthBonus, reason: `Strong match: "${area.name}" matches extracted text` });
           continue;
         }
         
@@ -330,8 +333,12 @@ export const appRouter = router({
         }
         
         if (wordMatches > 0) {
-          const score = Math.min(90, 60 + (wordMatches * 15));
-          matches.push({ area, score, reason: `Word match: "${matchedWords.join(', ')}" found in reference` });
+          // Score based on how many words match AND what percentage of the area name matched
+          const matchRatio = wordMatches / areaWords.length;
+          const baseScore = 60 + (wordMatches * 15);
+          const ratioBonus = matchRatio * 20; // Bonus for matching more of the area name
+          const score = Math.min(99, baseScore + ratioBonus);
+          matches.push({ area, score, reason: `Word match: "${matchedWords.join(', ')}" found in reference (${Math.round(matchRatio * 100)}% of area name)` });
         }
       }
       
@@ -342,7 +349,7 @@ export const appRouter = router({
         if (best.score >= 70) {
           return {
             bestMatchId: best.area.id,
-            confidence: best.score,
+            confidence: Math.min(100, Math.round(best.score)), // Cap at 100 for display
             reasoning: best.reason,
             isNewArea: false,
             suggestedName: best.area.name

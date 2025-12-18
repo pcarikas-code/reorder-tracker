@@ -1,0 +1,20 @@
+{
+  "query": "SELECT a.id, a.name, h.customerName as hospitalName FROM areas a JOIN hospitals h ON a.hospitalId = h.id WHERE a.name LIKE '%SSR%'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT a.id, a.name, h.customerName as hospitalName FROM areas a JOIN hospitals h ON a.hospitalId = h.id WHERE a.name LIKE '%SSR%'",
+  "rows": [
+    {
+      "id": "120046",
+      "name": "SSR",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "id": "120027",
+      "name": "Kenepuru SSR",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\thospitalName\n120046\tSSR\tCapital & Coast Health New Zealand\n120027\tKenepuru SSR\tCapital & Coast Health New Zealand\n",
+  "stderr": "",
+  "execution_time_ms": 1627
+}
