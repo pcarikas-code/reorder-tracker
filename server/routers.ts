@@ -13,12 +13,24 @@ async function updateSyncProgress(syncLogId: number, step: string, detail: strin
   await db.updateSyncLog(syncLogId, { progressStep: step, progressDetail: detail });
 }
 
+// Helper to check if sync was cancelled
+async function checkSyncCancelled(syncLogId: number): Promise<boolean> {
+  const syncLog = await db.getSyncLogById(syncLogId);
+  return syncLog?.status === 'cancelled';
+}
+
 // Background sync function
 async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise<void> {
   let recordsProcessed = 0;
   const syncType = sinceDate ? 'incremental' : 'full';
   console.log(`[Sync ${syncLogId}] Starting ${syncType} sync...${sinceDate ? ` (since ${sinceDate.toISOString()})` : ''}`);
   try {
+    // Check for cancellation before each major step
+    if (await checkSyncCancelled(syncLogId)) {
+      console.log(`[Sync ${syncLogId}] Cancelled before step 1`);
+      return;
+    }
+    
     // Step 1: Sync customers (hospitals)
     await updateSyncProgress(syncLogId, 'Step 1/6', 'Fetching customers from Synchub...');
     console.log(`[Sync ${syncLogId}] Step 1: Fetching customers...`);
@@ -27,6 +39,12 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     await updateSyncProgress(syncLogId, 'Step 1/6', `Saving ${customers.length} customers...`);
     await db.batchUpsertHospitals(customers.map(c => ({ unleashGuid: c.Guid, customerCode: c.CustomerCode, customerName: c.CustomerName })));
     recordsProcessed += customers.length;
+    
+    // Check for cancellation
+    if (await checkSyncCancelled(syncLogId)) {
+      console.log(`[Sync ${syncLogId}] Cancelled after step 1`);
+      return;
+    }
     
     // Step 2: Get reference data once
     await updateSyncProgress(syncLogId, 'Step 2/6', 'Loading reference data...');
@@ -37,6 +55,12 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     const allAreas = await db.getAllAreas();
     const allAliases = await db.getAllAliases();
     console.log(`[Sync ${syncLogId}] Reference data: ${allHospitals.length} hospitals, ${allAreas.length} areas, ${allAliases.length} aliases`);
+    
+    // Check for cancellation
+    if (await checkSyncCancelled(syncLogId)) {
+      console.log(`[Sync ${syncLogId}] Cancelled after step 2`);
+      return;
+    }
     
     // Step 3: Fetch orders and order lines together to filter for Endurocide products
     await updateSyncProgress(syncLogId, 'Step 3/6', 'Fetching sales orders from Synchub...');
@@ -87,12 +111,24 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     }
     console.log(`[Sync ${syncLogId}] Order processing: ${skippedNoEndurocide} skipped (no Endurocide products), ${skippedNoHospital} skipped (no hospital), ${skippedNoRawArea} skipped (no area text), ${matchedToArea} matched to existing areas, ${pendingMatchesToCreate.length} need matching`);
     
+    // Check for cancellation
+    if (await checkSyncCancelled(syncLogId)) {
+      console.log(`[Sync ${syncLogId}] Cancelled after step 3`);
+      return;
+    }
+    
     // Step 4: Batch upsert purchases
     await updateSyncProgress(syncLogId, 'Step 4/6', `Saving ${purchasesToUpsert.length} purchases...`);
     console.log(`[Sync ${syncLogId}] Step 4: Upserting ${purchasesToUpsert.length} purchases...`);
     await db.batchUpsertPurchases(purchasesToUpsert);
     recordsProcessed += purchasesToUpsert.length;
     console.log(`[Sync ${syncLogId}] Purchases upserted`);
+    
+    // Check for cancellation
+    if (await checkSyncCancelled(syncLogId)) {
+      console.log(`[Sync ${syncLogId}] Cancelled after step 4`);
+      return;
+    }
     
     // Step 5: Get all purchases for mapping and create pending matches
     await updateSyncProgress(syncLogId, 'Step 5/6', 'Creating pending matches...');
@@ -284,6 +320,22 @@ export const appRouter = router({
       runSyncInBackground(syncLog.id, sinceDate).catch(err => console.error('Background sync error:', err));
       
       return { success: true, message: `${syncType.charAt(0).toUpperCase() + syncType.slice(1)} sync started`, syncId: syncLog.id };
+    }),
+    cancel: protectedProcedure.mutation(async () => {
+      // Cancel any running sync
+      const existingSync = await db.getLatestSyncLog();
+      if (existingSync?.status !== 'running') {
+        return { success: false, message: 'No sync is currently running' };
+      }
+      
+      // Mark as cancelled - the background process will check this and stop
+      await db.updateSyncLog(existingSync.id, { 
+        status: 'cancelled', 
+        completedAt: new Date(),
+        errorMessage: 'Cancelled by user'
+      });
+      
+      return { success: true, message: 'Sync cancellation requested. It will stop at the next checkpoint.' };
     }),
     previewCleanup: protectedProcedure.query(async () => {
       // Preview orphan purchases without deleting

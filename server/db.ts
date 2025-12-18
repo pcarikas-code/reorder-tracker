@@ -455,6 +455,13 @@ export async function getLatestSyncLog(syncType?: string): Promise<SyncLog | und
   return result[0];
 }
 
+export async function getSyncLogById(id: number): Promise<SyncLog | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(syncLogs).where(eq(syncLogs.id, id)).limit(1);
+  return result[0];
+}
+
 // Reorder status calculations
 export interface AreaReorderStatus {
   areaId: number;

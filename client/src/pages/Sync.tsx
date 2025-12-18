@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, CheckCircle, XCircle, Clock, Database, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { RefreshCw, CheckCircle, XCircle, Clock, Database, Trash2, AlertTriangle, Loader2, StopCircle, Ban } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 
@@ -38,6 +38,20 @@ export default function Sync() {
     },
     onError: (error) => {
       toast.error(`Cleanup failed: ${error.message}`);
+    },
+  });
+
+  const cancelSync = trpc.sync.cancel.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.info(data.message);
+      } else {
+        toast.warning(data.message);
+      }
+      utils.sync.status.invalidate();
+    },
+    onError: (error) => {
+      toast.error(`Cancel failed: ${error.message}`);
     },
   });
 
@@ -82,6 +96,8 @@ export default function Sync() {
         return <Badge variant="secondary" className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
       case 'failed':
         return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Failed</Badge>;
+      case 'cancelled':
+        return <Badge variant="secondary" className="bg-amber-100 text-amber-800"><Ban className="h-3 w-3 mr-1" />Cancelled</Badge>;
       case 'running':
         return <Badge variant="secondary" className="bg-blue-100 text-blue-800"><Clock className="h-3 w-3 mr-1" />Running</Badge>;
       default:
@@ -122,12 +138,27 @@ export default function Sync() {
                   
                   {/* Progress indicator when running */}
                   {syncStatus.status === 'running' && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                        <span className="text-sm font-medium text-blue-800">
-                          {(syncStatus as any).progressStep || 'Starting...'}
-                        </span>
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                          <span className="text-sm font-medium text-blue-800">
+                            {(syncStatus as any).progressStep || 'Starting...'}
+                          </span>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => cancelSync.mutate()}
+                          disabled={cancelSync.isPending}
+                          className="h-7 text-xs border-red-300 text-red-600 hover:bg-red-50"
+                        >
+                          {cancelSync.isPending ? (
+                            <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Cancelling...</>
+                          ) : (
+                            <><StopCircle className="h-3 w-3 mr-1" />Cancel</>
+                          )}
+                        </Button>
                       </div>
                       {(syncStatus as any).progressDetail && (
                         <p className="text-xs text-blue-600">

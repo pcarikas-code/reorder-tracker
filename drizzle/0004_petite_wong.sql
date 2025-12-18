@@ -1,0 +1,1 @@
+ALTER TABLE `syncLogs` MODIFY COLUMN `status` enum('running','completed','failed','cancelled') NOT NULL;

@@ -127,7 +127,7 @@ export type InsertNotification = typeof notifications.$inferInsert;
 export const syncLogs = mysqlTable("syncLogs", {
   id: int("id").autoincrement().primaryKey(),
   syncType: varchar("syncType", { length: 50 }).notNull(),
-  status: mysqlEnum("status", ["running", "completed", "failed"]).notNull(),
+  status: mysqlEnum("status", ["running", "completed", "failed", "cancelled"]).notNull(),
   recordsProcessed: int("recordsProcessed").default(0),
   progressStep: varchar("progressStep", { length: 100 }),
   progressDetail: text("progressDetail"),
