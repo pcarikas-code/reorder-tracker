@@ -1,0 +1,40 @@
+{
+  "query": "SHOW TABLES",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SHOW TABLES",
+  "rows": [
+    {
+      "Tables_in_DxAqoJ22pGdNTCdjRs8uzu": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_DxAqoJ22pGdNTCdjRs8uzu": "areaAliases"
+    },
+    {
+      "Tables_in_DxAqoJ22pGdNTCdjRs8uzu": "areas"
+    },
+    {
+      "Tables_in_DxAqoJ22pGdNTCdjRs8uzu": "hospitals"
+    },
+    {
+      "Tables_in_DxAqoJ22pGdNTCdjRs8uzu": "notifications"
+    },
+    {
+      "Tables_in_DxAqoJ22pGdNTCdjRs8uzu": "pendingMatches"
+    },
+    {
+      "Tables_in_DxAqoJ22pGdNTCdjRs8uzu": "purchaseLines"
+    },
+    {
+      "Tables_in_DxAqoJ22pGdNTCdjRs8uzu": "purchases"
+    },
+    {
+      "Tables_in_DxAqoJ22pGdNTCdjRs8uzu": "syncLogs"
+    },
+    {
+      "Tables_in_DxAqoJ22pGdNTCdjRs8uzu": "users"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_DxAqoJ22pGdNTCdjRs8uzu\n__drizzle_migrations\nareaAliases\nareas\nhospitals\nnotifications\npendingMatches\npurchaseLines\npurchases\nsyncLogs\nusers\n",
+  "stderr": "",
+  "execution_time_ms": 1535
+}

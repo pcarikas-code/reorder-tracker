@@ -42,3 +42,4 @@
 - [x] Order pending matches by hospital name, then by area text
 - [x] Order Reorder Status by days (smallest/most overdue first)
 - [x] Fix "Match not found" error when using Confirm & Next (use next item from current list)
+- [x] Exclude orders without Endurocide products from sync (don't create purchase records for non-curtain orders)

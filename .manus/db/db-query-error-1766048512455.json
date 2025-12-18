@@ -1,0 +1,8 @@
+{
+  "query": "SELECT \n  p.id, p.order_number, p.order_date, p.customer_ref, p.raw_area_text,\n  h.customer_name as hospital_name,\n  a.name as area_name,\n  pl.product_code, pl.product_description, pl.quantity, pl.unit_price\nFROM purchases p\nLEFT JOIN hospitals h ON p.hospital_id = h.id\nLEFT JOIN areas a ON p.area_id = a.id\nLEFT JOIN purchase_lines pl ON p.id = pl.purchase_id\nWHERE p.order_number = 'SO-U-00000546'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT \n  p.id, p.order_number, p.order_date, p.customer_ref, p.raw_area_text,\n  h.customer_name as hospital_name,\n  a.name as area_name,\n  pl.product_code, pl.product_description, pl.quantity, pl.unit_price\nFROM purchases p\nLEFT JOIN hospitals h ON p.hospital_id = h.id\nLEFT JOIN areas a ON p.area_id = a.id\nLEFT JOIN purchase_lines pl ON p.id = pl.purchase_id\nWHERE p.order_number = 'SO-U-00000546'",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'dxaqoj22pgdntcdjrs8uzu.purchase_lines' doesn't exist"
+  ]
+}

@@ -30,17 +30,35 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     const allAliases = await db.getAllAliases();
     console.log(`[Sync ${syncLogId}] Reference data: ${allHospitals.length} hospitals, ${allAreas.length} areas, ${allAliases.length} aliases`);
     
-    // Step 3: Fetch orders and prepare batch data
+    // Step 3: Fetch orders and order lines together to filter for Endurocide products
     console.log(`[Sync ${syncLogId}] Step 3: Fetching orders${sinceDate ? ` modified since ${sinceDate.toISOString()}` : ''}...`);
     const orders = await synchub.fetchSalesOrders(sinceDate);
     console.log(`[Sync ${syncLogId}] Fetched ${orders.length} orders`);
+    
+    // Step 3b: Fetch order lines FIRST to identify which orders have Endurocide products
+    console.log(`[Sync ${syncLogId}] Step 3b: Fetching order lines to filter for Endurocide products...`);
+    const orderGuids = orders.map(o => o.Guid);
+    const allLines = orderGuids.length > 0 ? await synchub.fetchSalesOrderLines(orderGuids) : [];
+    console.log(`[Sync ${syncLogId}] Fetched ${allLines.length} Endurocide product lines`);
+    
+    // Build set of order GUIDs that have at least one Endurocide product
+    const ordersWithEndurocide = new Set<string>();
+    for (const line of allLines) {
+      ordersWithEndurocide.add(line.SalesOrderRemoteID.toLowerCase());
+    }
+    console.log(`[Sync ${syncLogId}] ${ordersWithEndurocide.size} orders have Endurocide products (filtering out ${orders.length - ordersWithEndurocide.size} orders without)`);
+    
     const purchasesToUpsert: Parameters<typeof db.batchUpsertPurchases>[0] = [];
     const pendingMatchesToCreate: { rawAreaText: string; orderGuid: string }[] = [];
     
     let skippedNoHospital = 0;
     let skippedNoRawArea = 0;
+    let skippedNoEndurocide = 0;
     let matchedToArea = 0;
     for (const order of orders) {
+      // Skip orders that don't have any Endurocide products
+      if (!ordersWithEndurocide.has(order.Guid.toLowerCase())) { skippedNoEndurocide++; continue; }
+      
       const hospitalId = hospitalMap.get(order.CustomerGuid);
       if (!hospitalId) { skippedNoHospital++; continue; }
       const rawAreaText = synchub.parseCustomerRef(order.CustomerRef);
@@ -55,7 +73,7 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
       purchasesToUpsert.push({ unleashOrderGuid: order.Guid, orderNumber: order.OrderNumber, orderDate: order.OrderDate, hospitalId, areaId, customerRef: order.CustomerRef, rawAreaText, orderStatus: order.OrderStatus });
       if (!areaId && rawAreaText) pendingMatchesToCreate.push({ rawAreaText, orderGuid: order.Guid });
     }
-    console.log(`[Sync ${syncLogId}] Order processing: ${skippedNoHospital} skipped (no hospital), ${skippedNoRawArea} skipped (no area text), ${matchedToArea} matched to existing areas, ${pendingMatchesToCreate.length} need matching`);
+    console.log(`[Sync ${syncLogId}] Order processing: ${skippedNoEndurocide} skipped (no Endurocide products), ${skippedNoHospital} skipped (no hospital), ${skippedNoRawArea} skipped (no area text), ${matchedToArea} matched to existing areas, ${pendingMatchesToCreate.length} need matching`);
     
     // Step 4: Batch upsert purchases
     console.log(`[Sync ${syncLogId}] Step 4: Upserting ${purchasesToUpsert.length} purchases...`);
@@ -80,28 +98,25 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     
     console.log(`[Sync ${syncLogId}] Created ${pendingMatchInserts.length} pending matches`);
     
-    // Step 6: Fetch and process order lines
-    console.log(`[Sync ${syncLogId}] Step 6: Fetching order lines...`);
-    const orderGuids = orders.map(o => o.Guid);
-    if (orderGuids.length > 0) {
-      const lines = await synchub.fetchSalesOrderLines(orderGuids);
-      console.log(`[Sync ${syncLogId}] Fetched ${lines.length} order lines`);
+    // Step 6: Process order lines (already fetched in Step 3b)
+    console.log(`[Sync ${syncLogId}] Step 6: Processing ${allLines.length} order lines...`);
+    if (allLines.length > 0) {
       const products = await synchub.fetchProducts();
       const productMap = new Map<string, typeof products[0]>();
       for (const p of products) productMap.set(p.Guid, p);
       
       const lineInserts: Parameters<typeof db.createPurchaseLines>[0] = [];
-      let skippedNoPurchase = 0, skippedNoProduct = 0, skippedNotCurtain = 0;
-      for (const line of lines) {
+      let skippedNoPurchase = 0, skippedNoProduct = 0;
+      for (const line of allLines) {
         const purchaseId = purchaseMap.get(line.SalesOrderRemoteID.toLowerCase());
         if (!purchaseId) { skippedNoPurchase++; continue; }
         const product = productMap.get(line.ProductGuid);
         if (!product) { skippedNoProduct++; continue; }
-        if (!synchub.isSporicidalCurtain(product.ProductCode)) { skippedNotCurtain++; continue; }
+        // No need to check isSporicidalCurtain - allLines already filtered at SQL level
         const parsed = synchub.parseProductCode(product.ProductCode);
         lineInserts.push({ purchaseId, unleashProductGuid: line.ProductGuid, productCode: product.ProductCode, productDescription: product.ProductDescription, productType: parsed.type, productSize: parsed.size, productColor: parsed.color, quantity: String(line.OrderQuantity), unitPrice: String(line.UnitPrice) });
       }
-      console.log(`[Sync ${syncLogId}] Line processing: ${lineInserts.length} to insert, skipped: ${skippedNoPurchase} no purchase, ${skippedNoProduct} no product, ${skippedNotCurtain} not curtain`);
+      console.log(`[Sync ${syncLogId}] Line processing: ${lineInserts.length} to insert, skipped: ${skippedNoPurchase} no purchase, ${skippedNoProduct} no product`);
       if (lineInserts.length > 0) {
         console.log(`[Sync ${syncLogId}] Inserting ${lineInserts.length} purchase lines...`);
         await db.createPurchaseLines(lineInserts);
