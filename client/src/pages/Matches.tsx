@@ -386,6 +386,14 @@ export default function Matches() {
               <Button variant="outline" onClick={closeDialog}>Cancel</Button>
               <div className="flex gap-2">
                 <Button 
+                  variant="ghost"
+                  onClick={goToNextMatch}
+                  disabled={confirmMatch.isPending || createNewArea.isPending}
+                >
+                  Skip
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+                <Button 
                   variant="secondary"
                   onClick={() => handleConfirm(false)} 
                   disabled={!canConfirm() || confirmMatch.isPending || createNewArea.isPending}

@@ -51,3 +51,4 @@
 - [x] Optimize cleanup to use bulk deletes (500 records per query)
 - [x] Fix duplicate pending matches - added unique constraint on unleashOrderGuid and cleaned up duplicates
 - [x] Auto-refresh cleanup preview after sync completes
+- [x] Add "Skip & Next" button to Resolve Match dialog
