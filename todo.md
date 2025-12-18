@@ -47,3 +47,5 @@
 - [x] Add live progress indicator to sync status card showing current step and errors
 - [x] Add cancel sync button with graceful stop
 - [x] Optimize batch upsert operations to use true bulk inserts (hospitals, purchases, purchase lines)
+- [x] Add progress indicator for data cleanup
+- [x] Optimize cleanup to use bulk deletes (500 records per query)

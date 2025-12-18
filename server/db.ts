@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, like, or, isNull, gte, lte } from "drizzle-orm";
+import { eq, and, desc, sql, like, or, isNull, gte, lte, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, users, 
@@ -641,18 +641,21 @@ export async function cleanupOrphanPurchases(): Promise<CleanupResult> {
 
   console.log(`[Cleanup] Found ${orphanPurchaseIds.length} orphan purchases (no product lines)`);
 
-  // Delete pending matches for orphan purchases
+  // Bulk delete pending matches for orphan purchases using IN clause
   let pendingMatchesDeleted = 0;
-  for (const purchaseId of orphanPurchaseIds) {
-    const result = await db.delete(pendingMatches).where(eq(pendingMatches.purchaseId, purchaseId));
+  const BATCH_SIZE = 500;
+  for (let i = 0; i < orphanPurchaseIds.length; i += BATCH_SIZE) {
+    const batch = orphanPurchaseIds.slice(i, i + BATCH_SIZE);
+    const result = await db.delete(pendingMatches).where(inArray(pendingMatches.purchaseId, batch));
     pendingMatchesDeleted += Number(result[0]?.affectedRows || 0);
   }
   console.log(`[Cleanup] Deleted ${pendingMatchesDeleted} pending matches`);
 
-  // Delete orphan purchases
+  // Bulk delete orphan purchases using IN clause
   let purchasesDeleted = 0;
-  for (const purchaseId of orphanPurchaseIds) {
-    const result = await db.delete(purchases).where(eq(purchases.id, purchaseId));
+  for (let i = 0; i < orphanPurchaseIds.length; i += BATCH_SIZE) {
+    const batch = orphanPurchaseIds.slice(i, i + BATCH_SIZE);
+    const result = await db.delete(purchases).where(inArray(purchases.id, batch));
     purchasesDeleted += Number(result[0]?.affectedRows || 0);
   }
   console.log(`[Cleanup] Deleted ${purchasesDeleted} orphan purchases`);

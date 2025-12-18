@@ -276,7 +276,20 @@ export default function Sync() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {cleanupPreview && cleanupPreview.count > 0 ? (
+            {runCleanup.isPending ? (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">Cleaning up database...</span>
+                </div>
+                <div className="text-xs text-blue-600 space-y-1">
+                  <div>• Identifying orphan purchases...</div>
+                  <div>• Removing associated pending matches...</div>
+                  <div>• Deleting orphan purchase records...</div>
+                </div>
+                <Progress value={50} className="h-2" />
+              </div>
+            ) : cleanupPreview && cleanupPreview.count > 0 ? (
               <>
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
                   <div className="flex items-center gap-2 text-amber-800 mb-2">
@@ -301,11 +314,7 @@ export default function Sync() {
                   disabled={runCleanup.isPending}
                   variant="destructive"
                 >
-                  {runCleanup.isPending ? (
-                    <><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Cleaning...</>
-                  ) : (
-                    <><Trash2 className="h-4 w-4 mr-2" />Remove {cleanupPreview.count} Orphan Records</>
-                  )}
+                  <Trash2 className="h-4 w-4 mr-2" />Remove {cleanupPreview.count} Orphan Records
                 </Button>
               </>
             ) : (
