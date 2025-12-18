@@ -551,6 +551,8 @@ export interface StockForecast {
   hospitalName: string;
   areaId: number;
   areaName: string;
+  productCode: string;
+  productDescription: string;
   productType: string;
   productSize: string;
   productColor: string;
@@ -603,6 +605,8 @@ export async function getStockForecasts(): Promise<StockForecast[]> {
         hospitalName: area.hospitalName,
         areaId: area.id,
         areaName: area.name,
+        productCode: line.productCode || 'unknown',
+        productDescription: line.productDescription || '',
         productType: line.productType || 'other',
         productSize: line.productSize || 'other',
         productColor: line.productColor || 'Unknown',

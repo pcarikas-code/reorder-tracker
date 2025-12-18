@@ -6,66 +6,93 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, Package } from "lucide-react";
+import { Search, Download, ChevronDown, ChevronRight } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
-const TYPE_LABELS: Record<string, string> = {
-  standard: 'Standard',
-  mesh_top: 'Mesh Top',
-  long_drop: 'Long Drop',
-  other: 'Other',
-};
-
-const SIZE_LABELS: Record<string, string> = {
-  full: 'Full Width',
-  medium: 'Medium Width',
-  half: 'Half Width',
-  other: 'Other',
-};
-
 export default function Forecast() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [sizeFilter, setSizeFilter] = useState<string>("all");
   const [hospitalFilter, setHospitalFilter] = useState<string>("all");
+  const [expandedSkus, setExpandedSkus] = useState<Set<string>>(new Set());
 
   const { data: forecasts, isLoading } = trpc.forecasts.list.useQuery();
-  const { data: summary } = trpc.forecasts.summary.useQuery();
   const { data: hospitals } = trpc.hospitals.list.useQuery();
 
+  // Filter forecasts
   const filteredForecasts = useMemo(() => {
     if (!forecasts) return [];
     return forecasts.filter(f => {
       const matchesSearch = searchTerm === "" || 
         f.hospitalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         f.areaName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.productColor.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = typeFilter === "all" || f.productType === typeFilter;
-      const matchesSize = sizeFilter === "all" || f.productSize === sizeFilter;
+        (f.productCode || '').toLowerCase().includes(searchTerm.toLowerCase());
       const matchesHospital = hospitalFilter === "all" || f.hospitalId.toString() === hospitalFilter;
-      return matchesSearch && matchesType && matchesSize && matchesHospital;
+      return matchesSearch && matchesHospital;
     });
-  }, [forecasts, searchTerm, typeFilter, sizeFilter, hospitalFilter]);
+  }, [forecasts, searchTerm, hospitalFilter]);
 
-  const aggregatedByProduct = useMemo(() => {
-    const agg: Record<string, { type: string; size: string; color: string; qty: number; areas: number }> = {};
+  // Aggregate by SKU (productCode)
+  const skuAggregates = useMemo(() => {
+    const agg: Record<string, { 
+      sku: string; 
+      description: string;
+      type: string;
+      size: string;
+      color: string;
+      totalQty: number; 
+      areaCount: number;
+      items: typeof filteredForecasts;
+    }> = {};
+    
     for (const f of filteredForecasts) {
-      const key = `${f.productType}-${f.productSize}-${f.productColor}`;
-      if (!agg[key]) agg[key] = { type: f.productType, size: f.productSize, color: f.productColor, qty: 0, areas: 0 };
-      agg[key].qty += f.expectedQuantity;
-      agg[key].areas += 1;
+      const sku = f.productCode || 'unknown';
+      if (!agg[sku]) {
+        agg[sku] = { 
+          sku, 
+          description: f.productDescription || '',
+          type: f.productType,
+          size: f.productSize,
+          color: f.productColor,
+          totalQty: 0, 
+          areaCount: 0,
+          items: []
+        };
+      }
+      agg[sku].totalQty += f.expectedQuantity;
+      agg[sku].areaCount += 1;
+      agg[sku].items.push(f);
     }
-    return Object.values(agg).sort((a, b) => b.qty - a.qty);
+    
+    // Sort by SKU alphabetically
+    return Object.values(agg).sort((a, b) => a.sku.localeCompare(b.sku));
   }, [filteredForecasts]);
+
+  // Calculate totals
+  const totalQty = skuAggregates.reduce((sum, s) => sum + s.totalQty, 0);
+  const totalAreas = skuAggregates.reduce((sum, s) => sum + s.areaCount, 0);
+
+  const toggleSku = (sku: string) => {
+    setExpandedSkus(prev => {
+      const next = new Set(prev);
+      if (next.has(sku)) {
+        next.delete(sku);
+      } else {
+        next.add(sku);
+      }
+      return next;
+    });
+  };
 
   const handleExport = () => {
     if (!filteredForecasts.length) return;
     const csv = [
-      ['Hospital', 'Area', 'Type', 'Size', 'Color', 'Quantity', 'Expected Date'].join(','),
+      ['SKU', 'Description', 'Hospital', 'Area', 'Quantity', 'Expected Date'].join(','),
       ...filteredForecasts.map(f => [
-        `"${f.hospitalName}"`, `"${f.areaName}"`, TYPE_LABELS[f.productType] || f.productType,
-        SIZE_LABELS[f.productSize] || f.productSize, `"${f.productColor}"`, f.expectedQuantity,
+        `"${f.productCode || 'unknown'}"`,
+        `"${f.productDescription || ''}"`,
+        `"${f.hospitalName}"`, 
+        `"${f.areaName}"`, 
+        f.expectedQuantity,
         f.expectedReorderDate ? new Date(f.expectedReorderDate).toLocaleDateString() : 'N/A'
       ].join(','))
     ].join('\n');
@@ -92,141 +119,133 @@ export default function Forecast() {
           </Button>
         </div>
 
-        {/* Summary Cards */}
-        {summary && summary.length > 0 && (
-          <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {summary.slice(0, 4).map((s, i) => (
-              <Card key={i}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Package className="h-4 w-4" />
-                    {TYPE_LABELS[s.type] || s.type} - {SIZE_LABELS[s.size] || s.size}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{s.totalQuantity}</div>
-                  <p className="text-xs text-muted-foreground">{s.color} • {s.areaCount} areas</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+        {/* Summary Stats */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total SKUs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{skuAggregates.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Quantity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalQty}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Area Assignments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalAreas}</div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Filters */}
         <Card>
-          <CardHeader className="pb-4"><CardTitle className="text-lg">Filter Forecasts</CardTitle></CardHeader>
+          <CardHeader className="pb-4"><CardTitle className="text-lg">Filter</CardTitle></CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
+                <Input placeholder="Search by SKU, hospital, or area..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
               </div>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-full md:w-[160px]"><SelectValue placeholder="Type" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="mesh_top">Mesh Top</SelectItem>
-                  <SelectItem value="long_drop">Long Drop</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={sizeFilter} onValueChange={setSizeFilter}>
-                <SelectTrigger className="w-full md:w-[160px]"><SelectValue placeholder="Size" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Sizes</SelectItem>
-                  <SelectItem value="full">Full Width</SelectItem>
-                  <SelectItem value="medium">Medium Width</SelectItem>
-                  <SelectItem value="half">Half Width</SelectItem>
-                </SelectContent>
-              </Select>
               <Select value={hospitalFilter} onValueChange={setHospitalFilter}>
-                <SelectTrigger className="w-full md:w-[200px]"><SelectValue placeholder="Hospital" /></SelectTrigger>
+                <SelectTrigger className="w-full md:w-[250px]"><SelectValue placeholder="Hospital" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Hospitals</SelectItem>
                   {hospitals?.map(h => <SelectItem key={h.id} value={h.id.toString()}>{h.customerName}</SelectItem>)}
                 </SelectContent>
               </Select>
-              {(typeFilter !== 'all' || sizeFilter !== 'all' || hospitalFilter !== 'all' || searchTerm) && (
-                <Button variant="ghost" onClick={() => { setTypeFilter('all'); setSizeFilter('all'); setHospitalFilter('all'); setSearchTerm(''); }}>Clear</Button>
+              {(hospitalFilter !== 'all' || searchTerm) && (
+                <Button variant="ghost" onClick={() => { setHospitalFilter('all'); setSearchTerm(''); }}>Clear</Button>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Aggregated Summary */}
+        {/* SKU List Table */}
         <Card>
-          <CardHeader><CardTitle className="text-lg">Product Summary ({aggregatedByProduct.length} products)</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-lg">Forecast by SKU ({skuAggregates.length})</CardTitle></CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="flex items-center justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
-            ) : aggregatedByProduct.length === 0 ? (
+            ) : skuAggregates.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No forecast data available.</div>
             ) : (
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Size</TableHead>
-                      <TableHead>Color</TableHead>
+                      <TableHead className="w-[40px]"></TableHead>
+                      <TableHead>SKU</TableHead>
+                      <TableHead>Description</TableHead>
                       <TableHead className="text-right">Total Qty</TableHead>
                       <TableHead className="text-right">Areas</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {aggregatedByProduct.map((p, i) => (
-                      <TableRow key={i}>
-                        <TableCell><Badge variant="outline">{TYPE_LABELS[p.type] || p.type}</Badge></TableCell>
-                        <TableCell>{SIZE_LABELS[p.size] || p.size}</TableCell>
-                        <TableCell>{p.color}</TableCell>
-                        <TableCell className="text-right font-medium">{p.qty}</TableCell>
-                        <TableCell className="text-right">{p.areas}</TableCell>
-                      </TableRow>
+                    {skuAggregates.map((sku) => (
+                      <>
+                        <TableRow 
+                          key={sku.sku} 
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => toggleSku(sku.sku)}
+                        >
+                          <TableCell className="py-2">
+                            {expandedSkus.has(sku.sku) ? (
+                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </TableCell>
+                          <TableCell className="font-mono text-sm font-medium">{sku.sku}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground max-w-[400px] truncate">{sku.description}</TableCell>
+                          <TableCell className="text-right font-semibold">{sku.totalQty}</TableCell>
+                          <TableCell className="text-right">
+                            <Badge variant="secondary">{sku.areaCount}</Badge>
+                          </TableCell>
+                        </TableRow>
+                        {expandedSkus.has(sku.sku) && (
+                          <TableRow key={`${sku.sku}-details`}>
+                            <TableCell colSpan={5} className="bg-muted/30 p-0">
+                              <div className="px-8 py-3">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead>Hospital</TableHead>
+                                      <TableHead>Area</TableHead>
+                                      <TableHead className="text-right">Qty</TableHead>
+                                      <TableHead>Expected Date</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {sku.items.map((item, idx) => (
+                                      <TableRow key={idx}>
+                                        <TableCell className="text-sm">{item.hospitalName}</TableCell>
+                                        <TableCell className="text-sm">{item.areaName}</TableCell>
+                                        <TableCell className="text-right text-sm">{item.expectedQuantity}</TableCell>
+                                        <TableCell className="text-sm">
+                                          {item.expectedReorderDate ? new Date(item.expectedReorderDate).toLocaleDateString() : '-'}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </>
                     ))}
                   </TableBody>
                 </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Detailed Forecast */}
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Detailed Forecast ({filteredForecasts.length} items)</CardTitle></CardHeader>
-          <CardContent>
-            {filteredForecasts.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No data matches your filters.</div>
-            ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Hospital</TableHead>
-                      <TableHead>Area</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Size</TableHead>
-                      <TableHead>Color</TableHead>
-                      <TableHead className="text-right">Qty</TableHead>
-                      <TableHead>Expected Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredForecasts.slice(0, 100).map((f, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium">{f.hospitalName}</TableCell>
-                        <TableCell>{f.areaName}</TableCell>
-                        <TableCell><Badge variant="outline">{TYPE_LABELS[f.productType] || f.productType}</Badge></TableCell>
-                        <TableCell>{SIZE_LABELS[f.productSize] || f.productSize}</TableCell>
-                        <TableCell>{f.productColor}</TableCell>
-                        <TableCell className="text-right">{f.expectedQuantity}</TableCell>
-                        <TableCell>{f.expectedReorderDate ? new Date(f.expectedReorderDate).toLocaleDateString() : '-'}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                {filteredForecasts.length > 100 && (
-                  <div className="text-center py-2 text-sm text-muted-foreground">Showing first 100 of {filteredForecasts.length} items. Use filters or export for full data.</div>
-                )}
               </div>
             )}
           </CardContent>

@@ -61,3 +61,4 @@
 - [x] Add ability to edit area name in Area Management
 - [x] Add view/manage linked purchases for each area (unlink to send back to pending matches)
 - [x] Add merge areas feature to combine duplicate areas
+- [x] Redesign Stock Forecast to use table/list format organized by SKU code
