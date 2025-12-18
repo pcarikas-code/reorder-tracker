@@ -56,3 +56,5 @@
 - [x] Make Resolve Match dialog bigger
 - [x] Add excluded orders section to Area Management with re-include option
 - [x] Add Enter keyboard shortcut for Confirm & Next in Resolve Match dialog
+- [x] Sort area dropdown alphabetically in Resolve Match dialog
+- [x] Improve AI suggestion to match against existing areas for the specific hospital only, with better prompt

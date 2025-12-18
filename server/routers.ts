@@ -268,19 +268,46 @@ export const appRouter = router({
       await db.unexcludePurchase(input.purchaseId);
       return { success: true };
     }),
-    getLlmSuggestion: protectedProcedure.input(z.object({ rawAreaText: z.string(), existingAreas: z.array(z.object({ id: z.number(), name: z.string(), hospitalName: z.string() })) })).mutation(async ({ input }) => {
+    getLlmSuggestion: protectedProcedure.input(z.object({ 
+      rawAreaText: z.string(), 
+      customerRef: z.string().optional(),
+      hospitalName: z.string().optional(),
+      existingAreas: z.array(z.object({ id: z.number(), name: z.string(), hospitalName: z.string() })) 
+    })).mutation(async ({ input }) => {
       // If no existing areas, suggest creating a new one
       if (!input.existingAreas || input.existingAreas.length === 0) {
+        // Extract a clean area name from the raw text
+        const cleanName = input.rawAreaText
+          .replace(/^\d+[-\s]*/g, '') // Remove leading numbers
+          .replace(/^PO\s*\d+[-\s]*/gi, '') // Remove PO numbers
+          .replace(/^\d{4,}[-\s]*/g, '') // Remove long number prefixes
+          .trim();
         return {
           bestMatchId: null,
           confidence: 100,
-          reasoning: "No existing areas to match against. This should be created as a new area.",
+          reasoning: "No existing areas for this hospital. This should be created as a new area.",
           isNewArea: true,
-          suggestedName: input.rawAreaText
+          suggestedName: cleanName || input.rawAreaText
         };
       }
       
-      const prompt = `Match hospital area names. Raw text: "${input.rawAreaText}". Existing areas:\n${input.existingAreas.map(a => `- ID ${a.id}: "${a.name}" at ${a.hospitalName}`).join('\n')}\nRespond JSON: {bestMatchId: number|null, confidence: 0-100, reasoning: string, isNewArea: boolean, suggestedName: string}`;
+      // Build a more detailed prompt with customerRef context
+      const prompt = `You are matching a hospital order to an existing area.
+
+Hospital: ${input.hospitalName || 'Unknown'}
+Original Reference: "${input.customerRef || input.rawAreaText}"
+Extracted Area Text: "${input.rawAreaText}"
+
+Existing areas for this hospital:
+${input.existingAreas.map(a => `- ID ${a.id}: "${a.name}"`).join('\n')}
+
+Task: Find the best matching existing area, or suggest this is a new area.
+- Look for partial matches (e.g., "Ward 3" matches "Ward 3 - Level 2")
+- Look for abbreviations (e.g., "ICU" matches "Intensive Care Unit")
+- Look for similar names with different formatting
+- If no good match exists, suggest creating a new area with a clean name
+
+Respond with JSON: {bestMatchId: number|null, confidence: 0-100, reasoning: string, isNewArea: boolean, suggestedName: string}`;
       try {
         const response = await invokeLLM({ messages: [{ role: "system", content: "Match hospital area names. Respond with valid JSON." }, { role: "user", content: prompt }], response_format: { type: "json_schema", json_schema: { name: "area_match", strict: true, schema: { type: "object", properties: { bestMatchId: { type: ["integer", "null"] }, confidence: { type: "integer" }, reasoning: { type: "string" }, isNewArea: { type: "boolean" }, suggestedName: { type: "string" } }, required: ["bestMatchId", "confidence", "reasoning", "isNewArea", "suggestedName"], additionalProperties: false } } } });
         const content = response?.choices?.[0]?.message?.content;

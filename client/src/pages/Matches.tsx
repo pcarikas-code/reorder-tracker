@@ -133,9 +133,14 @@ export default function Matches() {
     if (!selectedMatch) return;
     setIsGettingSuggestion(true);
     try {
+      // Only pass areas from the same hospital
+      const hospitalId = (selectedMatch as any)?.hospitalId;
+      const hospitalAreas = (areas || []).filter(a => a.hospitalId === hospitalId);
       const result = await getLlmSuggestion.mutateAsync({
         rawAreaText: selectedMatch.rawAreaText || "",
-        existingAreas: (areas || []).map(a => ({ id: a.id, name: a.name, hospitalName: a.hospitalName })),
+        customerRef: (selectedMatch as any)?.customerRef || "",
+        hospitalName: (selectedMatch as any)?.hospitalName || "",
+        existingAreas: hospitalAreas.map(a => ({ id: a.id, name: a.name, hospitalName: a.hospitalName })),
       });
       if (result) {
         setLlmSuggestion(result);
@@ -347,7 +352,7 @@ export default function Matches() {
               <TabsContent value="existing" className="space-y-4 mt-4">
                 {(() => {
                   const hospitalId = (selectedMatch as any)?.hospitalId;
-                  const filteredAreas = areas?.filter(a => a.hospitalId === hospitalId) || [];
+                  const filteredAreas = (areas?.filter(a => a.hospitalId === hospitalId) || []).sort((a, b) => a.name.localeCompare(b.name));
                   
                   if (filteredAreas.length > 0) {
                     return (
