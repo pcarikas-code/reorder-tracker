@@ -55,3 +55,4 @@
 - [x] Add "Exclude" feature to flag and hide unwanted orders (without deleting)
 - [x] Make Resolve Match dialog bigger
 - [x] Add excluded orders section to Area Management with re-include option
+- [x] Add Enter keyboard shortcut for Confirm & Next in Resolve Match dialog

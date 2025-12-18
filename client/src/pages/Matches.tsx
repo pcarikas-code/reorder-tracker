@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Check, X, Sparkles, Plus, Link, ChevronRight, Ban } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 
 export default function Matches() {
@@ -179,6 +179,27 @@ export default function Matches() {
     if (activeTab === "new") return !!newAreaName && !!newAreaHospitalId;
     return false;
   };
+
+  // Keyboard shortcut: Enter for Confirm & Next
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only trigger if dialog is open and Enter is pressed
+      if (!selectedMatch) return;
+      
+      // Don't trigger if user is typing in an input or select is open
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+      if (target.closest('[role="listbox"]') || target.closest('[data-radix-select-viewport]')) return;
+      
+      if (e.key === 'Enter' && canConfirm() && !confirmMatch.isPending && !createNewArea.isPending) {
+        e.preventDefault();
+        handleConfirm(true); // Confirm & Next
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedMatch, canConfirm, confirmMatch.isPending, createNewArea.isPending]);
 
   return (
     <DashboardLayout>
