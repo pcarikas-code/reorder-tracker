@@ -352,7 +352,7 @@ export default function Areas() {
 
         {/* Linked Purchases Dialog */}
         <Dialog open={showPurchasesDialog} onOpenChange={(open) => { setShowPurchasesDialog(open); if (!open) { setSelectedAreaId(null); setSelectedAreaName(""); setSelectedAreaHospitalId(null); } }}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="!max-w-[90vw] !w-[900px] max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Linked Purchases - {selectedAreaName}</DialogTitle>
               <DialogDescription>View and manage orders linked to this area. You can unlink orders or move them to a different area.</DialogDescription>
