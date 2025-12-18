@@ -184,8 +184,7 @@ export default function Forecast() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[40px]"></TableHead>
-                      <TableHead>SKU</TableHead>
-                      <TableHead>Description</TableHead>
+                      <TableHead>Product Code</TableHead>
                       <TableHead className="text-right">Total Qty</TableHead>
                       <TableHead className="text-right">Areas</TableHead>
                     </TableRow>
@@ -206,7 +205,6 @@ export default function Forecast() {
                             )}
                           </TableCell>
                           <TableCell className="font-mono text-sm font-medium">{sku.sku}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground max-w-[400px] truncate">{sku.description}</TableCell>
                           <TableCell className="text-right font-semibold">{sku.totalQty}</TableCell>
                           <TableCell className="text-right">
                             <Badge variant="secondary">{sku.areaCount}</Badge>
