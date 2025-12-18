@@ -120,17 +120,20 @@ export async function batchUpsertHospitals(hospitalList: InsertHospital[]): Prom
   const db = await getDb();
   if (!db || hospitalList.length === 0) return;
   
-  const BATCH_SIZE = 50;
+  // True bulk insert with ON DUPLICATE KEY UPDATE
+  const BATCH_SIZE = 100;
   for (let i = 0; i < hospitalList.length; i += BATCH_SIZE) {
     const batch = hospitalList.slice(i, i + BATCH_SIZE);
-    for (const hospital of batch) {
-      await db.insert(hospitals).values(hospital).onDuplicateKeyUpdate({
+    try {
+      await db.insert(hospitals).values(batch).onDuplicateKeyUpdate({
         set: {
-          customerCode: hospital.customerCode,
-          customerName: hospital.customerName,
-          updatedAt: new Date(),
+          customerCode: sql`VALUES(customerCode)`,
+          customerName: sql`VALUES(customerName)`,
+          updatedAt: sql`NOW()`,
         }
       });
+    } catch (error) {
+      console.error('Error batch upserting hospitals:', error);
     }
   }
 }
@@ -262,20 +265,23 @@ export async function batchUpsertPurchases(purchaseList: InsertPurchase[]): Prom
   const db = await getDb();
   if (!db || purchaseList.length === 0) return;
   
-  const BATCH_SIZE = 50;
+  // True bulk insert with ON DUPLICATE KEY UPDATE
+  const BATCH_SIZE = 100;
   for (let i = 0; i < purchaseList.length; i += BATCH_SIZE) {
     const batch = purchaseList.slice(i, i + BATCH_SIZE);
-    for (const purchase of batch) {
-      await db.insert(purchases).values(purchase).onDuplicateKeyUpdate({
+    try {
+      await db.insert(purchases).values(batch).onDuplicateKeyUpdate({
         set: {
-          orderDate: purchase.orderDate,
-          areaId: purchase.areaId,
-          customerRef: purchase.customerRef,
-          rawAreaText: purchase.rawAreaText,
-          orderStatus: purchase.orderStatus,
-          updatedAt: new Date(),
+          orderDate: sql`VALUES(orderDate)`,
+          areaId: sql`VALUES(areaId)`,
+          customerRef: sql`VALUES(customerRef)`,
+          rawAreaText: sql`VALUES(rawAreaText)`,
+          orderStatus: sql`VALUES(orderStatus)`,
+          updatedAt: sql`NOW()`,
         }
       });
+    } catch (error) {
+      console.error('Error batch upserting purchases:', error);
     }
   }
 }
