@@ -37,3 +37,4 @@
 - [x] Fix New Area dialog opening on top of Match to Area dialog (already handled by condition)
 - [x] Show original CustomerRef in both Match to Area and New Area dialogs
 - [x] Combine Match to Area and New Area dialogs into single Resolve Match dialog with tabs
+- [x] Filter area dropdown in Resolve Match dialog to only show areas from current hospital

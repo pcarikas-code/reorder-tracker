@@ -275,36 +275,45 @@ export default function Matches() {
               </TabsList>
               
               <TabsContent value="existing" className="space-y-4 mt-4">
-                {areas && areas.length > 0 ? (
-                  <>
-                    <div className="space-y-2">
-                      <Label>Select Area</Label>
-                      <Select value={selectedAreaId} onValueChange={setSelectedAreaId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose an area..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {areas.map((area) => (
-                            <SelectItem key={area.id} value={area.id.toString()}>
-                              {area.hospitalName} - {area.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                {(() => {
+                  const hospitalId = (selectedMatch as any)?.hospitalId;
+                  const filteredAreas = areas?.filter(a => a.hospitalId === hospitalId) || [];
+                  
+                  if (filteredAreas.length > 0) {
+                    return (
+                      <>
+                        <div className="space-y-2">
+                          <Label>Select Area from {(selectedMatch as any)?.hospitalName}</Label>
+                          <Select value={selectedAreaId} onValueChange={setSelectedAreaId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choose an area..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {filteredAreas.map((area) => (
+                                <SelectItem key={area.id} value={area.id.toString()}>
+                                  {area.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="addAlias" checked={addAlias} onCheckedChange={(checked) => setAddAlias(checked === true)} />
-                      <Label htmlFor="addAlias" className="text-sm">
-                        Add "{selectedMatch?.rawAreaText}" as an alias for future auto-matching
-                      </Label>
-                    </div>
-                  </>
-                ) : (
-                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 text-center">
-                    No existing areas yet. Switch to "Create New" tab to create the first area.
-                  </div>
-                )}
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="addAlias" checked={addAlias} onCheckedChange={(checked) => setAddAlias(checked === true)} />
+                          <Label htmlFor="addAlias" className="text-sm">
+                            Add "{selectedMatch?.rawAreaText}" as an alias for future auto-matching
+                          </Label>
+                        </div>
+                      </>
+                    );
+                  } else {
+                    return (
+                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 text-center">
+                        No existing areas for {(selectedMatch as any)?.hospitalName || 'this hospital'}. Switch to "Create New" tab to create the first area.
+                      </div>
+                    );
+                  }
+                })()}
               </TabsContent>
               
               <TabsContent value="new" className="space-y-4 mt-4">
