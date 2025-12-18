@@ -116,6 +116,25 @@ export async function upsertHospital(hospital: InsertHospital): Promise<Hospital
   return result[0];
 }
 
+export async function batchUpsertHospitals(hospitalList: InsertHospital[]): Promise<void> {
+  const db = await getDb();
+  if (!db || hospitalList.length === 0) return;
+  
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < hospitalList.length; i += BATCH_SIZE) {
+    const batch = hospitalList.slice(i, i + BATCH_SIZE);
+    for (const hospital of batch) {
+      await db.insert(hospitals).values(hospital).onDuplicateKeyUpdate({
+        set: {
+          customerCode: hospital.customerCode,
+          customerName: hospital.customerName,
+          updatedAt: new Date(),
+        }
+      });
+    }
+  }
+}
+
 export async function getAllHospitals(): Promise<Hospital[]> {
   const db = await getDb();
   if (!db) return [];
@@ -239,11 +258,55 @@ export async function updatePurchase(id: number, data: Partial<InsertPurchase>):
   await db.update(purchases).set({ ...data, updatedAt: new Date() }).where(eq(purchases.id, id));
 }
 
+export async function batchUpsertPurchases(purchaseList: InsertPurchase[]): Promise<void> {
+  const db = await getDb();
+  if (!db || purchaseList.length === 0) return;
+  
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < purchaseList.length; i += BATCH_SIZE) {
+    const batch = purchaseList.slice(i, i + BATCH_SIZE);
+    for (const purchase of batch) {
+      await db.insert(purchases).values(purchase).onDuplicateKeyUpdate({
+        set: {
+          orderDate: purchase.orderDate,
+          areaId: purchase.areaId,
+          customerRef: purchase.customerRef,
+          rawAreaText: purchase.rawAreaText,
+          orderStatus: purchase.orderStatus,
+          updatedAt: new Date(),
+        }
+      });
+    }
+  }
+}
+
+export async function getAllPurchases(): Promise<Purchase[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(purchases);
+}
+
 // Purchase line operations
 export async function createPurchaseLines(lines: InsertPurchaseLine[]): Promise<void> {
   const db = await getDb();
   if (!db || lines.length === 0) return;
-  await db.insert(purchaseLines).values(lines);
+  
+  // Insert in batches of 100 to avoid query size limits
+  const BATCH_SIZE = 100;
+  for (let i = 0; i < lines.length; i += BATCH_SIZE) {
+    const batch = lines.slice(i, i + BATCH_SIZE);
+    try {
+      await db.insert(purchaseLines).values(batch).onDuplicateKeyUpdate({
+        set: {
+          quantity: sql`VALUES(quantity)`,
+          unitPrice: sql`VALUES(unitPrice)`,
+        }
+      });
+    } catch (error) {
+      console.error('Error inserting purchase lines batch:', error);
+      // Continue with next batch
+    }
+  }
 }
 
 export async function getPurchaseLinesByPurchase(purchaseId: number): Promise<PurchaseLine[]> {
@@ -262,10 +325,79 @@ export async function createPendingMatch(match: InsertPendingMatch): Promise<Pen
   return inserted[0];
 }
 
-export async function getPendingMatches(): Promise<PendingMatch[]> {
+export async function createPendingMatchIfNotExists(match: InsertPendingMatch): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  
+  // Check if pending match already exists for this purchase
+  const existing = await db.select().from(pendingMatches)
+    .where(and(eq(pendingMatches.purchaseId, match.purchaseId), eq(pendingMatches.status, 'pending')))
+    .limit(1);
+  
+  if (existing.length === 0) {
+    await db.insert(pendingMatches).values(match);
+  }
+}
+
+export async function batchCreatePendingMatches(matches: InsertPendingMatch[]): Promise<void> {
+  const db = await getDb();
+  if (!db || matches.length === 0) return;
+  
+  // Get all existing pending matches to filter out duplicates
+  const existingMatches = await db.select({ purchaseId: pendingMatches.purchaseId })
+    .from(pendingMatches)
+    .where(eq(pendingMatches.status, 'pending'));
+  const existingPurchaseIds = new Set(existingMatches.map(m => m.purchaseId));
+  
+  // Filter out matches that already exist
+  const newMatches = matches.filter(m => !existingPurchaseIds.has(m.purchaseId));
+  if (newMatches.length === 0) return;
+  
+  // Insert in batches of 100
+  const BATCH_SIZE = 100;
+  for (let i = 0; i < newMatches.length; i += BATCH_SIZE) {
+    const batch = newMatches.slice(i, i + BATCH_SIZE);
+    try {
+      await db.insert(pendingMatches).values(batch);
+    } catch (error) {
+      console.error('Error inserting pending matches batch:', error);
+    }
+  }
+}
+
+export async function getPendingMatches() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(pendingMatches).where(eq(pendingMatches.status, 'pending')).orderBy(desc(pendingMatches.createdAt));
+  
+  // Join with purchases and hospitals to get context
+  const results = await db
+    .select({
+      id: pendingMatches.id,
+      purchaseId: pendingMatches.purchaseId,
+      rawAreaText: pendingMatches.rawAreaText,
+      suggestedAreaId: pendingMatches.suggestedAreaId,
+      suggestedAreaName: pendingMatches.suggestedAreaName,
+      matchScore: pendingMatches.matchScore,
+      llmSuggestion: pendingMatches.llmSuggestion,
+      status: pendingMatches.status,
+      createdAt: pendingMatches.createdAt,
+      resolvedAt: pendingMatches.resolvedAt,
+      // Purchase info
+      orderNumber: purchases.orderNumber,
+      orderDate: purchases.orderDate,
+      customerRef: purchases.customerRef,
+      // Hospital info
+      hospitalId: hospitals.id,
+      hospitalName: hospitals.customerName,
+      hospitalCode: hospitals.customerCode,
+    })
+    .from(pendingMatches)
+    .innerJoin(purchases, eq(pendingMatches.purchaseId, purchases.id))
+    .innerJoin(hospitals, eq(purchases.hospitalId, hospitals.id))
+    .where(eq(pendingMatches.status, 'pending'))
+    .orderBy(desc(pendingMatches.createdAt));
+  
+  return results;
 }
 
 export async function updatePendingMatch(id: number, data: Partial<InsertPendingMatch>): Promise<void> {
@@ -312,13 +444,14 @@ export async function updateSyncLog(id: number, data: Partial<InsertSyncLog>): P
   await db.update(syncLogs).set(data).where(eq(syncLogs.id, id));
 }
 
-export async function getLatestSyncLog(syncType: string): Promise<SyncLog | undefined> {
+export async function getLatestSyncLog(syncType?: string): Promise<SyncLog | undefined> {
   const db = await getDb();
   if (!db) return undefined;
-  const result = await db.select().from(syncLogs)
-    .where(eq(syncLogs.syncType, syncType))
-    .orderBy(desc(syncLogs.startedAt))
-    .limit(1);
+  // If no syncType specified, get the most recent sync of any type
+  const query = syncType 
+    ? db.select().from(syncLogs).where(eq(syncLogs.syncType, syncType))
+    : db.select().from(syncLogs);
+  const result = await query.orderBy(desc(syncLogs.startedAt)).limit(1);
   return result[0];
 }
 
@@ -339,6 +472,16 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
   if (!db) return [];
 
   const allAreas = await getAllAreas();
+  
+  // Get all purchases in one query and group by area
+  const allPurchases = await db.select().from(purchases).orderBy(desc(purchases.orderDate));
+  const purchasesByArea = new Map<number, typeof allPurchases[0]>();
+  for (const p of allPurchases) {
+    if (p.areaId && !purchasesByArea.has(p.areaId)) {
+      purchasesByArea.set(p.areaId, p); // First one is the most recent
+    }
+  }
+  
   const now = new Date();
   const twoYearsMs = 2 * 365 * 24 * 60 * 60 * 1000;
   const dueSoonThresholdMs = 90 * 24 * 60 * 60 * 1000; // 90 days
@@ -346,8 +489,7 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
   const statuses: AreaReorderStatus[] = [];
 
   for (const area of allAreas) {
-    const areaPurchases = await getPurchasesByArea(area.id);
-    const lastPurchase = areaPurchases[0]; // Already sorted by date desc
+    const lastPurchase = purchasesByArea.get(area.id);
 
     let status: AreaReorderStatus['status'] = 'no_purchase';
     let reorderDueDate: Date | null = null;
@@ -403,12 +545,31 @@ export async function getStockForecasts(): Promise<StockForecast[]> {
   const forecasts: StockForecast[] = [];
   const twoYearsMs = 2 * 365 * 24 * 60 * 60 * 1000;
 
-  for (const area of allAreas) {
-    const areaPurchases = await getPurchasesByArea(area.id);
-    if (areaPurchases.length === 0) continue;
+  // Get all purchases and lines in bulk
+  const allPurchases = await db.select().from(purchases).orderBy(desc(purchases.orderDate));
+  const allLines = await db.select().from(purchaseLines);
+  
+  // Build lookup maps
+  const purchasesByArea = new Map<number, typeof allPurchases[0]>();
+  for (const p of allPurchases) {
+    if (p.areaId && !purchasesByArea.has(p.areaId)) {
+      purchasesByArea.set(p.areaId, p);
+    }
+  }
+  
+  const linesByPurchase = new Map<number, typeof allLines>();
+  for (const line of allLines) {
+    if (!linesByPurchase.has(line.purchaseId)) {
+      linesByPurchase.set(line.purchaseId, []);
+    }
+    linesByPurchase.get(line.purchaseId)!.push(line);
+  }
 
-    const lastPurchase = areaPurchases[0];
-    const lines = await getPurchaseLinesByPurchase(lastPurchase.id);
+  for (const area of allAreas) {
+    const lastPurchase = purchasesByArea.get(area.id);
+    if (!lastPurchase) continue;
+
+    const lines = linesByPurchase.get(lastPurchase.id) || [];
 
     // Filter for Sporicidal Curtains only (standard, mesh_top, long_drop)
     const curtainLines = lines.filter(l => 

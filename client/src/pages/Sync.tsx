@@ -1,5 +1,6 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
+import { useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,19 +13,40 @@ export default function Sync() {
 
   const runSync = trpc.sync.run.useMutation({
     onSuccess: (data) => {
-      toast.success(`Sync completed! Processed ${data.recordsProcessed} records.`);
+      if (data.success) {
+        toast.info(data.message + ' - Refresh the page to check progress.');
+      } else {
+        toast.warning(data.message);
+      }
       utils.sync.status.invalidate();
-      utils.hospitals.list.invalidate();
-      utils.areas.list.invalidate();
-      utils.reorders.statuses.invalidate();
-      utils.forecasts.list.invalidate();
-      utils.matches.pending.invalidate();
     },
     onError: (error) => {
       toast.error(`Sync failed: ${error.message}`);
       utils.sync.status.invalidate();
     },
   });
+
+  // Poll for sync status when running
+  const isRunning = syncStatus?.status === 'running';
+  const wasRunning = useRef(false);
+  
+  // Auto-poll while sync is running
+  const { refetch } = trpc.sync.status.useQuery(undefined, {
+    refetchInterval: isRunning ? 2000 : false,
+  });
+  
+  // When sync completes, invalidate all data
+  useEffect(() => {
+    if (wasRunning.current && !isRunning && syncStatus?.status === 'completed') {
+      toast.success(`Sync completed! Processed ${syncStatus.recordsProcessed || 0} records.`);
+      utils.hospitals.list.invalidate();
+      utils.areas.list.invalidate();
+      utils.reorders.statuses.invalidate();
+      utils.forecasts.list.invalidate();
+      utils.matches.pending.invalidate();
+    }
+    wasRunning.current = isRunning;
+  }, [isRunning, syncStatus?.status, syncStatus?.recordsProcessed, utils]);
 
   const getStatusBadge = (status: string | undefined) => {
     switch (status) {
@@ -116,23 +138,48 @@ export default function Sync() {
                 <li>Sales orders with Sporicidal Curtains</li>
                 <li>Order line items and product details</li>
               </ul>
-              <Button
-                onClick={() => runSync.mutate()}
-                disabled={runSync.isPending}
-                className="w-full"
-              >
-                {runSync.isPending ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Syncing...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Start Sync
-                  </>
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => runSync.mutate({ incremental: true })}
+                  disabled={runSync.isPending || isRunning || !syncStatus?.completedAt}
+                  variant="outline"
+                  className="flex-1"
+                  title={!syncStatus?.completedAt ? 'Run a full sync first' : 'Only sync changes since last sync'}
+                >
+                  {runSync.isPending ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Quick Sync
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={() => runSync.mutate({})}
+                  disabled={runSync.isPending || isRunning}
+                  className="flex-1"
+                >
+                  {runSync.isPending ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Full Sync
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                <strong>Quick Sync:</strong> Only fetches orders modified since last sync (faster).<br/>
+                <strong>Full Sync:</strong> Re-syncs all historical data (use for first sync or to fix issues).
+              </p>
             </CardContent>
           </Card>
         </div>

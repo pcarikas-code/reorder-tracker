@@ -8,6 +8,116 @@ import * as synchub from "./synchub";
 import { invokeLLM } from "./_core/llm";
 import { notifyOwner } from "./_core/notification";
 
+// Background sync function
+async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise<void> {
+  let recordsProcessed = 0;
+  const syncType = sinceDate ? 'incremental' : 'full';
+  console.log(`[Sync ${syncLogId}] Starting ${syncType} sync...${sinceDate ? ` (since ${sinceDate.toISOString()})` : ''}`);
+  try {
+    // Step 1: Sync customers (hospitals)
+    console.log(`[Sync ${syncLogId}] Step 1: Fetching customers...`);
+    const customers = await synchub.fetchCustomers();
+    console.log(`[Sync ${syncLogId}] Fetched ${customers.length} customers`);
+    await db.batchUpsertHospitals(customers.map(c => ({ unleashGuid: c.Guid, customerCode: c.CustomerCode, customerName: c.CustomerName })));
+    recordsProcessed += customers.length;
+    
+    // Step 2: Get reference data once
+    console.log(`[Sync ${syncLogId}] Step 2: Getting reference data...`);
+    const allHospitals = await db.getAllHospitals();
+    const hospitalMap = new Map<string, number>();
+    for (const h of allHospitals) hospitalMap.set(h.unleashGuid, h.id);
+    const allAreas = await db.getAllAreas();
+    const allAliases = await db.getAllAliases();
+    console.log(`[Sync ${syncLogId}] Reference data: ${allHospitals.length} hospitals, ${allAreas.length} areas, ${allAliases.length} aliases`);
+    
+    // Step 3: Fetch orders and prepare batch data
+    console.log(`[Sync ${syncLogId}] Step 3: Fetching orders${sinceDate ? ` modified since ${sinceDate.toISOString()}` : ''}...`);
+    const orders = await synchub.fetchSalesOrders(sinceDate);
+    console.log(`[Sync ${syncLogId}] Fetched ${orders.length} orders`);
+    const purchasesToUpsert: Parameters<typeof db.batchUpsertPurchases>[0] = [];
+    const pendingMatchesToCreate: { rawAreaText: string; orderGuid: string }[] = [];
+    
+    let skippedNoHospital = 0;
+    let skippedNoRawArea = 0;
+    let matchedToArea = 0;
+    for (const order of orders) {
+      const hospitalId = hospitalMap.get(order.CustomerGuid);
+      if (!hospitalId) { skippedNoHospital++; continue; }
+      const rawAreaText = synchub.parseCustomerRef(order.CustomerRef);
+      let areaId: number | undefined;
+      if (rawAreaText) {
+        const directMatch = allAreas.find(a => a.hospitalId === hospitalId && (a.name.toLowerCase() === rawAreaText.toLowerCase() || a.normalizedName?.toLowerCase() === rawAreaText.toLowerCase()));
+        if (directMatch) { areaId = directMatch.id; matchedToArea++; }
+        else { const aliasMatch = allAliases.find(al => al.alias.toLowerCase() === rawAreaText.toLowerCase()); if (aliasMatch) { areaId = aliasMatch.areaId; matchedToArea++; } }
+      } else {
+        skippedNoRawArea++;
+      }
+      purchasesToUpsert.push({ unleashOrderGuid: order.Guid, orderNumber: order.OrderNumber, orderDate: order.OrderDate, hospitalId, areaId, customerRef: order.CustomerRef, rawAreaText, orderStatus: order.OrderStatus });
+      if (!areaId && rawAreaText) pendingMatchesToCreate.push({ rawAreaText, orderGuid: order.Guid });
+    }
+    console.log(`[Sync ${syncLogId}] Order processing: ${skippedNoHospital} skipped (no hospital), ${skippedNoRawArea} skipped (no area text), ${matchedToArea} matched to existing areas, ${pendingMatchesToCreate.length} need matching`);
+    
+    // Step 4: Batch upsert purchases
+    console.log(`[Sync ${syncLogId}] Step 4: Upserting ${purchasesToUpsert.length} purchases...`);
+    await db.batchUpsertPurchases(purchasesToUpsert);
+    recordsProcessed += purchasesToUpsert.length;
+    console.log(`[Sync ${syncLogId}] Purchases upserted`);
+    
+    // Step 5: Get all purchases for mapping and create pending matches
+    console.log(`[Sync ${syncLogId}] Step 5: Creating pending matches...`);
+    const allPurchases = await db.getAllPurchases();
+    const purchaseMap = new Map<string, number>();
+    // Normalize GUIDs to lowercase for case-insensitive matching
+    for (const p of allPurchases) purchaseMap.set(p.unleashOrderGuid.toLowerCase(), p.id);
+    
+    // Batch create pending matches
+    const pendingMatchInserts: Parameters<typeof db.batchCreatePendingMatches>[0] = [];
+    for (const pm of pendingMatchesToCreate) {
+      const purchaseId = purchaseMap.get(pm.orderGuid.toLowerCase());
+      if (purchaseId) pendingMatchInserts.push({ purchaseId, rawAreaText: pm.rawAreaText, status: 'pending' });
+    }
+    await db.batchCreatePendingMatches(pendingMatchInserts);
+    
+    console.log(`[Sync ${syncLogId}] Created ${pendingMatchInserts.length} pending matches`);
+    
+    // Step 6: Fetch and process order lines
+    console.log(`[Sync ${syncLogId}] Step 6: Fetching order lines...`);
+    const orderGuids = orders.map(o => o.Guid);
+    if (orderGuids.length > 0) {
+      const lines = await synchub.fetchSalesOrderLines(orderGuids);
+      console.log(`[Sync ${syncLogId}] Fetched ${lines.length} order lines`);
+      const products = await synchub.fetchProducts();
+      const productMap = new Map<string, typeof products[0]>();
+      for (const p of products) productMap.set(p.Guid, p);
+      
+      const lineInserts: Parameters<typeof db.createPurchaseLines>[0] = [];
+      let skippedNoPurchase = 0, skippedNoProduct = 0, skippedNotCurtain = 0;
+      for (const line of lines) {
+        const purchaseId = purchaseMap.get(line.SalesOrderRemoteID.toLowerCase());
+        if (!purchaseId) { skippedNoPurchase++; continue; }
+        const product = productMap.get(line.ProductGuid);
+        if (!product) { skippedNoProduct++; continue; }
+        if (!synchub.isSporicidalCurtain(product.ProductCode)) { skippedNotCurtain++; continue; }
+        const parsed = synchub.parseProductCode(product.ProductCode);
+        lineInserts.push({ purchaseId, unleashProductGuid: line.ProductGuid, productCode: product.ProductCode, productDescription: product.ProductDescription, productType: parsed.type, productSize: parsed.size, productColor: parsed.color, quantity: String(line.OrderQuantity), unitPrice: String(line.UnitPrice) });
+      }
+      console.log(`[Sync ${syncLogId}] Line processing: ${lineInserts.length} to insert, skipped: ${skippedNoPurchase} no purchase, ${skippedNoProduct} no product, ${skippedNotCurtain} not curtain`);
+      if (lineInserts.length > 0) {
+        console.log(`[Sync ${syncLogId}] Inserting ${lineInserts.length} purchase lines...`);
+        await db.createPurchaseLines(lineInserts);
+        console.log(`[Sync ${syncLogId}] Purchase lines inserted`);
+      }
+      recordsProcessed += lineInserts.length;
+    }
+    
+    await db.updateSyncLog(syncLogId, { status: 'completed', recordsProcessed, completedAt: new Date() });
+    console.log(`Sync completed: ${recordsProcessed} records processed`);
+  } catch (error) {
+    console.error('Sync error:', error);
+    await db.updateSyncLog(syncLogId, { status: 'failed', errorMessage: String(error), completedAt: new Date() });
+  }
+}
+
 export const appRouter = router({
   system: systemRouter,
   auth: router({
@@ -77,67 +187,70 @@ export const appRouter = router({
     }),
     reject: protectedProcedure.input(z.object({ matchId: z.number() })).mutation(async ({ input }) => { await db.updatePendingMatch(input.matchId, { status: 'rejected', resolvedAt: new Date() }); return { success: true }; }),
     getLlmSuggestion: protectedProcedure.input(z.object({ rawAreaText: z.string(), existingAreas: z.array(z.object({ id: z.number(), name: z.string(), hospitalName: z.string() })) })).mutation(async ({ input }) => {
+      // If no existing areas, suggest creating a new one
+      if (!input.existingAreas || input.existingAreas.length === 0) {
+        return {
+          bestMatchId: null,
+          confidence: 100,
+          reasoning: "No existing areas to match against. This should be created as a new area.",
+          isNewArea: true,
+          suggestedName: input.rawAreaText
+        };
+      }
+      
       const prompt = `Match hospital area names. Raw text: "${input.rawAreaText}". Existing areas:\n${input.existingAreas.map(a => `- ID ${a.id}: "${a.name}" at ${a.hospitalName}`).join('\n')}\nRespond JSON: {bestMatchId: number|null, confidence: 0-100, reasoning: string, isNewArea: boolean, suggestedName: string}`;
       try {
         const response = await invokeLLM({ messages: [{ role: "system", content: "Match hospital area names. Respond with valid JSON." }, { role: "user", content: prompt }], response_format: { type: "json_schema", json_schema: { name: "area_match", strict: true, schema: { type: "object", properties: { bestMatchId: { type: ["integer", "null"] }, confidence: { type: "integer" }, reasoning: { type: "string" }, isNewArea: { type: "boolean" }, suggestedName: { type: "string" } }, required: ["bestMatchId", "confidence", "reasoning", "isNewArea", "suggestedName"], additionalProperties: false } } } });
-        const content = response.choices[0]?.message?.content;
+        const content = response?.choices?.[0]?.message?.content;
         if (content && typeof content === 'string') return JSON.parse(content);
-      } catch (error) { console.error("LLM suggestion failed:", error); }
+        // If no content, return a default suggestion
+        return {
+          bestMatchId: null,
+          confidence: 50,
+          reasoning: "Could not analyze. Consider creating as a new area.",
+          isNewArea: true,
+          suggestedName: input.rawAreaText
+        };
+      } catch (error) { 
+        console.error("LLM suggestion failed:", error);
+        return {
+          bestMatchId: null,
+          confidence: 0,
+          reasoning: "AI analysis failed. Please select manually.",
+          isNewArea: true,
+          suggestedName: input.rawAreaText
+        };
+      }
       return null;
     }),
   }),
 
   sync: router({
-    status: protectedProcedure.query(async () => db.getLatestSyncLog('full')),
-    run: protectedProcedure.mutation(async () => {
-      const syncLog = await db.createSyncLog({ syncType: 'full', status: 'running' });
-      let recordsProcessed = 0;
-      try {
-        const customers = await synchub.fetchCustomers();
-        for (const customer of customers) { await db.upsertHospital({ unleashGuid: customer.Guid, customerCode: customer.CustomerCode, customerName: customer.CustomerName }); recordsProcessed++; }
-        const orders = await synchub.fetchSalesOrders();
-        const hospitalMap = new Map<string, number>();
-        const allHospitals = await db.getAllHospitals();
-        for (const h of allHospitals) hospitalMap.set(h.unleashGuid, h.id);
-        const allAreas = await db.getAllAreas();
-        const allAliases = await db.getAllAliases();
-        for (const order of orders) {
-          const hospitalId = hospitalMap.get(order.CustomerGuid);
-          if (!hospitalId) continue;
-          const rawAreaText = synchub.parseCustomerRef(order.CustomerRef);
-          let areaId: number | undefined;
-          if (rawAreaText) {
-            const directMatch = allAreas.find(a => a.hospitalId === hospitalId && (a.name.toLowerCase() === rawAreaText.toLowerCase() || a.normalizedName?.toLowerCase() === rawAreaText.toLowerCase()));
-            if (directMatch) areaId = directMatch.id;
-            else { const aliasMatch = allAliases.find(al => al.alias.toLowerCase() === rawAreaText.toLowerCase()); if (aliasMatch) areaId = aliasMatch.areaId; }
-          }
-          const purchase = await db.upsertPurchase({ unleashOrderGuid: order.Guid, orderNumber: order.OrderNumber, orderDate: order.OrderDate, hospitalId, areaId, customerRef: order.CustomerRef, rawAreaText, orderStatus: order.OrderStatus });
-          if (!areaId && rawAreaText) await db.createPendingMatch({ purchaseId: purchase.id, rawAreaText, status: 'pending' });
-          recordsProcessed++;
-        }
-        const orderGuids = orders.map(o => o.Guid);
-        if (orderGuids.length > 0) {
-          const lines = await synchub.fetchSalesOrderLines(orderGuids);
-          const products = await synchub.fetchProducts();
-          const productMap = new Map<string, typeof products[0]>();
-          for (const p of products) productMap.set(p.Guid, p);
-          const purchaseMap = new Map<string, number>();
-          for (const order of orders) { const purchases = await db.getPurchasesByHospital(hospitalMap.get(order.CustomerGuid) || 0); const p = purchases.find(pu => pu.unleashOrderGuid === order.Guid); if (p) purchaseMap.set(order.Guid, p.id); }
-          const lineInserts: Parameters<typeof db.createPurchaseLines>[0] = [];
-          for (const line of lines) {
-            const purchaseId = purchaseMap.get(line.SalesOrderRemoteID);
-            if (!purchaseId) continue;
-            const product = productMap.get(line.ProductGuid);
-            if (!product || !synchub.isSporicidalCurtain(product.ProductCode)) continue;
-            const parsed = synchub.parseProductCode(product.ProductCode);
-            lineInserts.push({ purchaseId, unleashProductGuid: line.ProductGuid, productCode: product.ProductCode, productDescription: product.ProductDescription, productType: parsed.type, productSize: parsed.size, productColor: parsed.color, quantity: String(line.OrderQuantity), unitPrice: String(line.UnitPrice) });
-          }
-          if (lineInserts.length > 0) await db.createPurchaseLines(lineInserts);
-          recordsProcessed += lineInserts.length;
-        }
-        await db.updateSyncLog(syncLog.id, { status: 'completed', recordsProcessed, completedAt: new Date() });
-        return { success: true, recordsProcessed };
-      } catch (error) { await db.updateSyncLog(syncLog.id, { status: 'failed', errorMessage: String(error), completedAt: new Date() }); throw error; }
+    status: protectedProcedure.query(async () => {
+      // Get the most recent sync of any type
+      const result = await db.getLatestSyncLog();
+      return result ?? null;
+    }),
+    run: protectedProcedure.input(z.object({ incremental: z.boolean().optional() }).optional()).mutation(async ({ input }) => {
+      // Check if any sync is already running
+      const existingSync = await db.getLatestSyncLog();
+      if (existingSync?.status === 'running') {
+        return { success: false, message: 'Sync already in progress', syncId: existingSync.id };
+      }
+      
+      // For incremental sync, get the last successful sync date
+      let sinceDate: Date | undefined;
+      if (input?.incremental && existingSync?.status === 'completed' && existingSync.completedAt) {
+        sinceDate = existingSync.completedAt;
+      }
+      
+      const syncType = sinceDate ? 'incremental' : 'full';
+      const syncLog = await db.createSyncLog({ syncType, status: 'running' });
+      
+      // Fire and forget - run sync in background
+      runSyncInBackground(syncLog.id, sinceDate).catch(err => console.error('Background sync error:', err));
+      
+      return { success: true, message: `${syncType.charAt(0).toUpperCase() + syncType.slice(1)} sync started`, syncId: syncLog.id };
     }),
   }),
 
