@@ -521,6 +521,14 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
     });
   }
 
+  // Sort by daysUntilDue (smallest/most overdue first, nulls at end)
+  statuses.sort((a, b) => {
+    if (a.daysUntilDue === null && b.daysUntilDue === null) return 0;
+    if (a.daysUntilDue === null) return 1;
+    if (b.daysUntilDue === null) return -1;
+    return a.daysUntilDue - b.daysUntilDue;
+  });
+
   return statuses;
 }
 
