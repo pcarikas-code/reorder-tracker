@@ -376,7 +376,7 @@ export default function Matches() {
                         <div className="flex items-center space-x-2">
                           <Checkbox id="addAlias" checked={addAlias} onCheckedChange={(checked) => setAddAlias(checked === true)} />
                           <Label htmlFor="addAlias" className="text-sm">
-                            Add "{selectedMatch?.rawAreaText}" as an alias for future auto-matching
+                            Add "{selectedMatch?.rawAreaText}" as an alias for "{filteredAreas.find(a => a.id.toString() === selectedAreaId)?.name || 'selected area'}"
                           </Label>
                         </div>
                       </>

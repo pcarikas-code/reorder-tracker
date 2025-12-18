@@ -307,7 +307,13 @@ export const appRouter = router({
         const areaName = area.name.toLowerCase();
         const areaWords = areaName.split(/[\s-]+/).filter(w => w.length > 2);
         
-        // Check for exact area name in reference (full name match is best)
+        // PRIORITY 1: Exact match - area name equals raw text exactly
+        if (areaName === rawText) {
+          matches.push({ area, score: 200, reason: `Perfect match: "${area.name}" exactly matches extracted text` });
+          continue;
+        }
+        
+        // PRIORITY 2: Full area name found in reference
         if (refText.includes(areaName)) {
           // Bonus for longer area names (more specific matches are better)
           const lengthBonus = Math.min(10, areaName.length / 3);
@@ -315,14 +321,23 @@ export const appRouter = router({
           continue;
         }
         
-        // Check if area name contains the raw text or vice versa
-        if (areaName.includes(rawText) || rawText.includes(areaName)) {
-          const lengthBonus = Math.min(10, areaName.length / 3);
-          matches.push({ area, score: 95 + lengthBonus, reason: `Strong match: "${area.name}" matches extracted text` });
+        // PRIORITY 3: Raw text is contained in area name (e.g., "Radiology" in "Radiology Staff Changing Rm")
+        // Lower score because it's a partial match - prefer exact area name if it exists
+        if (areaName.includes(rawText)) {
+          // Penalize longer area names - prefer shorter/more exact matches
+          const lengthPenalty = Math.min(20, (areaName.length - rawText.length) / 2);
+          matches.push({ area, score: 85 - lengthPenalty, reason: `Partial match: "${area.name}" contains extracted text` });
           continue;
         }
         
-        // Check for significant word matches (e.g., PACU, ICU, Ward, ED)
+        // PRIORITY 4: Area name is contained in raw text
+        if (rawText.includes(areaName)) {
+          const lengthBonus = Math.min(10, areaName.length / 3);
+          matches.push({ area, score: 90 + lengthBonus, reason: `Strong match: "${area.name}" found in extracted text` });
+          continue;
+        }
+        
+        // PRIORITY 5: Check for significant word matches (e.g., PACU, ICU, Ward, ED)
         let wordMatches = 0;
         let matchedWords: string[] = [];
         for (const word of areaWords) {
@@ -337,7 +352,7 @@ export const appRouter = router({
           const matchRatio = wordMatches / areaWords.length;
           const baseScore = 60 + (wordMatches * 15);
           const ratioBonus = matchRatio * 20; // Bonus for matching more of the area name
-          const score = Math.min(99, baseScore + ratioBonus);
+          const score = Math.min(84, baseScore + ratioBonus); // Cap below partial matches
           matches.push({ area, score, reason: `Word match: "${matchedWords.join(', ')}" found in reference (${Math.round(matchRatio * 100)}% of area name)` });
         }
       }

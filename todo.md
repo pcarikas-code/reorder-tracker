@@ -64,3 +64,5 @@
 - [x] Redesign Stock Forecast to use table/list format organized by SKU code
 - [x] Fix AI suggestion matching - improved prompt to match partial strings like PACU to Kenepuru PACU
 - [x] Add simple string matching fallback before AI call (faster, more reliable)
+- [x] Fix matching to prefer exact area name matches over partial contains
+- [x] Fix alias checkbox text to update when different area is selected
