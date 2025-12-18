@@ -297,20 +297,22 @@ export const appRouter = router({
       }
       
       // Build a more detailed prompt with customerRef context
-      const prompt = `You are matching a hospital order to an existing area.
+      const prompt = `You are matching a hospital order to an existing area. Your job is to find the BEST match from the existing areas list.
 
 Hospital: ${input.hospitalName || 'Unknown'}
 Original Reference: "${input.customerRef || input.rawAreaText}"
 Extracted Area Text: "${input.rawAreaText}"
 
-Existing areas for this hospital:
+Existing areas for this hospital (ONLY match to these):
 ${input.existingAreas.map(a => `- ID ${a.id}: "${a.name}"`).join('\n')}
 
-Task: Find the best matching existing area, or suggest this is a new area.
-- Look for partial matches (e.g., "Ward 3" matches "Ward 3 - Level 2")
-- Look for abbreviations (e.g., "ICU" matches "Intensive Care Unit")
-- Look for similar names with different formatting
-- If no good match exists, suggest creating a new area with a clean name
+IMPORTANT MATCHING RULES:
+1. Look for the area name ANYWHERE in the reference text. Example: "340353 - Kenepuru Hospital - PACU" should match "Kenepuru PACU" because PACU appears in both.
+2. Match partial strings: if "PACU" appears in the reference and an area contains "PACU", that's a match.
+3. Match abbreviations: ICU = Intensive Care Unit, ED = Emergency Department, PACU = Post Anesthesia Care Unit
+4. Ignore numbers, hospital names, and prefixes when matching - focus on the AREA NAME portion.
+5. If ANY existing area name appears in the reference (even partially), prefer matching to it over creating new.
+6. Only suggest a new area if there is truly NO match in the existing list.
 
 Respond with JSON: {bestMatchId: number|null, confidence: 0-100, reasoning: string, isNewArea: boolean, suggestedName: string}`;
       try {

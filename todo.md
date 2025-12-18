@@ -62,3 +62,4 @@
 - [x] Add view/manage linked purchases for each area (unlink to send back to pending matches)
 - [x] Add merge areas feature to combine duplicate areas
 - [x] Redesign Stock Forecast to use table/list format organized by SKU code
+- [x] Fix AI suggestion matching - improved prompt to match partial strings like PACU to Kenepuru PACU
