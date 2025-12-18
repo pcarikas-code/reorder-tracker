@@ -80,28 +80,31 @@ export default function Matches() {
   };
 
   const goToNextMatch = () => {
-    // Find the next pending match after the current one
+    // Find the next pending match from the CURRENT list (before invalidation)
     if (!pendingMatches || !selectedMatch) {
       closeDialog();
       return;
     }
+    
     const currentIndex = pendingMatches.findIndex(m => m.id === selectedMatch.id);
-    // Get next match (skip current one which will be removed after invalidation)
-    // Since the list will refresh, we just open the first item
-    // But we need to wait for invalidation, so we'll reset and let the user see the updated list
+    // Get the next match in the current list (the one after the current)
+    const nextMatch = currentIndex >= 0 && currentIndex < pendingMatches.length - 1 
+      ? pendingMatches[currentIndex + 1] 
+      : null;
+    
+    // Reset state
     setSelectedAreaId("");
     setLlmSuggestion(null);
     setGoToNextAfterConfirm(false);
-    // The list will refresh, so we'll select the first remaining match
-    // We use a small delay to let the invalidation complete
-    setTimeout(() => {
-      const updatedMatches = utils.matches.pending.getData();
-      if (updatedMatches && updatedMatches.length > 0) {
-        openDialog(updatedMatches[0]);
-      } else {
-        closeDialog();
-      }
-    }, 100);
+    
+    if (nextMatch) {
+      // Open the next match immediately (it still exists in the list)
+      openDialog(nextMatch);
+    } else {
+      // No more matches after this one, close the dialog
+      closeDialog();
+      toast.info("All matches processed!");
+    }
   };
 
   const openDialog = (match: NonNullable<typeof pendingMatches>[number]) => {
