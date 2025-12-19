@@ -91,3 +91,8 @@
 - [x] Fix Pending Matches to show ALL unmatched orders, not just from last sync
 - [x] Add Exclude button next to Resolve on Pending Matches page
 - [x] Add excluded purchases section in Hospital Management page
+- [x] Add invoiceDate column to purchases table (keep orderDate as Sales Order Date)
+- [x] Update sync to capture both Sales Order Date and Invoice Date from Unleashed
+- [x] Use Invoice Date for reorder calculations instead of Sales Order Date
+- [x] Add "On Order" status for orders with Sales Order Date but no Invoice Date
+- [x] Update UI to show both dates where relevant

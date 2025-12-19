@@ -254,6 +254,7 @@ export async function batchUpsertPurchases(purchaseList: InsertPurchase[]): Prom
       await db.insert(purchases).values(batch).onDuplicateKeyUpdate({
         set: {
           orderDate: sql`VALUES(orderDate)`,
+          invoiceDate: sql`VALUES(invoiceDate)`,
           areaId: sql`VALUES(areaId)`,
           customerRef: sql`VALUES(customerRef)`,
           rawAreaText: sql`VALUES(rawAreaText)`,
@@ -490,9 +491,10 @@ export interface AreaReorderStatus {
   areaName: string;
   hospitalId: number;
   hospitalName: string;
-  lastPurchaseDate: Date | null;
+  lastPurchaseDate: Date | null; // This is now invoiceDate (or orderDate if no invoice)
+  lastOrderDate: Date | null; // The sales order date
   reorderDueDate: Date | null;
-  status: 'overdue' | 'due_soon' | 'near_soon' | 'far_soon';
+  status: 'on_order' | 'overdue' | 'due_soon' | 'near_soon' | 'far_soon';
   daysUntilDue: number | null;
 }
 
@@ -503,7 +505,8 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
   const allAreas = await getAllAreas();
   
   // Get all purchases in one query and group by area
-  const allPurchases = await db.select().from(purchases).orderBy(desc(purchases.orderDate));
+  // Sort by invoiceDate first (for delivered orders), then orderDate
+  const allPurchases = await db.select().from(purchases).orderBy(desc(purchases.invoiceDate), desc(purchases.orderDate));
   const purchasesByArea = new Map<number, typeof allPurchases[0]>();
   for (const p of allPurchases) {
     if (p.areaId && !purchasesByArea.has(p.areaId)) {
@@ -525,7 +528,24 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
     // Skip areas with no purchase history
     if (!lastPurchase) continue;
 
-    const reorderDueDate = new Date(lastPurchase.orderDate.getTime() + twoYearsMs);
+    // If no invoiceDate, this is "On Order" - not yet delivered
+    if (!lastPurchase.invoiceDate) {
+      statuses.push({
+        areaId: area.id,
+        areaName: area.name,
+        hospitalId: area.hospitalId,
+        hospitalName: area.hospitalName,
+        lastPurchaseDate: null,
+        lastOrderDate: lastPurchase.orderDate,
+        reorderDueDate: null,
+        status: 'on_order',
+        daysUntilDue: null,
+      });
+      continue;
+    }
+
+    // Use invoiceDate for reorder calculations (when curtains were actually delivered)
+    const reorderDueDate = new Date(lastPurchase.invoiceDate.getTime() + twoYearsMs);
     const timeDiff = reorderDueDate.getTime() - now.getTime();
     const daysUntilDue = Math.ceil(timeDiff / (24 * 60 * 60 * 1000));
 
@@ -548,15 +568,21 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
       areaName: area.name,
       hospitalId: area.hospitalId,
       hospitalName: area.hospitalName,
-      lastPurchaseDate: lastPurchase.orderDate,
+      lastPurchaseDate: lastPurchase.invoiceDate,
+      lastOrderDate: lastPurchase.orderDate,
       reorderDueDate,
       status,
       daysUntilDue,
     });
   }
 
-  // Sort by daysUntilDue (smallest/most overdue first, nulls at end)
+  // Sort by status priority (on_order first, then by daysUntilDue)
+  const statusOrder = { 'on_order': 0, 'overdue': 1, 'due_soon': 2, 'near_soon': 3, 'far_soon': 4 };
   statuses.sort((a, b) => {
+    // First sort by status priority
+    const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+    if (statusDiff !== 0) return statusDiff;
+    // Then by daysUntilDue
     if (a.daysUntilDue === null && b.daysUntilDue === null) return 0;
     if (a.daysUntilDue === null) return 1;
     if (b.daysUntilDue === null) return -1;

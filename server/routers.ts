@@ -104,7 +104,7 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
       } else {
         skippedNoRawArea++;
       }
-      purchasesToUpsert.push({ unleashOrderGuid: order.Guid, orderNumber: order.OrderNumber, orderDate: order.OrderDate, hospitalId, areaId, customerRef: order.CustomerRef, rawAreaText, orderStatus: order.OrderStatus });
+      purchasesToUpsert.push({ unleashOrderGuid: order.Guid, orderNumber: order.OrderNumber, orderDate: order.OrderDate, invoiceDate: order.InvoiceDate || null, hospitalId, areaId, customerRef: order.CustomerRef, rawAreaText, orderStatus: order.OrderStatus });
       if (!areaId && rawAreaText) pendingMatchesToCreate.push({ rawAreaText, orderGuid: order.Guid });
     }
     console.log(`[Sync ${syncLogId}] Order processing: ${skippedNoEndurocide} skipped (no Endurocide products), ${skippedNoHospital} skipped (no hospital), ${skippedNoRawArea} skipped (no area text), ${matchedToArea} matched to existing areas, ${pendingMatchesToCreate.length} need matching`);

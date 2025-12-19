@@ -59,7 +59,8 @@ export const purchases = mysqlTable("purchases", {
   id: int("id").autoincrement().primaryKey(),
   unleashOrderGuid: varchar("unleashOrderGuid", { length: 64 }).notNull().unique(),
   orderNumber: varchar("orderNumber", { length: 50 }).notNull(),
-  orderDate: timestamp("orderDate").notNull(),
+  orderDate: timestamp("orderDate").notNull(), // Sales Order Date from Unleashed
+  invoiceDate: timestamp("invoiceDate"), // Invoice Date from Unleashed (null = On Order)
   hospitalId: int("hospitalId").notNull(),
   areaId: int("areaId"),
   customerRef: text("customerRef"),

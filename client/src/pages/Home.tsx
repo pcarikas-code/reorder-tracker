@@ -12,7 +12,7 @@ import { Link } from "wouter";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
-type StatusFilter = 'all' | 'overdue' | 'due_soon' | 'near_soon' | 'far_soon';
+type StatusFilter = 'all' | 'on_order' | 'overdue' | 'due_soon' | 'near_soon' | 'far_soon';
 
 // Component for area name with hover to show purchase history
 function AreaNameWithHover({ areaId, areaName }: { areaId: number; areaName: string }) {
@@ -95,8 +95,9 @@ export default function Home() {
   }, [statuses, searchTerm, statusFilter, hospitalFilter]);
 
   const statusCounts = useMemo(() => {
-    if (!statuses) return { overdue: 0, due_soon: 0, near_soon: 0, far_soon: 0 };
+    if (!statuses) return { on_order: 0, overdue: 0, due_soon: 0, near_soon: 0, far_soon: 0 };
     return {
+      on_order: statuses.filter(s => s.status === 'on_order').length,
       overdue: statuses.filter(s => s.status === 'overdue').length,
       due_soon: statuses.filter(s => s.status === 'due_soon').length,
       near_soon: statuses.filter(s => s.status === 'near_soon').length,
@@ -106,6 +107,7 @@ export default function Home() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case 'on_order': return <Badge variant="secondary" className="gap-1 bg-purple-100 text-purple-800 hover:bg-purple-100"><Clock className="h-3 w-3" />On Order</Badge>;
       case 'overdue': return <Badge variant="destructive" className="gap-1"><AlertTriangle className="h-3 w-3" />Overdue</Badge>;
       case 'due_soon': return <Badge variant="secondary" className="gap-1 bg-amber-100 text-amber-800 hover:bg-amber-100"><Clock className="h-3 w-3" />Due Soon</Badge>;
       case 'near_soon': return <Badge variant="secondary" className="gap-1 bg-blue-100 text-blue-800 hover:bg-blue-100"><Clock className="h-3 w-3" />Near Soon</Badge>;
@@ -117,8 +119,8 @@ export default function Home() {
   const handleExport = () => {
     if (!filteredStatuses.length) return;
     const csv = [
-      ['Hospital', 'Area', 'Status', 'Last Purchase', 'Due Date', 'Days Until Due'].join(','),
-      ...filteredStatuses.map(s => [`"${s.hospitalName}"`, `"${s.areaName}"`, s.status, s.lastPurchaseDate ? new Date(s.lastPurchaseDate).toLocaleDateString() : 'N/A', s.reorderDueDate ? new Date(s.reorderDueDate).toLocaleDateString() : 'N/A', s.daysUntilDue ?? 'N/A'].join(','))
+      ['Hospital', 'Area', 'Status', 'Order Date', 'Invoice Date', 'Due Date', 'Days Until Due'].join(','),
+      ...filteredStatuses.map(s => [`"${s.hospitalName}"`, `"${s.areaName}"`, s.status, s.lastOrderDate ? new Date(s.lastOrderDate).toLocaleDateString() : 'N/A', s.lastPurchaseDate ? new Date(s.lastPurchaseDate).toLocaleDateString() : 'Awaiting', s.reorderDueDate ? new Date(s.reorderDueDate).toLocaleDateString() : 'N/A', s.daysUntilDue ?? 'N/A'].join(','))
     ].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -144,7 +146,11 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-5">
+          <Card className="cursor-pointer hover:border-purple-500 transition-colors" onClick={() => setStatusFilter('on_order')}>
+            <CardHeader className="pb-2"><CardDescription>On Order</CardDescription><CardTitle className="text-3xl text-purple-600">{statusCounts.on_order}</CardTitle></CardHeader>
+            <CardContent><p className="text-xs text-muted-foreground">Awaiting delivery</p></CardContent>
+          </Card>
           <Card className="cursor-pointer hover:border-destructive transition-colors" onClick={() => setStatusFilter('overdue')}>
             <CardHeader className="pb-2"><CardDescription>Overdue</CardDescription><CardTitle className="text-3xl text-destructive">{statusCounts.overdue}</CardTitle></CardHeader>
             <CardContent><p className="text-xs text-muted-foreground">Past 2-year replacement date</p></CardContent>
@@ -175,6 +181,7 @@ export default function Home() {
                 <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="on_order">On Order</SelectItem>
                   <SelectItem value="overdue">Overdue</SelectItem>
                   <SelectItem value="due_soon">Due Soon (0-90)</SelectItem>
                   <SelectItem value="near_soon">Near Soon (90-180)</SelectItem>
@@ -208,7 +215,8 @@ export default function Home() {
                       <TableHead>Hospital</TableHead>
                       <TableHead>Area</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Last Purchase</TableHead>
+                      <TableHead>Order Date</TableHead>
+                      <TableHead>Invoice Date</TableHead>
                       <TableHead>Reorder Due</TableHead>
                       <TableHead className="text-right">Days</TableHead>
                     </TableRow>
@@ -226,7 +234,8 @@ export default function Home() {
                           <AreaNameWithHover areaId={status.areaId} areaName={status.areaName} />
                         </TableCell>
                         <TableCell>{getStatusBadge(status.status)}</TableCell>
-                        <TableCell>{status.lastPurchaseDate ? new Date(status.lastPurchaseDate).toLocaleDateString() : '-'}</TableCell>
+                        <TableCell>{status.lastOrderDate ? new Date(status.lastOrderDate).toLocaleDateString() : '-'}</TableCell>
+                        <TableCell>{status.lastPurchaseDate ? new Date(status.lastPurchaseDate).toLocaleDateString() : <span className="text-purple-600 text-xs">Awaiting</span>}</TableCell>
                         <TableCell>{status.reorderDueDate ? new Date(status.reorderDueDate).toLocaleDateString() : '-'}</TableCell>
                         <TableCell className="text-right">{status.daysUntilDue !== null ? <span className={status.daysUntilDue < 0 ? 'text-destructive font-medium' : status.daysUntilDue < 90 ? 'text-amber-600' : status.daysUntilDue < 180 ? 'text-blue-600' : 'text-green-600'}>{status.daysUntilDue}</span> : '-'}</TableCell>
                       </TableRow>

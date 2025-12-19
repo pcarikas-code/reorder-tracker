@@ -64,6 +64,7 @@ export interface UnleashedSalesOrder {
   Guid: string;
   OrderNumber: string;
   OrderDate: Date;
+  InvoiceDate: Date | null; // From SalesInvoice table - null means "On Order"
   CustomerGuid: string;
   CustomerRef: string;
   Comments: string;
@@ -73,17 +74,19 @@ export interface UnleashedSalesOrder {
 export async function fetchSalesOrders(sinceDate?: Date): Promise<UnleashedSalesOrder[]> {
   const p = await getSynchubPool();
   // Use LastModifiedOn for incremental sync (catches updates, not just new orders)
+  // LEFT JOIN with SalesInvoice to get InvoiceDate (null = On Order)
   let query = `
-    SELECT Guid, OrderNumber, OrderDate, CustomerGuid, CustomerRef, Comments, OrderStatus
-    FROM [${SCHEMA}].[SalesOrder]
-    WHERE IsDeleted = 0
+    SELECT so.Guid, so.OrderNumber, so.OrderDate, si.InvoiceDate, so.CustomerGuid, so.CustomerRef, so.Comments, so.OrderStatus
+    FROM [${SCHEMA}].[SalesOrder] so
+    LEFT JOIN [${SCHEMA}].[SalesInvoice] si ON so.OrderNumber = si.OrderNumber AND si.IsDeleted = 0
+    WHERE so.IsDeleted = 0
   `;
   
   if (sinceDate) {
-    query += ` AND LastModifiedOn >= @sinceDate`;
+    query += ` AND so.LastModifiedOn >= @sinceDate`;
   }
   
-  query += ` ORDER BY OrderDate DESC`;
+  query += ` ORDER BY so.OrderDate DESC`;
   
   const request = p.request();
   if (sinceDate) {
@@ -116,10 +119,11 @@ export async function fetchSalesOrdersInChunks(
     request.input('endDate', sql.DateTime, currentEnd);
     
     const result = await request.query(`
-      SELECT Guid, OrderNumber, OrderDate, CustomerGuid, CustomerRef, Comments, OrderStatus
-      FROM [${SCHEMA}].[SalesOrder]
-      WHERE IsDeleted = 0 AND OrderDate >= @startDate AND OrderDate < @endDate
-      ORDER BY OrderDate DESC
+      SELECT so.Guid, so.OrderNumber, so.OrderDate, si.InvoiceDate, so.CustomerGuid, so.CustomerRef, so.Comments, so.OrderStatus
+      FROM [${SCHEMA}].[SalesOrder] so
+      LEFT JOIN [${SCHEMA}].[SalesInvoice] si ON so.OrderNumber = si.OrderNumber AND si.IsDeleted = 0
+      WHERE so.IsDeleted = 0 AND so.OrderDate >= @startDate AND so.OrderDate < @endDate
+      ORDER BY so.OrderDate DESC
     `);
     
     allOrders.push(...result.recordset);
