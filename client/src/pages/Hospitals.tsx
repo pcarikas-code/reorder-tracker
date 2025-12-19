@@ -457,8 +457,8 @@ export default function Hospitals() {
                           <TableHead>Order Date</TableHead>
                           <TableHead>Customer Reference</TableHead>
                           <TableHead>Area</TableHead>
-                          <TableHead className="text-right">Curtains</TableHead>
-                          <TableHead className="w-[100px]">Action</TableHead>
+                          <TableHead className="text-center">Curtains</TableHead>
+                          <TableHead className="text-center w-[120px]">Action</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -476,11 +476,11 @@ export default function Hospitals() {
                                 <span className="text-muted-foreground italic">Unmatched</span>
                               )}
                             </TableCell>
-                            <TableCell className="text-right font-medium">
+                            <TableCell className="text-center font-medium">
                               {purchase.totalCurtains > 0 ? purchase.totalCurtains : '-'}
                             </TableCell>
                             <TableCell>
-                              <div className="flex gap-1">
+                              <div className="flex gap-1 justify-center">
                                 <Button
                                   variant="ghost"
                                   size="sm"
