@@ -267,7 +267,7 @@ export default function Matches() {
 
         {/* Simplified Resolve Match Dialog */}
         <Dialog open={!!selectedMatch} onOpenChange={(open) => { if (!open) closeDialog(); }}>
-          <DialogContent className="!max-w-2xl !w-[90vw]">
+          <DialogContent className="!max-w-2xl !w-[90vw] !min-h-[450px]">
             <DialogHeader>
               <DialogTitle>Resolve Match</DialogTitle>
               <DialogDescription>
@@ -306,7 +306,7 @@ export default function Matches() {
                 
                 {/* Suggestions dropdown */}
                 {showSuggestions && areaInput.trim() && filteredAreas.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-40 overflow-auto">
+                  <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-52 overflow-auto">
                     {filteredAreas.map((area) => (
                       <button
                         key={area.id}
