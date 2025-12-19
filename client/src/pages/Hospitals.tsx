@@ -30,6 +30,7 @@ export default function Hospitals() {
   const [selectedHospitalId, setSelectedHospitalId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [areaFilter, setAreaFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   
   // Hospital search state
   const [hospitalSearch, setHospitalSearch] = useState("");
@@ -65,6 +66,12 @@ export default function Hospitals() {
     if (!excludedPurchases || !selectedHospitalId) return [];
     return excludedPurchases.filter(p => p.hospitalId === parseInt(selectedHospitalId));
   }, [excludedPurchases, selectedHospitalId]);
+
+  // Set of excluded purchase IDs for quick lookup
+  const excludedPurchaseIds = useMemo(() => {
+    if (!hospitalExcludedPurchases) return new Set<number>();
+    return new Set(hospitalExcludedPurchases.map(p => p.id));
+  }, [hospitalExcludedPurchases]);
 
   const unexcludePurchase = trpc.matches.unexclude.useMutation({
     onSuccess: () => {
@@ -138,19 +145,47 @@ export default function Hospitals() {
     return Array.from(areaMap.entries()).map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
   }, [purchases]);
 
-  const filteredPurchases = useMemo(() => {
+  // Combine purchases with excluded status
+  const allPurchasesWithStatus = useMemo(() => {
     if (!purchases) return [];
-    return purchases.filter(p => {
+    // Regular purchases (not excluded)
+    const regularPurchases = purchases.map(p => ({
+      ...p,
+      status: p.areaId ? 'matched' as const : 'unmatched' as const,
+      isExcluded: false,
+    }));
+    // Add excluded purchases
+    const excludedItems = hospitalExcludedPurchases.map(p => ({
+      id: p.id,
+      orderNumber: p.orderNumber,
+      orderDate: p.orderDate,
+      customerRef: p.customerRef,
+      rawAreaText: p.rawAreaText,
+      areaId: null,
+      areaName: null,
+      totalCurtains: 0,
+      status: 'excluded' as const,
+      isExcluded: true,
+    }));
+    return [...regularPurchases, ...excludedItems];
+  }, [purchases, hospitalExcludedPurchases]);
+
+  const filteredPurchases = useMemo(() => {
+    return allPurchasesWithStatus.filter(p => {
       const matchesSearch = searchTerm === "" || 
         p.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (p.customerRef?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (p.areaName?.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesArea = areaFilter === "all" || 
-        (areaFilter === "unmatched" && !p.areaId) ||
+        (areaFilter === "unmatched" && !p.areaId && !p.isExcluded) ||
         (p.areaId?.toString() === areaFilter);
-      return matchesSearch && matchesArea;
+      const matchesStatus = statusFilter === "all" ||
+        (statusFilter === "matched" && p.status === 'matched') ||
+        (statusFilter === "unmatched" && p.status === 'unmatched') ||
+        (statusFilter === "excluded" && p.status === 'excluded');
+      return matchesSearch && matchesArea && matchesStatus;
     });
-  }, [purchases, searchTerm, areaFilter]);
+  }, [allPurchasesWithStatus, searchTerm, areaFilter, statusFilter]);
 
   // Filter areas based on input
   const filteredAreas = useMemo(() => {
@@ -409,20 +444,30 @@ export default function Hospitals() {
                       className="pl-9" 
                     />
                   </div>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full md:w-[180px]">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="matched">Matched</SelectItem>
+                      <SelectItem value="unmatched">Unmatched</SelectItem>
+                      <SelectItem value="excluded">Excluded</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Select value={areaFilter} onValueChange={setAreaFilter}>
                     <SelectTrigger className="w-full md:w-[250px]">
                       <SelectValue placeholder="Filter by area" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Areas</SelectItem>
-                      <SelectItem value="unmatched">Unmatched Only</SelectItem>
                       {purchaseAreas.map(a => (
                         <SelectItem key={a.id} value={a.id.toString()}>{a.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {(areaFilter !== 'all' || searchTerm) && (
-                    <Button variant="ghost" onClick={() => { setAreaFilter('all'); setSearchTerm(''); }}>Clear</Button>
+                  {(areaFilter !== 'all' || searchTerm || statusFilter !== 'all') && (
+                    <Button variant="ghost" onClick={() => { setAreaFilter('all'); setSearchTerm(''); setStatusFilter('all'); }}>Clear</Button>
                   )}
                 </div>
               </CardContent>
@@ -470,10 +515,12 @@ export default function Hospitals() {
                               {purchase.customerRef || '-'}
                             </TableCell>
                             <TableCell>
-                              {purchase.areaName ? (
-                                <span>{purchase.areaName}</span>
+                              {purchase.status === 'excluded' ? (
+                                <span className="text-red-500 font-medium">Excluded</span>
+                              ) : purchase.areaName ? (
+                                <span className="text-green-600">{purchase.areaName}</span>
                               ) : (
-                                <span className="text-muted-foreground italic">Unmatched</span>
+                                <span className="text-amber-500 font-medium">Unmatched</span>
                               )}
                             </TableCell>
                             <TableCell className="text-center font-medium">
@@ -481,33 +528,48 @@ export default function Hospitals() {
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-1 justify-center">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => openDialog(purchase)}
-                                  className="h-8 px-2"
-                                >
-                                  {purchase.areaId ? (
-                                    <>
-                                      <Pencil className="h-4 w-4 mr-1" />
-                                      Edit
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Link2 className="h-4 w-4 mr-1" />
-                                      Match
-                                    </>
-                                  )}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => excludePurchase.mutate({ purchaseId: purchase.id })}
-                                  className="h-8 px-2 text-muted-foreground hover:text-destructive"
-                                  disabled={excludePurchase.isPending}
-                                >
-                                  <Ban className="h-4 w-4" />
-                                </Button>
+                                {purchase.status === 'excluded' ? (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => unexcludePurchase.mutate({ purchaseId: purchase.id })}
+                                    className="h-8 px-2"
+                                    disabled={unexcludePurchase.isPending}
+                                  >
+                                    <RotateCcw className="h-4 w-4 mr-1" />
+                                    Restore
+                                  </Button>
+                                ) : (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => openDialog(purchase)}
+                                      className="h-8 px-2"
+                                    >
+                                      {purchase.areaId ? (
+                                        <>
+                                          <Pencil className="h-4 w-4 mr-1" />
+                                          Edit
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Link2 className="h-4 w-4 mr-1" />
+                                          Match
+                                        </>
+                                      )}
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => excludePurchase.mutate({ purchaseId: purchase.id })}
+                                      className="h-8 px-2 text-muted-foreground hover:text-destructive"
+                                      disabled={excludePurchase.isPending}
+                                    >
+                                      <Ban className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
                               </div>
                             </TableCell>
                           </TableRow>

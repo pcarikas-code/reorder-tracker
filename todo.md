@@ -100,3 +100,5 @@
 - [x] Add Exclude button to Hospital Management (after Edit button)
 - [x] Reorder Pending Matches buttons: Exclude before Resolve
 - [x] Center Curtains and Action columns in Hospital Management table
+- [x] Show area status in Hospital Management: matched area name, Unmatched, or Excluded
+- [x] Add filter for area status (Matched, Unmatched, Excluded) in Hospital Management
