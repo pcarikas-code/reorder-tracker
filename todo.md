@@ -104,3 +104,4 @@
 - [x] Add filter for area status (Matched, Unmatched, Excluded) in Hospital Management
 - [x] Remove separate Excluded Purchases card from Hospital Management
 - [x] Fix duplicate key error in Hospital Management table (purchases appearing in both regular and excluded lists)
+- [x] Fix Hospital Management to not show excluded purchases in regular list (filter them out properly)

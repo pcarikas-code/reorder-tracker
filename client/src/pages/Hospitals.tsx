@@ -146,12 +146,14 @@ export default function Hospitals() {
   // Combine purchases with excluded status
   const allPurchasesWithStatus = useMemo(() => {
     if (!purchases) return [];
-    // Regular purchases (not excluded)
-    const regularPurchases = purchases.map(p => ({
-      ...p,
-      status: p.areaId ? 'matched' as const : 'unmatched' as const,
-      isExcluded: false,
-    }));
+    // Regular purchases (filter out any that are excluded)
+    const regularPurchases = purchases
+      .filter(p => !excludedPurchaseIds.has(p.id))
+      .map(p => ({
+        ...p,
+        status: p.areaId ? 'matched' as const : 'unmatched' as const,
+        isExcluded: false,
+      }));
     // Add excluded purchases
     const excludedItems = hospitalExcludedPurchases.map(p => ({
       id: p.id,
@@ -166,7 +168,7 @@ export default function Hospitals() {
       isExcluded: true,
     }));
     return [...regularPurchases, ...excludedItems];
-  }, [purchases, hospitalExcludedPurchases]);
+  }, [purchases, hospitalExcludedPurchases, excludedPurchaseIds]);
 
   const filteredPurchases = useMemo(() => {
     return allPurchasesWithStatus.filter(p => {
