@@ -356,6 +356,41 @@ export async function getPendingMatches() {
   const db = await getDb();
   if (!db) return [];
   
+  // First, find all purchases with null areaId that don't have a pending match yet
+  // and create pending matches for them
+  const unmatchedPurchases = await db
+    .select({
+      id: purchases.id,
+      rawAreaText: purchases.rawAreaText,
+      customerRef: purchases.customerRef,
+    })
+    .from(purchases)
+    .leftJoin(pendingMatches, and(
+      eq(pendingMatches.purchaseId, purchases.id),
+      eq(pendingMatches.status, 'pending')
+    ))
+    .where(and(
+      isNull(purchases.areaId),
+      eq(purchases.isExcluded, false),
+      isNull(pendingMatches.id)
+    ));
+  
+  // Create pending matches for any unmatched purchases that don't have one
+  if (unmatchedPurchases.length > 0) {
+    const newMatches = unmatchedPurchases.map(p => ({
+      purchaseId: p.id,
+      rawAreaText: p.rawAreaText || p.customerRef || 'Unknown',
+      status: 'pending' as const,
+    }));
+    
+    // Insert in batches
+    const BATCH_SIZE = 100;
+    for (let i = 0; i < newMatches.length; i += BATCH_SIZE) {
+      const batch = newMatches.slice(i, i + BATCH_SIZE);
+      await db.insert(pendingMatches).values(batch);
+    }
+  }
+  
   // Join with purchases and hospitals to get context
   const results = await db
     .select({

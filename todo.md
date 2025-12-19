@@ -88,3 +88,4 @@
 - [x] Add Match/Edit button to Hospital Management table rows
 - [x] Make hospital selector searchable/filterable as user types
 - [x] Add link on hospital name in Reorder Status to open Hospital Management
+- [x] Fix Pending Matches to show ALL unmatched orders, not just from last sync
