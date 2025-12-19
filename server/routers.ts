@@ -278,6 +278,8 @@ export const appRouter = router({
     // Link a purchase directly to an existing area (from Hospital Management)
     linkToArea: protectedProcedure.input(z.object({ purchaseId: z.number(), areaId: z.number() })).mutation(async ({ input }) => {
       await db.updatePurchase(input.purchaseId, { areaId: input.areaId });
+      // Remove from pending matches if exists
+      await db.deletePendingMatchByPurchaseId(input.purchaseId);
       return { success: true };
     }),
     
@@ -285,6 +287,8 @@ export const appRouter = router({
     createAreaAndLink: protectedProcedure.input(z.object({ purchaseId: z.number(), hospitalId: z.number(), areaName: z.string() })).mutation(async ({ input }) => {
       const area = await db.createArea({ hospitalId: input.hospitalId, name: input.areaName, isConfirmed: true });
       await db.updatePurchase(input.purchaseId, { areaId: area.id });
+      // Remove from pending matches if exists
+      await db.deletePendingMatchByPurchaseId(input.purchaseId);
       return { success: true, areaId: area.id };
     }),
 

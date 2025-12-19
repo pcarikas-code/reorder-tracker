@@ -94,6 +94,7 @@ export default function Hospitals() {
   const linkToArea = trpc.matches.linkToArea.useMutation({
     onSuccess: () => {
       utils.hospitals.getPurchases.invalidate();
+      utils.matches.pending.invalidate();
       toast.success("Purchase linked to area");
       setDialogOpen(false);
     },
@@ -104,6 +105,7 @@ export default function Hospitals() {
     onSuccess: () => {
       utils.hospitals.getPurchases.invalidate();
       utils.areas.byHospital.invalidate();
+      utils.matches.pending.invalidate();
       toast.success("New area created and purchase linked");
       setDialogOpen(false);
     },

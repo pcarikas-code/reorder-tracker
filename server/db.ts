@@ -439,6 +439,12 @@ export async function updatePendingMatch(id: number, data: Partial<InsertPending
   await db.update(pendingMatches).set(data).where(eq(pendingMatches.id, id));
 }
 
+export async function deletePendingMatchByPurchaseId(purchaseId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(pendingMatches).where(eq(pendingMatches.purchaseId, purchaseId));
+}
+
 // Notification operations
 export async function createNotification(notification: InsertNotification): Promise<void> {
   const db = await getDb();

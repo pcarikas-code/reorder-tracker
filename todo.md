@@ -108,3 +108,4 @@
 - [x] Add unique constraint for area name per hospital (prevent duplicates)
 - [x] Add area merge functionality to combine duplicate areas
 - [x] Fix existing duplicate areas in database
+- [x] Fix: Matching in Hospital Management should update/remove pending matches
