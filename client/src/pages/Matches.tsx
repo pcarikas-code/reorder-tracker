@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Check, X, Sparkles, Plus, Link, ChevronRight, Ban } from "lucide-react";
@@ -22,7 +22,7 @@ export default function Matches() {
   const [selectedMatch, setSelectedMatch] = useState<NonNullable<typeof pendingMatches>[number] | null>(null);
   const [activeTab, setActiveTab] = useState<string>("existing");
   const [selectedAreaId, setSelectedAreaId] = useState<string>("");
-  const [addAlias, setAddAlias] = useState(true);
+
   const [newAreaName, setNewAreaName] = useState("");
   const [newAreaHospitalId, setNewAreaHospitalId] = useState<string>("");
   const [llmSuggestion, setLlmSuggestion] = useState<{ bestMatchId: number | null; confidence: number; reasoning: string; isNewArea: boolean; suggestedName: string } | null>(null);
@@ -196,7 +196,7 @@ export default function Matches() {
       confirmMatch.mutate({
         matchId: selectedMatch.id,
         areaId: parseInt(selectedAreaId),
-        addAlias,
+
       });
     } else if (activeTab === "new" && newAreaName && newAreaHospitalId) {
       createNewArea.mutate({
@@ -401,12 +401,7 @@ export default function Matches() {
                           </Select>
                         </div>
 
-                        <div className="flex items-center space-x-2">
-                          <Checkbox id="addAlias" checked={addAlias} onCheckedChange={(checked) => setAddAlias(checked === true)} />
-                          <Label htmlFor="addAlias" className="text-sm">
-                            Add "{selectedMatch?.rawAreaText}" as an alias for "{filteredAreas.find(a => a.id.toString() === selectedAreaId)?.name || 'selected area'}"
-                          </Label>
-                        </div>
+
                       </>
                     );
                   } else {

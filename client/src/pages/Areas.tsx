@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Tag, Ban, Undo2, Pencil, FileText, Unlink, Merge } from "lucide-react";
+import { Search, Plus, Ban, Undo2, Pencil, FileText, Unlink, Merge } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
@@ -21,7 +21,7 @@ export default function Areas() {
   const [searchTerm, setSearchTerm] = useState("");
   const [hospitalFilter, setHospitalFilter] = useState<string>("all");
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showAliasDialog, setShowAliasDialog] = useState(false);
+
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showPurchasesDialog, setShowPurchasesDialog] = useState(false);
   const [showMergeDialog, setShowMergeDialog] = useState(false);
@@ -31,14 +31,11 @@ export default function Areas() {
   const [mergeTargetAreaId, setMergeTargetAreaId] = useState<string>("");
   const [newAreaName, setNewAreaName] = useState("");
   const [newAreaHospitalId, setNewAreaHospitalId] = useState<string>("");
-  const [newAlias, setNewAlias] = useState("");
+
   const [editAreaName, setEditAreaName] = useState("");
   const [moveToAreaId, setMoveToAreaId] = useState<string>("");
 
-  const { data: selectedAreaAliases } = trpc.areas.getAliases.useQuery(
-    { areaId: selectedAreaId! },
-    { enabled: !!selectedAreaId && showAliasDialog }
-  );
+
 
   const { data: selectedAreaPurchases, refetch: refetchPurchases } = trpc.areas.getPurchases.useQuery(
     { areaId: selectedAreaId! },
@@ -66,14 +63,7 @@ export default function Areas() {
     onError: (error) => toast.error(`Failed: ${error.message}`),
   });
 
-  const addAlias = trpc.areas.addAlias.useMutation({
-    onSuccess: () => {
-      toast.success("Alias added");
-      utils.areas.getAliases.invalidate({ areaId: selectedAreaId! });
-      setNewAlias("");
-    },
-    onError: (error) => toast.error(`Failed: ${error.message}`),
-  });
+
 
   const unlinkPurchase = trpc.areas.unlinkPurchase.useMutation({
     onSuccess: () => {
@@ -168,7 +158,7 @@ export default function Areas() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Area Management</h1>
-            <p className="text-muted-foreground">Manage hospital areas and name aliases</p>
+            <p className="text-muted-foreground">Manage hospital areas</p>
           </div>
           <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
             <DialogTrigger asChild>
@@ -277,9 +267,7 @@ export default function Areas() {
                           <Button variant="ghost" size="sm" onClick={() => openMergeDialog(area)} title="Merge into another area">
                             <Merge className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => { setSelectedAreaId(area.id); setShowAliasDialog(true); }} title="Manage aliases">
-                            <Tag className="h-4 w-4" />
-                          </Button>
+
                         </TableCell>
                       </TableRow>
                     ))}
@@ -457,7 +445,7 @@ export default function Areas() {
             <DialogHeader>
               <DialogTitle>Merge Area</DialogTitle>
               <DialogDescription>
-                Merge "{selectedAreaName}" into another area. All linked purchases and aliases will be moved to the target area, and this area will be deleted.
+                Merge "{selectedAreaName}" into another area. All linked purchases will be moved to the target area, and this area will be deleted.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -491,43 +479,7 @@ export default function Areas() {
           </DialogContent>
         </Dialog>
 
-        {/* Aliases Dialog */}
-        <Dialog open={showAliasDialog} onOpenChange={(open) => { setShowAliasDialog(open); if (!open) setSelectedAreaId(null); }}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Manage Aliases</DialogTitle>
-              <DialogDescription>
-                Aliases help automatically match different spellings or abbreviations to this area.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Current Aliases</Label>
-                {selectedAreaAliases?.length ? (
-                  <div className="flex flex-wrap gap-2">
-                    {selectedAreaAliases.map((alias) => (
-                      <Badge key={alias.id} variant="secondary">{alias.alias}</Badge>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No aliases defined.</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>Add New Alias</Label>
-                <div className="flex gap-2">
-                  <Input value={newAlias} onChange={(e) => setNewAlias(e.target.value)} placeholder="e.g., ICU, Intensive Care" />
-                  <Button onClick={() => addAlias.mutate({ areaId: selectedAreaId!, alias: newAlias })} disabled={!newAlias || addAlias.isPending}>
-                    Add
-                  </Button>
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAliasDialog(false)}>Close</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+
       </div>
     </DashboardLayout>
   );

@@ -68,3 +68,4 @@
 - [x] Fix alias checkbox text to update when different area is selected
 - [x] Add auto-suggest on dialog open
 - [x] Fix missing key prop error in Stock Forecast TableBody
+- [x] Remove all alias functionality from the application

@@ -4,7 +4,7 @@ import {
   InsertUser, users, 
   hospitals, Hospital, InsertHospital,
   areas, Area, InsertArea,
-  areaAliases, AreaAlias, InsertAreaAlias,
+
   purchases, Purchase, InsertPurchase,
   purchaseLines, PurchaseLine, InsertPurchaseLine,
   pendingMatches, PendingMatch, InsertPendingMatch,
@@ -196,25 +196,6 @@ export async function updateArea(id: number, data: Partial<InsertArea>): Promise
   const db = await getDb();
   if (!db) return;
   await db.update(areas).set({ ...data, updatedAt: new Date() }).where(eq(areas.id, id));
-}
-
-// Area alias operations
-export async function addAreaAlias(alias: InsertAreaAlias): Promise<void> {
-  const db = await getDb();
-  if (!db) return;
-  await db.insert(areaAliases).values(alias);
-}
-
-export async function getAliasesForArea(areaId: number): Promise<AreaAlias[]> {
-  const db = await getDb();
-  if (!db) return [];
-  return db.select().from(areaAliases).where(eq(areaAliases.areaId, areaId));
-}
-
-export async function getAllAliases(): Promise<AreaAlias[]> {
-  const db = await getDb();
-  if (!db) return [];
-  return db.select().from(areaAliases);
 }
 
 // Purchase operations
@@ -800,11 +781,6 @@ export async function mergeAreas(sourceAreaId: number, targetAreaId: number): Pr
   const result = await db.update(purchases)
     .set({ areaId: targetAreaId })
     .where(eq(purchases.areaId, sourceAreaId));
-  
-  // Move any aliases from source to target
-  await db.update(areaAliases)
-    .set({ areaId: targetAreaId })
-    .where(eq(areaAliases.areaId, sourceAreaId));
   
   // Delete the source area
   await db.delete(areas).where(eq(areas.id, sourceAreaId));

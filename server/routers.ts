@@ -53,8 +53,7 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     const hospitalMap = new Map<string, number>();
     for (const h of allHospitals) hospitalMap.set(h.unleashGuid, h.id);
     const allAreas = await db.getAllAreas();
-    const allAliases = await db.getAllAliases();
-    console.log(`[Sync ${syncLogId}] Reference data: ${allHospitals.length} hospitals, ${allAreas.length} areas, ${allAliases.length} aliases`);
+    console.log(`[Sync ${syncLogId}] Reference data: ${allHospitals.length} hospitals, ${allAreas.length} areas`);
     
     // Check for cancellation
     if (await checkSyncCancelled(syncLogId)) {
@@ -102,7 +101,7 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
       if (rawAreaText) {
         const directMatch = allAreas.find(a => a.hospitalId === hospitalId && (a.name.toLowerCase() === rawAreaText.toLowerCase() || a.normalizedName?.toLowerCase() === rawAreaText.toLowerCase()));
         if (directMatch) { areaId = directMatch.id; matchedToArea++; }
-        else { const aliasMatch = allAliases.find(al => al.alias.toLowerCase() === rawAreaText.toLowerCase()); if (aliasMatch) { areaId = aliasMatch.areaId; matchedToArea++; } }
+
       } else {
         skippedNoRawArea++;
       }
@@ -209,8 +208,7 @@ export const appRouter = router({
     create: protectedProcedure.input(z.object({ hospitalId: z.number(), name: z.string(), normalizedName: z.string().optional() })).mutation(async ({ input }) => db.createArea({ hospitalId: input.hospitalId, name: input.name, normalizedName: input.normalizedName })),
     update: protectedProcedure.input(z.object({ id: z.number(), name: z.string().optional(), normalizedName: z.string().optional(), isConfirmed: z.boolean().optional() })).mutation(async ({ input }) => { const { id, ...data } = input; await db.updateArea(id, data); return { success: true }; }),
     rename: protectedProcedure.input(z.object({ areaId: z.number(), newName: z.string() })).mutation(async ({ input }) => { await db.updateAreaName(input.areaId, input.newName); return { success: true }; }),
-    addAlias: protectedProcedure.input(z.object({ areaId: z.number(), alias: z.string() })).mutation(async ({ input }) => { await db.addAreaAlias({ areaId: input.areaId, alias: input.alias }); return { success: true }; }),
-    getAliases: protectedProcedure.input(z.object({ areaId: z.number() })).query(async ({ input }) => db.getAliasesForArea(input.areaId)),
+
     getPurchases: protectedProcedure.input(z.object({ areaId: z.number() })).query(async ({ input }) => db.getPurchasesForArea(input.areaId)),
     unlinkPurchase: protectedProcedure.input(z.object({ purchaseId: z.number() })).mutation(async ({ input }) => { await db.unlinkPurchaseFromArea(input.purchaseId); return { success: true }; }),
     movePurchase: protectedProcedure.input(z.object({ purchaseId: z.number(), newAreaId: z.number() })).mutation(async ({ input }) => { await db.movePurchaseToArea(input.purchaseId, input.newAreaId); return { success: true }; }),
@@ -240,12 +238,11 @@ export const appRouter = router({
 
   matches: router({
     pending: protectedProcedure.query(async () => db.getPendingMatches()),
-    confirm: protectedProcedure.input(z.object({ matchId: z.number(), areaId: z.number(), addAlias: z.boolean().optional() })).mutation(async ({ input }) => {
+    confirm: protectedProcedure.input(z.object({ matchId: z.number(), areaId: z.number() })).mutation(async ({ input }) => {
       const matches = await db.getPendingMatches();
       const match = matches.find(m => m.id === input.matchId);
       if (!match) throw new Error("Match not found");
       await db.updatePurchase(match.purchaseId, { areaId: input.areaId });
-      if (input.addAlias && match.rawAreaText) await db.addAreaAlias({ areaId: input.areaId, alias: match.rawAreaText });
       await db.updatePendingMatch(input.matchId, { status: 'confirmed', resolvedAt: new Date() });
       return { success: true };
     }),
@@ -255,7 +252,7 @@ export const appRouter = router({
       if (!match) throw new Error("Match not found");
       const area = await db.createArea({ hospitalId: input.hospitalId, name: input.areaName, isConfirmed: true });
       await db.updatePurchase(match.purchaseId, { areaId: area.id });
-      if (match.rawAreaText && match.rawAreaText !== input.areaName) await db.addAreaAlias({ areaId: area.id, alias: match.rawAreaText });
+
       await db.updatePendingMatch(input.matchId, { status: 'new_area', resolvedAt: new Date() });
       return { success: true, areaId: area.id };
     }),
