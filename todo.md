@@ -78,3 +78,5 @@
 - [x] Add keyboard navigation for suggestions dropdown (arrow keys + Enter)
 - [x] Add hover tooltip on area cards to show linked purchases
 - [x] Add original reference (customerRef) to area hover tooltip
+- [x] Update Reorder Status categories: Due Soon (0-90), Near Soon (90-180), Far Soon (180-360)
+- [x] Remove "No Purchase" category from Reorder Status

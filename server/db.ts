@@ -457,7 +457,7 @@ export interface AreaReorderStatus {
   hospitalName: string;
   lastPurchaseDate: Date | null;
   reorderDueDate: Date | null;
-  status: 'overdue' | 'due_soon' | 'on_track' | 'no_purchase';
+  status: 'overdue' | 'due_soon' | 'near_soon' | 'far_soon';
   daysUntilDue: number | null;
 }
 
@@ -478,29 +478,34 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
   
   const now = new Date();
   const twoYearsMs = 2 * 365 * 24 * 60 * 60 * 1000;
-  const dueSoonThresholdMs = 90 * 24 * 60 * 60 * 1000; // 90 days
+  const dueSoonThresholdMs = 90 * 24 * 60 * 60 * 1000; // 0-90 days
+  const nearSoonThresholdMs = 180 * 24 * 60 * 60 * 1000; // 90-180 days
+  const farSoonThresholdMs = 360 * 24 * 60 * 60 * 1000; // 180-360 days
 
   const statuses: AreaReorderStatus[] = [];
 
   for (const area of allAreas) {
     const lastPurchase = purchasesByArea.get(area.id);
 
-    let status: AreaReorderStatus['status'] = 'no_purchase';
-    let reorderDueDate: Date | null = null;
-    let daysUntilDue: number | null = null;
+    // Skip areas with no purchase history
+    if (!lastPurchase) continue;
 
-    if (lastPurchase) {
-      reorderDueDate = new Date(lastPurchase.orderDate.getTime() + twoYearsMs);
-      const timeDiff = reorderDueDate.getTime() - now.getTime();
-      daysUntilDue = Math.ceil(timeDiff / (24 * 60 * 60 * 1000));
+    const reorderDueDate = new Date(lastPurchase.orderDate.getTime() + twoYearsMs);
+    const timeDiff = reorderDueDate.getTime() - now.getTime();
+    const daysUntilDue = Math.ceil(timeDiff / (24 * 60 * 60 * 1000));
 
-      if (timeDiff < 0) {
-        status = 'overdue';
-      } else if (timeDiff < dueSoonThresholdMs) {
-        status = 'due_soon';
-      } else {
-        status = 'on_track';
-      }
+    let status: AreaReorderStatus['status'];
+    if (timeDiff < 0) {
+      status = 'overdue';
+    } else if (timeDiff < dueSoonThresholdMs) {
+      status = 'due_soon';
+    } else if (timeDiff < nearSoonThresholdMs) {
+      status = 'near_soon';
+    } else if (timeDiff < farSoonThresholdMs) {
+      status = 'far_soon';
+    } else {
+      // More than 360 days out - skip these as they're not actionable
+      continue;
     }
 
     statuses.push({
@@ -508,7 +513,7 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
       areaName: area.name,
       hospitalId: area.hospitalId,
       hospitalName: area.hospitalName,
-      lastPurchaseDate: lastPurchase?.orderDate || null,
+      lastPurchaseDate: lastPurchase.orderDate,
       reorderDueDate,
       status,
       daysUntilDue,

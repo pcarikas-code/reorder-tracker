@@ -10,7 +10,7 @@ import { AlertTriangle, CheckCircle, Clock, Search, Download, Bell } from "lucid
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
-type StatusFilter = 'all' | 'overdue' | 'due_soon' | 'on_track' | 'no_purchase';
+type StatusFilter = 'all' | 'overdue' | 'due_soon' | 'near_soon' | 'far_soon';
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,12 +35,12 @@ export default function Home() {
   }, [statuses, searchTerm, statusFilter, hospitalFilter]);
 
   const statusCounts = useMemo(() => {
-    if (!statuses) return { overdue: 0, due_soon: 0, on_track: 0, no_purchase: 0 };
+    if (!statuses) return { overdue: 0, due_soon: 0, near_soon: 0, far_soon: 0 };
     return {
       overdue: statuses.filter(s => s.status === 'overdue').length,
       due_soon: statuses.filter(s => s.status === 'due_soon').length,
-      on_track: statuses.filter(s => s.status === 'on_track').length,
-      no_purchase: statuses.filter(s => s.status === 'no_purchase').length,
+      near_soon: statuses.filter(s => s.status === 'near_soon').length,
+      far_soon: statuses.filter(s => s.status === 'far_soon').length,
     };
   }, [statuses]);
 
@@ -48,8 +48,9 @@ export default function Home() {
     switch (status) {
       case 'overdue': return <Badge variant="destructive" className="gap-1"><AlertTriangle className="h-3 w-3" />Overdue</Badge>;
       case 'due_soon': return <Badge variant="secondary" className="gap-1 bg-amber-100 text-amber-800 hover:bg-amber-100"><Clock className="h-3 w-3" />Due Soon</Badge>;
-      case 'on_track': return <Badge variant="secondary" className="gap-1 bg-green-100 text-green-800 hover:bg-green-100"><CheckCircle className="h-3 w-3" />On Track</Badge>;
-      default: return <Badge variant="outline">No Purchase</Badge>;
+      case 'near_soon': return <Badge variant="secondary" className="gap-1 bg-blue-100 text-blue-800 hover:bg-blue-100"><Clock className="h-3 w-3" />Near Soon</Badge>;
+      case 'far_soon': return <Badge variant="secondary" className="gap-1 bg-green-100 text-green-800 hover:bg-green-100"><CheckCircle className="h-3 w-3" />Far Soon</Badge>;
+      default: return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
@@ -90,15 +91,15 @@ export default function Home() {
           </Card>
           <Card className="cursor-pointer hover:border-amber-500 transition-colors" onClick={() => setStatusFilter('due_soon')}>
             <CardHeader className="pb-2"><CardDescription>Due Soon</CardDescription><CardTitle className="text-3xl text-amber-600">{statusCounts.due_soon}</CardTitle></CardHeader>
-            <CardContent><p className="text-xs text-muted-foreground">Within 90 days</p></CardContent>
+            <CardContent><p className="text-xs text-muted-foreground">0-90 days</p></CardContent>
           </Card>
-          <Card className="cursor-pointer hover:border-green-500 transition-colors" onClick={() => setStatusFilter('on_track')}>
-            <CardHeader className="pb-2"><CardDescription>On Track</CardDescription><CardTitle className="text-3xl text-green-600">{statusCounts.on_track}</CardTitle></CardHeader>
-            <CardContent><p className="text-xs text-muted-foreground">More than 90 days out</p></CardContent>
+          <Card className="cursor-pointer hover:border-blue-500 transition-colors" onClick={() => setStatusFilter('near_soon')}>
+            <CardHeader className="pb-2"><CardDescription>Near Soon</CardDescription><CardTitle className="text-3xl text-blue-600">{statusCounts.near_soon}</CardTitle></CardHeader>
+            <CardContent><p className="text-xs text-muted-foreground">90-180 days</p></CardContent>
           </Card>
-          <Card className="cursor-pointer hover:border-gray-400 transition-colors" onClick={() => setStatusFilter('no_purchase')}>
-            <CardHeader className="pb-2"><CardDescription>No Purchase</CardDescription><CardTitle className="text-3xl">{statusCounts.no_purchase}</CardTitle></CardHeader>
-            <CardContent><p className="text-xs text-muted-foreground">No purchase history</p></CardContent>
+          <Card className="cursor-pointer hover:border-green-500 transition-colors" onClick={() => setStatusFilter('far_soon')}>
+            <CardHeader className="pb-2"><CardDescription>Far Soon</CardDescription><CardTitle className="text-3xl text-green-600">{statusCounts.far_soon}</CardTitle></CardHeader>
+            <CardContent><p className="text-xs text-muted-foreground">180-360 days</p></CardContent>
           </Card>
         </div>
 
@@ -115,9 +116,9 @@ export default function Home() {
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="overdue">Overdue</SelectItem>
-                  <SelectItem value="due_soon">Due Soon</SelectItem>
-                  <SelectItem value="on_track">On Track</SelectItem>
-                  <SelectItem value="no_purchase">No Purchase</SelectItem>
+                  <SelectItem value="due_soon">Due Soon (0-90)</SelectItem>
+                  <SelectItem value="near_soon">Near Soon (90-180)</SelectItem>
+                  <SelectItem value="far_soon">Far Soon (180-360)</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={hospitalFilter} onValueChange={setHospitalFilter}>
@@ -160,7 +161,7 @@ export default function Home() {
                         <TableCell>{getStatusBadge(status.status)}</TableCell>
                         <TableCell>{status.lastPurchaseDate ? new Date(status.lastPurchaseDate).toLocaleDateString() : '-'}</TableCell>
                         <TableCell>{status.reorderDueDate ? new Date(status.reorderDueDate).toLocaleDateString() : '-'}</TableCell>
-                        <TableCell className="text-right">{status.daysUntilDue !== null ? <span className={status.daysUntilDue < 0 ? 'text-destructive font-medium' : status.daysUntilDue < 90 ? 'text-amber-600' : ''}>{status.daysUntilDue}</span> : '-'}</TableCell>
+                        <TableCell className="text-right">{status.daysUntilDue !== null ? <span className={status.daysUntilDue < 0 ? 'text-destructive font-medium' : status.daysUntilDue < 90 ? 'text-amber-600' : status.daysUntilDue < 180 ? 'text-blue-600' : 'text-green-600'}>{status.daysUntilDue}</span> : '-'}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
