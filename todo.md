@@ -69,3 +69,7 @@
 - [x] Add auto-suggest on dialog open
 - [x] Fix missing key prop error in Stock Forecast TableBody
 - [x] Remove all alias functionality from the application
+- [x] Simplify Resolve Match dialog - single autocomplete input for area name
+- [x] Remove AI suggestion functionality (getLlmSuggestion endpoint and UI)
+- [x] Filter existing areas as user types in autocomplete
+- [x] Auto-create new area when no match exists

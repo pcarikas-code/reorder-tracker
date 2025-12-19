@@ -3,32 +3,23 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Check, X, Sparkles, Plus, Link, ChevronRight, Ban } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { AlertTriangle, Check, X, ChevronRight, Ban } from "lucide-react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
 export default function Matches() {
   const utils = trpc.useUtils();
   const { data: pendingMatches, isLoading } = trpc.matches.pending.useQuery();
   const { data: areas } = trpc.areas.list.useQuery();
-  const { data: hospitals } = trpc.hospitals.list.useQuery();
 
   const [selectedMatch, setSelectedMatch] = useState<NonNullable<typeof pendingMatches>[number] | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("existing");
-  const [selectedAreaId, setSelectedAreaId] = useState<string>("");
-
-  const [newAreaName, setNewAreaName] = useState("");
-  const [newAreaHospitalId, setNewAreaHospitalId] = useState<string>("");
-  const [llmSuggestion, setLlmSuggestion] = useState<{ bestMatchId: number | null; confidence: number; reasoning: string; isNewArea: boolean; suggestedName: string } | null>(null);
-  const [isGettingSuggestion, setIsGettingSuggestion] = useState(false);
-
+  const [areaInput, setAreaInput] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [goToNextAfterConfirm, setGoToNextAfterConfirm] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const confirmMatch = trpc.matches.confirm.useMutation({
     onSuccess: () => {
@@ -76,41 +67,55 @@ export default function Matches() {
     onError: (error) => toast.error(`Failed: ${error.message}`),
   });
 
-  const getLlmSuggestion = trpc.matches.getLlmSuggestion.useMutation();
+  // Get areas for the current hospital
+  const hospitalAreas = useMemo(() => {
+    if (!selectedMatch || !areas) return [];
+    const hospitalId = (selectedMatch as any)?.hospitalId;
+    return areas.filter(a => a.hospitalId === hospitalId).sort((a, b) => a.name.localeCompare(b.name));
+  }, [selectedMatch, areas]);
+
+  // Filter areas based on input
+  const filteredAreas = useMemo(() => {
+    if (!areaInput.trim()) return hospitalAreas;
+    const search = areaInput.toLowerCase().trim();
+    return hospitalAreas.filter(a => a.name.toLowerCase().includes(search));
+  }, [hospitalAreas, areaInput]);
+
+  // Check if there's an exact match
+  const exactMatch = useMemo(() => {
+    if (!areaInput.trim()) return null;
+    const search = areaInput.toLowerCase().trim();
+    return hospitalAreas.find(a => a.name.toLowerCase() === search);
+  }, [hospitalAreas, areaInput]);
+
+  // Determine if this will create a new area
+  const isNewArea = areaInput.trim() && !exactMatch && filteredAreas.length === 0;
 
   const closeDialog = () => {
     setSelectedMatch(null);
-    setSelectedAreaId("");
-    setNewAreaName("");
-    setNewAreaHospitalId("");
-    setLlmSuggestion(null);
-    setActiveTab("existing");
+    setAreaInput("");
+    setShowSuggestions(false);
     setGoToNextAfterConfirm(false);
   };
 
   const goToNextMatch = () => {
-    // Find the next pending match from the CURRENT list (before invalidation)
     if (!pendingMatches || !selectedMatch) {
       closeDialog();
       return;
     }
     
     const currentIndex = pendingMatches.findIndex(m => m.id === selectedMatch.id);
-    // Get the next match in the current list (the one after the current)
     const nextMatch = currentIndex >= 0 && currentIndex < pendingMatches.length - 1 
       ? pendingMatches[currentIndex + 1] 
       : null;
     
-    // Reset state
-    setSelectedAreaId("");
-    setLlmSuggestion(null);
+    setAreaInput("");
+    setShowSuggestions(false);
     setGoToNextAfterConfirm(false);
     
     if (nextMatch) {
-      // Open the next match immediately (it still exists in the list)
       openDialog(nextMatch);
     } else {
-      // No more matches after this one, close the dialog
       closeDialog();
       toast.info("All matches processed!");
     }
@@ -118,121 +123,70 @@ export default function Matches() {
 
   const openDialog = (match: NonNullable<typeof pendingMatches>[number]) => {
     setSelectedMatch(match);
-    setSelectedAreaId("");
-    setNewAreaName(match.rawAreaText || "");
-    setLlmSuggestion(null);
-    // Pre-select hospital from the order
-    if ((match as any).hospitalId) {
-      setNewAreaHospitalId((match as any).hospitalId.toString());
-    }
-    // Default to "new" tab if no existing areas
-    setActiveTab(areas && areas.length > 0 ? "existing" : "new");
-    
-    // Auto-run suggestion when dialog opens
-    const hospitalId = (match as any)?.hospitalId;
-    const hospitalAreas = (areas || []).filter(a => a.hospitalId === hospitalId);
-    if (hospitalAreas.length > 0) {
-      setIsGettingSuggestion(true);
-      getLlmSuggestion.mutateAsync({
-        rawAreaText: match.rawAreaText || "",
-        customerRef: (match as any)?.customerRef || "",
-        hospitalName: (match as any)?.hospitalName || "",
-        existingAreas: hospitalAreas.map(a => ({ id: a.id, name: a.name, hospitalName: a.hospitalName })),
-      }).then(result => {
-        if (result) {
-          setLlmSuggestion(result);
-          if (result.bestMatchId && !result.isNewArea) {
-            setSelectedAreaId(result.bestMatchId.toString());
-            setActiveTab("existing");
-          } else if (result.isNewArea && result.suggestedName) {
-            setNewAreaName(result.suggestedName);
-            setActiveTab("new");
-          }
-        }
-      }).catch(() => {
-        // Silently fail - user can still manually select
-      }).finally(() => {
-        setIsGettingSuggestion(false);
-      });
-    }
+    setAreaInput(match.rawAreaText || "");
+    setShowSuggestions(false);
+    // Focus input after dialog opens
+    setTimeout(() => inputRef.current?.focus(), 100);
   };
 
-  const handleGetSuggestion = async () => {
-    if (!selectedMatch) return;
-    setIsGettingSuggestion(true);
-    try {
-      // Only pass areas from the same hospital
-      const hospitalId = (selectedMatch as any)?.hospitalId;
-      const hospitalAreas = (areas || []).filter(a => a.hospitalId === hospitalId);
-      const result = await getLlmSuggestion.mutateAsync({
-        rawAreaText: selectedMatch.rawAreaText || "",
-        customerRef: (selectedMatch as any)?.customerRef || "",
-        hospitalName: (selectedMatch as any)?.hospitalName || "",
-        existingAreas: hospitalAreas.map(a => ({ id: a.id, name: a.name, hospitalName: a.hospitalName })),
-      });
-      if (result) {
-        setLlmSuggestion(result);
-        if (result.bestMatchId && !result.isNewArea) {
-          setSelectedAreaId(result.bestMatchId.toString());
-          setActiveTab("existing");
-        }
-        if (result.isNewArea) {
-          setNewAreaName(result.suggestedName || selectedMatch.rawAreaText || "");
-          setActiveTab("new");
-        }
-      }
-    } catch (error) {
-      toast.error("Failed to get AI suggestion");
-    } finally {
-      setIsGettingSuggestion(false);
-    }
+  const handleSelectArea = (areaName: string) => {
+    setAreaInput(areaName);
+    setShowSuggestions(false);
   };
 
   const handleConfirm = (goToNext: boolean = false) => {
-    if (!selectedMatch) return;
+    if (!selectedMatch || !areaInput.trim()) return;
     setGoToNextAfterConfirm(goToNext);
     
-    if (activeTab === "existing" && selectedAreaId) {
+    if (exactMatch) {
+      // Link to existing area
       confirmMatch.mutate({
         matchId: selectedMatch.id,
-        areaId: parseInt(selectedAreaId),
-
+        areaId: exactMatch.id,
       });
-    } else if (activeTab === "new" && newAreaName && newAreaHospitalId) {
+    } else {
+      // Create new area
+      const hospitalId = (selectedMatch as any)?.hospitalId;
+      if (!hospitalId) {
+        toast.error("Hospital not found");
+        return;
+      }
       createNewArea.mutate({
         matchId: selectedMatch.id,
-        hospitalId: parseInt(newAreaHospitalId),
-        areaName: newAreaName,
+        hospitalId: hospitalId,
+        areaName: areaInput.trim(),
       });
     }
   };
 
   const canConfirm = () => {
-    if (activeTab === "existing") return !!selectedAreaId;
-    if (activeTab === "new") return !!newAreaName && !!newAreaHospitalId;
-    return false;
+    return areaInput.trim().length > 0;
   };
 
-  // Keyboard shortcut: Enter for Confirm & Next
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only trigger if dialog is open and Enter is pressed
       if (!selectedMatch) return;
       
-      // Don't trigger if user is typing in an input or select is open
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
-      if (target.closest('[role="listbox"]') || target.closest('[data-radix-select-viewport]')) return;
-      
-      if (e.key === 'Enter' && canConfirm() && !confirmMatch.isPending && !createNewArea.isPending) {
+      // Enter to confirm (when not in suggestions dropdown)
+      if (e.key === 'Enter' && !showSuggestions && canConfirm() && !confirmMatch.isPending && !createNewArea.isPending) {
         e.preventDefault();
-        handleConfirm(true); // Confirm & Next
+        handleConfirm(true);
+      }
+      
+      // Escape to close suggestions or dialog
+      if (e.key === 'Escape') {
+        if (showSuggestions) {
+          setShowSuggestions(false);
+        } else {
+          closeDialog();
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedMatch, canConfirm, confirmMatch.isPending, createNewArea.isPending]);
+  }, [selectedMatch, showSuggestions, canConfirm, confirmMatch.isPending, createNewArea.isPending]);
 
   return (
     <DashboardLayout>
@@ -267,7 +221,7 @@ export default function Matches() {
                 {pendingMatches.map((match) => (
                   <div key={match.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="space-y-1 flex-1 min-w-0">
-                      <div className="font-medium text-lg">{match.rawAreaText}</div>
+                      <div className="font-medium truncate">{match.rawAreaText || "No area text"}</div>
                       <div className="text-sm text-muted-foreground space-y-0.5">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="font-normal">
@@ -311,13 +265,13 @@ export default function Matches() {
           </CardContent>
         </Card>
 
-        {/* Combined Resolve Match Dialog */}
+        {/* Simplified Resolve Match Dialog */}
         <Dialog open={!!selectedMatch} onOpenChange={(open) => { if (!open) closeDialog(); }}>
-          <DialogContent className="!max-w-4xl !w-[90vw] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="!max-w-2xl !w-[90vw]">
             <DialogHeader>
               <DialogTitle>Resolve Match</DialogTitle>
               <DialogDescription>
-                Match "{selectedMatch?.rawAreaText}" to an existing area or create a new one
+                Type an area name. Matching existing areas will appear as you type.
               </DialogDescription>
             </DialogHeader>
             
@@ -334,111 +288,62 @@ export default function Matches() {
               </div>
             )}
 
-            {/* AI Suggestion Button */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleGetSuggestion}
-                disabled={isGettingSuggestion}
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                {isGettingSuggestion ? "Analyzing..." : "Get AI Suggestion"}
-              </Button>
-            </div>
-
-            {/* AI Suggestion Result */}
-            {llmSuggestion && (
-              <div className="p-3 bg-muted rounded-lg space-y-2">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <span className="font-medium">AI Suggestion</span>
-                  <Badge variant={llmSuggestion.confidence > 70 ? "default" : "secondary"}>
-                    {llmSuggestion.confidence}% confident
-                  </Badge>
-                </div>
-                <p className="text-sm">{llmSuggestion.reasoning}</p>
-                {llmSuggestion.isNewArea && (
-                  <p className="text-sm text-amber-600">Suggested as new area: "{llmSuggestion.suggestedName}"</p>
+            {/* Single autocomplete input */}
+            <div className="space-y-2">
+              <Label>Area Name</Label>
+              <div className="relative">
+                <Input
+                  ref={inputRef}
+                  value={areaInput}
+                  onChange={(e) => {
+                    setAreaInput(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  placeholder="Type area name..."
+                  className="w-full"
+                />
+                
+                {/* Suggestions dropdown */}
+                {showSuggestions && areaInput.trim() && filteredAreas.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                    {filteredAreas.map((area) => (
+                      <button
+                        key={area.id}
+                        type="button"
+                        className="w-full px-3 py-2 text-left hover:bg-muted text-sm flex items-center justify-between"
+                        onClick={() => handleSelectArea(area.name)}
+                      >
+                        <span>{area.name}</span>
+                        {area.name.toLowerCase() === areaInput.toLowerCase().trim() && (
+                          <Badge variant="secondary" className="text-xs">exact match</Badge>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
-            )}
-
-            {/* Tabs for Existing vs New Area */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="existing" className="flex items-center gap-2">
-                  <Link className="h-4 w-4" />
-                  Link to Existing
-                </TabsTrigger>
-                <TabsTrigger value="new" className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Create New
-                </TabsTrigger>
-              </TabsList>
               
-              <TabsContent value="existing" className="space-y-4 mt-4">
-                {(() => {
-                  const hospitalId = (selectedMatch as any)?.hospitalId;
-                  const filteredAreas = (areas?.filter(a => a.hospitalId === hospitalId) || []).sort((a, b) => a.name.localeCompare(b.name));
-                  
-                  if (filteredAreas.length > 0) {
-                    return (
-                      <>
-                        <div className="space-y-2">
-                          <Label>Select Area from {(selectedMatch as any)?.hospitalName}</Label>
-                          <Select value={selectedAreaId} onValueChange={setSelectedAreaId}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Choose an area..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {filteredAreas.map((area) => (
-                                <SelectItem key={area.id} value={area.id.toString()}>
-                                  {area.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-
-                      </>
-                    );
-                  } else {
-                    return (
-                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 text-center">
-                        No existing areas for {(selectedMatch as any)?.hospitalName || 'this hospital'}. Switch to "Create New" tab to create the first area.
-                      </div>
-                    );
-                  }
-                })()}
-              </TabsContent>
-              
-              <TabsContent value="new" className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label>Hospital</Label>
-                  <Select value={newAreaHospitalId} onValueChange={setNewAreaHospitalId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select hospital..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {hospitals?.map((h) => (
-                        <SelectItem key={h.id} value={h.id.toString()}>{h.customerName}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Area Name</Label>
-                  <Input
-                    value={newAreaName}
-                    onChange={(e) => setNewAreaName(e.target.value)}
-                    placeholder="Enter area name..."
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
+              {/* Status indicator */}
+              <div className="text-sm">
+                {areaInput.trim() && (
+                  exactMatch ? (
+                    <span className="text-green-600 flex items-center gap-1">
+                      <Check className="h-4 w-4" />
+                      Will link to existing area: "{exactMatch.name}"
+                    </span>
+                  ) : filteredAreas.length > 0 ? (
+                    <span className="text-muted-foreground">
+                      {filteredAreas.length} matching area{filteredAreas.length !== 1 ? 's' : ''} found - select one or keep typing
+                    </span>
+                  ) : (
+                    <span className="text-blue-600">
+                      Will create new area: "{areaInput.trim()}"
+                    </span>
+                  )
+                )}
+              </div>
+            </div>
 
             <DialogFooter className="flex-col sm:flex-row gap-2">
               <div className="flex gap-2">
@@ -467,7 +372,7 @@ export default function Matches() {
                   disabled={!canConfirm() || confirmMatch.isPending || createNewArea.isPending}
                 >
                   <Check className="h-4 w-4 mr-2" />
-                  {activeTab === "existing" ? "Confirm" : "Create"}
+                  {exactMatch ? "Confirm" : "Create"}
                 </Button>
                 <Button 
                   onClick={() => handleConfirm(true)} 
