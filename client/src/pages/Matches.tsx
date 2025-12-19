@@ -19,7 +19,9 @@ export default function Matches() {
   const [areaInput, setAreaInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [goToNextAfterConfirm, setGoToNextAfterConfirm] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const confirmMatch = trpc.matches.confirm.useMutation({
     onSuccess: () => {
@@ -96,6 +98,7 @@ export default function Matches() {
     setAreaInput("");
     setShowSuggestions(false);
     setGoToNextAfterConfirm(false);
+    setHighlightedIndex(-1);
   };
 
   const goToNextMatch = () => {
@@ -112,6 +115,7 @@ export default function Matches() {
     setAreaInput("");
     setShowSuggestions(false);
     setGoToNextAfterConfirm(false);
+    setHighlightedIndex(-1);
     
     if (nextMatch) {
       openDialog(nextMatch);
@@ -125,6 +129,7 @@ export default function Matches() {
     setSelectedMatch(match);
     setAreaInput(match.rawAreaText || "");
     setShowSuggestions(false);
+    setHighlightedIndex(-1);
     // Focus input after dialog opens
     setTimeout(() => inputRef.current?.focus(), 100);
   };
@@ -132,6 +137,53 @@ export default function Matches() {
   const handleSelectArea = (areaName: string) => {
     setAreaInput(areaName);
     setShowSuggestions(false);
+    setHighlightedIndex(-1);
+  };
+
+  // Handle keyboard navigation in input
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || filteredAreas.length === 0) {
+      // If no suggestions visible, Enter confirms
+      if (e.key === 'Enter' && canConfirm() && !confirmMatch.isPending && !createNewArea.isPending) {
+        e.preventDefault();
+        handleConfirm(true);
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev < filteredAreas.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev > 0 ? prev - 1 : filteredAreas.length - 1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (highlightedIndex >= 0 && highlightedIndex < filteredAreas.length) {
+          handleSelectArea(filteredAreas[highlightedIndex].name);
+        } else if (canConfirm() && !confirmMatch.isPending && !createNewArea.isPending) {
+          handleConfirm(true);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setShowSuggestions(false);
+        setHighlightedIndex(-1);
+        break;
+      case 'Tab':
+        if (highlightedIndex >= 0 && highlightedIndex < filteredAreas.length) {
+          e.preventDefault();
+          handleSelectArea(filteredAreas[highlightedIndex].name);
+        }
+        break;
+    }
   };
 
   const handleConfirm = (goToNext: boolean = false) => {
@@ -298,21 +350,24 @@ export default function Matches() {
                   onChange={(e) => {
                     setAreaInput(e.target.value);
                     setShowSuggestions(true);
+                    setHighlightedIndex(-1);
                   }}
                   onFocus={() => setShowSuggestions(true)}
+                  onKeyDown={handleInputKeyDown}
                   placeholder="Type area name..."
                   className="w-full"
                 />
                 
                 {/* Suggestions dropdown */}
                 {showSuggestions && areaInput.trim() && filteredAreas.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-52 overflow-auto">
-                    {filteredAreas.map((area) => (
+                  <div ref={suggestionsRef} className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-52 overflow-auto">
+                    {filteredAreas.map((area, index) => (
                       <button
                         key={area.id}
                         type="button"
-                        className="w-full px-3 py-2 text-left hover:bg-muted text-sm flex items-center justify-between"
+                        className={`w-full px-3 py-2 text-left text-sm flex items-center justify-between ${index === highlightedIndex ? 'bg-muted' : 'hover:bg-muted'}`}
                         onClick={() => handleSelectArea(area.name)}
+                        onMouseEnter={() => setHighlightedIndex(index)}
                       >
                         <span>{area.name}</span>
                         {area.name.toLowerCase() === areaInput.toLowerCase().trim() && (
