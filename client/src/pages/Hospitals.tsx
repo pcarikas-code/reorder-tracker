@@ -55,12 +55,13 @@ export default function Hospitals() {
   const handleExport = () => {
     if (!filteredPurchases.length || !selectedHospital) return;
     const csv = [
-      ['Order Number', 'Order Date', 'Customer Reference', 'Area', 'Raw Area Text'].join(','),
+      ['Order Number', 'Order Date', 'Customer Reference', 'Area', 'Curtains', 'Raw Area Text'].join(','),
       ...filteredPurchases.map(p => [
         `"${p.orderNumber}"`,
         new Date(p.orderDate).toLocaleDateString(),
         `"${p.customerRef || ''}"`,
         `"${p.areaName || 'Unmatched'}"`,
+        p.totalCurtains || 0,
         `"${p.rawAreaText || ''}"`,
       ].join(','))
     ].join('\n');
@@ -181,6 +182,7 @@ export default function Hospitals() {
                           <TableHead>Order Date</TableHead>
                           <TableHead>Customer Reference</TableHead>
                           <TableHead>Area</TableHead>
+                          <TableHead className="text-right">Curtains</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -197,6 +199,9 @@ export default function Hospitals() {
                               ) : (
                                 <span className="text-muted-foreground italic">Unmatched</span>
                               )}
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {purchase.totalCurtains > 0 ? purchase.totalCurtains : '-'}
                             </TableCell>
                           </TableRow>
                         ))}

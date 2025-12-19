@@ -793,12 +793,13 @@ export async function mergeAreas(sourceAreaId: number, targetAreaId: number): Pr
   return { purchasesMoved: result[0]?.affectedRows || 0 };
 }
 
-// Get all purchases for a hospital with area info (detailed version)
+// Get all purchases for a hospital with area info and curtain totals
 export async function getPurchasesByHospitalWithArea(hospitalId: number) {
   const db = await getDb();
   if (!db) return [];
   
-  const results = await db
+  // Get purchases
+  const purchaseResults = await db
     .select({
       id: purchases.id,
       orderNumber: purchases.orderNumber,
@@ -813,5 +814,32 @@ export async function getPurchasesByHospitalWithArea(hospitalId: number) {
     .where(eq(purchases.hospitalId, hospitalId))
     .orderBy(desc(purchases.orderDate));
   
-  return results;
+  // Get all purchase lines for these purchases to calculate curtain totals
+  // Only count lines where productType is NOT 'other' (services/non-curtain items)
+  const purchaseIds = purchaseResults.map(p => p.id);
+  if (purchaseIds.length === 0) return [];
+  
+  const lines = await db
+    .select({
+      purchaseId: purchaseLines.purchaseId,
+      quantity: purchaseLines.quantity,
+      productType: purchaseLines.productType,
+    })
+    .from(purchaseLines)
+    .where(inArray(purchaseLines.purchaseId, purchaseIds));
+  
+  // Calculate total curtains per purchase (exclude 'other' product type)
+  const curtainTotals = new Map<number, number>();
+  for (const line of lines) {
+    if (line.productType !== 'other') {
+      const current = curtainTotals.get(line.purchaseId) || 0;
+      curtainTotals.set(line.purchaseId, current + parseFloat(line.quantity));
+    }
+  }
+  
+  // Combine results
+  return purchaseResults.map(p => ({
+    ...p,
+    totalCurtains: curtainTotals.get(p.id) || 0,
+  }));
 }
