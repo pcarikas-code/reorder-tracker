@@ -73,3 +73,4 @@
 - [x] Remove AI suggestion functionality (getLlmSuggestion endpoint and UI)
 - [x] Filter existing areas as user types in autocomplete
 - [x] Auto-create new area when no match exists
+- [x] Fix suggestions dropdown overlapping dialog footer buttons

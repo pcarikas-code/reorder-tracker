@@ -289,7 +289,7 @@ export default function Matches() {
             )}
 
             {/* Single autocomplete input */}
-            <div className="space-y-2">
+            <div className="space-y-2 mb-4">
               <Label>Area Name</Label>
               <div className="relative">
                 <Input
@@ -306,7 +306,7 @@ export default function Matches() {
                 
                 {/* Suggestions dropdown */}
                 {showSuggestions && areaInput.trim() && filteredAreas.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                  <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg max-h-40 overflow-auto">
                     {filteredAreas.map((area) => (
                       <button
                         key={area.id}
