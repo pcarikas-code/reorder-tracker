@@ -302,12 +302,14 @@ export default function Matches() {
                         Resolve
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        onClick={() => rejectMatch.mutate({ matchId: match.id })}
-                        title="Reject - not an area"
+                        onClick={() => excludeMatch.mutate({ matchId: match.id })}
+                        title="Exclude - this order won't appear in pending matches or reorder tracking"
+                        disabled={excludeMatch.isPending}
                       >
-                        <X className="h-4 w-4" />
+                        <Ban className="h-4 w-4 mr-1" />
+                        Exclude
                       </Button>
                     </div>
                   </div>

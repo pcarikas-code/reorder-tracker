@@ -89,3 +89,4 @@
 - [x] Make hospital selector searchable/filterable as user types
 - [x] Add link on hospital name in Reorder Status to open Hospital Management
 - [x] Fix Pending Matches to show ALL unmatched orders, not just from last sync
+- [x] Add Exclude button next to Resolve on Pending Matches page
