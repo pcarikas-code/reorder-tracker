@@ -506,7 +506,7 @@ export default function Hospitals() {
                       </TableHeader>
                       <TableBody>
                         {filteredPurchases.map((purchase) => (
-                          <TableRow key={purchase.id}>
+                          <TableRow key={`${purchase.status}-${purchase.id}`}>
                             <TableCell className="font-medium">{purchase.orderNumber}</TableCell>
                             <TableCell>{new Date(purchase.orderDate).toLocaleDateString()}</TableCell>
                             <TableCell className="max-w-[300px] truncate" title={purchase.customerRef || undefined}>
