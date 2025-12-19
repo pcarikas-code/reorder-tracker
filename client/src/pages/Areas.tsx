@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Search, Plus, Ban, Undo2, Pencil, FileText, Unlink, Merge } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
@@ -152,6 +153,57 @@ export default function Areas() {
     setShowMergeDialog(true);
   };
 
+  // Component to show area name with hover card for linked purchases
+  const AreaNameWithHover = ({ area }: { area: { id: number; name: string } }) => {
+    const { data: purchases, isLoading } = trpc.areas.getPurchases.useQuery(
+      { areaId: area.id },
+      { enabled: false } // Only fetch on hover
+    );
+    const [hasHovered, setHasHovered] = useState(false);
+    const utils = trpc.useUtils();
+
+    const handleHover = () => {
+      if (!hasHovered) {
+        setHasHovered(true);
+        utils.areas.getPurchases.fetch({ areaId: area.id });
+      }
+    };
+
+    return (
+      <HoverCard openDelay={200}>
+        <HoverCardTrigger asChild onMouseEnter={handleHover}>
+          <span className="cursor-help underline decoration-dotted underline-offset-2">{area.name}</span>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-80" align="start">
+          <div className="space-y-2">
+            <h4 className="font-semibold text-sm">Linked Purchases</h4>
+            {!hasHovered || isLoading ? (
+              <div className="text-sm text-muted-foreground">Loading...</div>
+            ) : purchases && purchases.length > 0 ? (
+              <div className="space-y-1 max-h-48 overflow-auto">
+                {purchases.slice(0, 10).map((p) => (
+                  <div key={p.id} className="text-xs border-b pb-1">
+                    <div className="font-medium">{p.orderNumber}</div>
+                    <div className="text-muted-foreground">
+                      {new Date(p.orderDate).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))}
+                {purchases.length > 10 && (
+                  <div className="text-xs text-muted-foreground pt-1">
+                    +{purchases.length - 10} more...
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground">No purchases linked</div>
+            )}
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+    );
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -248,7 +300,9 @@ export default function Areas() {
                     {filteredAreas.map((area) => (
                       <TableRow key={area.id}>
                         <TableCell className="font-medium">{area.hospitalName}</TableCell>
-                        <TableCell>{area.name}</TableCell>
+                        <TableCell>
+                          <AreaNameWithHover area={area} />
+                        </TableCell>
                         <TableCell>
                           {area.isConfirmed ? (
                             <Badge variant="secondary" className="bg-green-100 text-green-800">Confirmed</Badge>

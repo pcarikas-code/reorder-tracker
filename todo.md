@@ -76,3 +76,4 @@
 - [x] Fix suggestions dropdown overlapping dialog footer buttons
 - [x] Increase height of Resolve Match dialog
 - [x] Add keyboard navigation for suggestions dropdown (arrow keys + Enter)
+- [x] Add hover tooltip on area cards to show linked purchases
