@@ -6,11 +6,70 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { AlertTriangle, CheckCircle, Clock, Search, Download, Bell } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
 type StatusFilter = 'all' | 'overdue' | 'due_soon' | 'near_soon' | 'far_soon';
+
+// Component for area name with hover to show purchase history
+function AreaNameWithHover({ areaId, areaName }: { areaId: number; areaName: string }) {
+  const [hasHovered, setHasHovered] = useState(false);
+  const utils = trpc.useUtils();
+  const { data: purchases, isLoading } = trpc.areas.getPurchases.useQuery(
+    { areaId },
+    { enabled: hasHovered }
+  );
+
+  const handleHover = () => {
+    if (!hasHovered) {
+      setHasHovered(true);
+      utils.areas.getPurchases.fetch({ areaId });
+    }
+  };
+
+  return (
+    <HoverCard openDelay={200}>
+      <HoverCardTrigger asChild onMouseEnter={handleHover}>
+        <span className="cursor-help underline decoration-dotted underline-offset-2">{areaName}</span>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-80" align="start">
+        <div className="space-y-2">
+          <h4 className="font-semibold text-sm">Purchase History</h4>
+          {!hasHovered || isLoading ? (
+            <div className="text-sm text-muted-foreground">Loading...</div>
+          ) : purchases && purchases.length > 0 ? (
+            <div className="space-y-2 max-h-48 overflow-auto">
+              {purchases.slice(0, 10).map((p) => (
+                <div key={p.id} className="text-xs border-b pb-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{p.orderNumber}</span>
+                    <span className="text-muted-foreground">
+                      {new Date(p.orderDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                  {p.customerRef && (
+                    <div className="text-muted-foreground truncate mt-0.5" title={p.customerRef}>
+                      {p.customerRef}
+                    </div>
+                  )}
+                </div>
+              ))}
+              {purchases.length > 10 && (
+                <div className="text-xs text-muted-foreground pt-1">
+                  +{purchases.length - 10} more...
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">No purchases found</div>
+          )}
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -157,7 +216,9 @@ export default function Home() {
                     {filteredStatuses.map((status) => (
                       <TableRow key={status.areaId}>
                         <TableCell className="font-medium">{status.hospitalName}</TableCell>
-                        <TableCell>{status.areaName}</TableCell>
+                        <TableCell>
+                          <AreaNameWithHover areaId={status.areaId} areaName={status.areaName} />
+                        </TableCell>
                         <TableCell>{getStatusBadge(status.status)}</TableCell>
                         <TableCell>{status.lastPurchaseDate ? new Date(status.lastPurchaseDate).toLocaleDateString() : '-'}</TableCell>
                         <TableCell>{status.reorderDueDate ? new Date(status.reorderDueDate).toLocaleDateString() : '-'}</TableCell>
