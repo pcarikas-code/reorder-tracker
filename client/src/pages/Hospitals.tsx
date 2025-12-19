@@ -26,6 +26,11 @@ export default function Hospitals() {
   const [searchTerm, setSearchTerm] = useState("");
   const [areaFilter, setAreaFilter] = useState<string>("all");
   
+  // Hospital search state
+  const [hospitalSearch, setHospitalSearch] = useState("");
+  const [showHospitalDropdown, setShowHospitalDropdown] = useState(false);
+  const [hospitalHighlightedIndex, setHospitalHighlightedIndex] = useState(-1);
+  
   // Match/Edit dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
@@ -64,6 +69,14 @@ export default function Hospitals() {
   });
 
   const selectedHospital = hospitals?.find(h => h.id.toString() === selectedHospitalId);
+
+  // Filter hospitals based on search input
+  const filteredHospitals = useMemo(() => {
+    if (!hospitals) return [];
+    if (!hospitalSearch.trim()) return hospitals;
+    const search = hospitalSearch.toLowerCase();
+    return hospitals.filter(h => h.customerName.toLowerCase().includes(search));
+  }, [hospitals, hospitalSearch]);
 
   // Get unique areas from purchases for filtering
   const purchaseAreas = useMemo(() => {
@@ -198,6 +211,56 @@ export default function Hospitals() {
 
   const isLoading = linkToArea.isPending || createAreaAndLink.isPending;
 
+  const handleSelectHospital = (hospitalId: string, hospitalName: string) => {
+    setSelectedHospitalId(hospitalId);
+    setHospitalSearch(hospitalName);
+    setShowHospitalDropdown(false);
+    setHospitalHighlightedIndex(-1);
+    setAreaFilter("all");
+    setSearchTerm("");
+  };
+
+  const handleHospitalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showHospitalDropdown || filteredHospitals.length === 0) {
+      if (e.key === 'Enter' && filteredHospitals.length === 1) {
+        e.preventDefault();
+        handleSelectHospital(filteredHospitals[0].id.toString(), filteredHospitals[0].customerName);
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHospitalHighlightedIndex(prev => Math.min(prev + 1, filteredHospitals.length - 1));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHospitalHighlightedIndex(prev => Math.max(prev - 1, -1));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (hospitalHighlightedIndex >= 0 && hospitalHighlightedIndex < filteredHospitals.length) {
+          const h = filteredHospitals[hospitalHighlightedIndex];
+          handleSelectHospital(h.id.toString(), h.customerName);
+        } else if (filteredHospitals.length === 1) {
+          handleSelectHospital(filteredHospitals[0].id.toString(), filteredHospitals[0].customerName);
+        }
+        break;
+      case 'Tab':
+        if (hospitalHighlightedIndex >= 0 && hospitalHighlightedIndex < filteredHospitals.length) {
+          e.preventDefault();
+          const h = filteredHospitals[hospitalHighlightedIndex];
+          handleSelectHospital(h.id.toString(), h.customerName);
+        }
+        break;
+      case 'Escape':
+        setShowHospitalDropdown(false);
+        setHospitalHighlightedIndex(-1);
+        break;
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -222,20 +285,61 @@ export default function Hospitals() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Select value={selectedHospitalId} onValueChange={(v) => { setSelectedHospitalId(v); setAreaFilter("all"); setSearchTerm(""); }}>
-              <SelectTrigger className="w-full md:w-[400px]">
-                <SelectValue placeholder="Choose a hospital to view purchases..." />
-              </SelectTrigger>
-              <SelectContent>
-                {hospitalsLoading ? (
-                  <SelectItem value="loading" disabled>Loading...</SelectItem>
-                ) : (
-                  hospitals?.map(h => (
-                    <SelectItem key={h.id} value={h.id.toString()}>{h.customerName}</SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+            <div className="relative w-full md:w-[400px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={hospitalSearch}
+                onChange={(e) => {
+                  setHospitalSearch(e.target.value);
+                  setShowHospitalDropdown(true);
+                  setHospitalHighlightedIndex(-1);
+                  if (!e.target.value.trim()) {
+                    setSelectedHospitalId("");
+                  }
+                }}
+                onFocus={() => setShowHospitalDropdown(true)}
+                onBlur={() => setTimeout(() => setShowHospitalDropdown(false), 200)}
+                onKeyDown={handleHospitalKeyDown}
+                placeholder="Type to search hospitals..."
+                className="pl-9"
+              />
+              
+              {/* Hospital Dropdown */}
+              {showHospitalDropdown && !hospitalsLoading && filteredHospitals.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+                  {filteredHospitals.map((h, index) => (
+                    <div
+                      key={h.id}
+                      className={`px-3 py-2 cursor-pointer text-sm ${
+                        index === hospitalHighlightedIndex ? 'bg-accent' : 'hover:bg-muted'
+                      } ${h.id.toString() === selectedHospitalId ? 'font-medium text-primary' : ''}`}
+                      onMouseEnter={() => setHospitalHighlightedIndex(index)}
+                      onMouseDown={() => handleSelectHospital(h.id.toString(), h.customerName)}
+                    >
+                      {h.customerName}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {showHospitalDropdown && !hospitalsLoading && hospitalSearch && filteredHospitals.length === 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg p-3 text-sm text-muted-foreground">
+                  No hospitals found matching "{hospitalSearch}"
+                </div>
+              )}
+              
+              {hospitalsLoading && (
+                <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg p-3 text-sm text-muted-foreground">
+                  Loading hospitals...
+                </div>
+              )}
+            </div>
+            
+            {selectedHospital && (
+              <div className="mt-2 text-sm text-muted-foreground">
+                Selected: <span className="font-medium text-foreground">{selectedHospital.customerName}</span>
+              </div>
+            )}
           </CardContent>
         </Card>
 
