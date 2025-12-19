@@ -295,13 +295,6 @@ export default function Matches() {
                     </div>
                     <div className="flex gap-2 ml-4">
                       <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => openDialog(match)}
-                      >
-                        Resolve
-                      </Button>
-                      <Button
                         variant="outline"
                         size="sm"
                         onClick={() => excludeMatch.mutate({ matchId: match.id })}
@@ -310,6 +303,13 @@ export default function Matches() {
                       >
                         <Ban className="h-4 w-4 mr-1" />
                         Exclude
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => openDialog(match)}
+                      >
+                        Resolve
                       </Button>
                     </div>
                   </div>

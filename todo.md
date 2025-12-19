@@ -96,3 +96,6 @@
 - [x] Use Invoice Date for reorder calculations instead of Sales Order Date
 - [x] Add "On Order" status for orders with Sales Order Date but no Invoice Date
 - [x] Update UI to show both dates where relevant
+
+- [x] Add Exclude button to Hospital Management (after Edit button)
+- [x] Reorder Pending Matches buttons: Exclude before Resolve

@@ -270,6 +270,10 @@ export const appRouter = router({
       await db.unexcludePurchase(input.purchaseId);
       return { success: true };
     }),
+    excludeByPurchaseId: protectedProcedure.input(z.object({ purchaseId: z.number(), reason: z.string().optional() })).mutation(async ({ input }) => {
+      await db.excludePurchase(input.purchaseId, input.reason);
+      return { success: true };
+    }),
     
     // Link a purchase directly to an existing area (from Hospital Management)
     linkToArea: protectedProcedure.input(z.object({ purchaseId: z.number(), areaId: z.number() })).mutation(async ({ input }) => {

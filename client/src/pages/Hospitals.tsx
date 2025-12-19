@@ -76,6 +76,16 @@ export default function Hospitals() {
     onError: (error: { message: string }) => toast.error(error.message),
   });
 
+  const excludePurchase = trpc.matches.excludeByPurchaseId.useMutation({
+    onSuccess: () => {
+      utils.matches.excluded.invalidate();
+      utils.hospitals.getPurchases.invalidate();
+      utils.matches.pending.invalidate();
+      toast.success("Purchase excluded");
+    },
+    onError: (error: { message: string }) => toast.error(error.message),
+  });
+
   const linkToArea = trpc.matches.linkToArea.useMutation({
     onSuccess: () => {
       utils.hospitals.getPurchases.invalidate();
@@ -470,24 +480,35 @@ export default function Hospitals() {
                               {purchase.totalCurtains > 0 ? purchase.totalCurtains : '-'}
                             </TableCell>
                             <TableCell>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => openDialog(purchase)}
-                                className="h-8 px-2"
-                              >
-                                {purchase.areaId ? (
-                                  <>
-                                    <Pencil className="h-4 w-4 mr-1" />
-                                    Edit
-                                  </>
-                                ) : (
-                                  <>
-                                    <Link2 className="h-4 w-4 mr-1" />
-                                    Match
-                                  </>
-                                )}
-                              </Button>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => openDialog(purchase)}
+                                  className="h-8 px-2"
+                                >
+                                  {purchase.areaId ? (
+                                    <>
+                                      <Pencil className="h-4 w-4 mr-1" />
+                                      Edit
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Link2 className="h-4 w-4 mr-1" />
+                                      Match
+                                    </>
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => excludePurchase.mutate({ purchaseId: purchase.id })}
+                                  className="h-8 px-2 text-muted-foreground hover:text-destructive"
+                                  disabled={excludePurchase.isPending}
+                                >
+                                  <Ban className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
