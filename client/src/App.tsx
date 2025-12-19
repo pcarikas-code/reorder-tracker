@@ -9,6 +9,7 @@ import Forecast from "./pages/Forecast";
 import Matches from "./pages/Matches";
 import Sync from "./pages/Sync";
 import Areas from "./pages/Areas";
+import Hospitals from "./pages/Hospitals";
 
 function Router() {
   return (
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/matches" component={Matches} />
       <Route path="/sync" component={Sync} />
       <Route path="/areas" component={Areas} />
+      <Route path="/hospitals" component={Hospitals} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

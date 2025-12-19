@@ -792,3 +792,26 @@ export async function mergeAreas(sourceAreaId: number, targetAreaId: number): Pr
   
   return { purchasesMoved: result[0]?.affectedRows || 0 };
 }
+
+// Get all purchases for a hospital with area info (detailed version)
+export async function getPurchasesByHospitalWithArea(hospitalId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const results = await db
+    .select({
+      id: purchases.id,
+      orderNumber: purchases.orderNumber,
+      orderDate: purchases.orderDate,
+      customerRef: purchases.customerRef,
+      rawAreaText: purchases.rawAreaText,
+      areaId: purchases.areaId,
+      areaName: areas.name,
+    })
+    .from(purchases)
+    .leftJoin(areas, eq(purchases.areaId, areas.id))
+    .where(eq(purchases.hospitalId, hospitalId))
+    .orderBy(desc(purchases.orderDate));
+  
+  return results;
+}

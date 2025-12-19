@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Package, AlertTriangle, RefreshCw, Settings } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Package, AlertTriangle, RefreshCw, Settings, Building2 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -32,6 +32,7 @@ const menuItems = [
   { icon: Package, label: "Stock Forecast", path: "/forecast" },
   { icon: AlertTriangle, label: "Pending Matches", path: "/matches" },
   { icon: RefreshCw, label: "Sync Data", path: "/sync" },
+  { icon: Building2, label: "Hospital Management", path: "/hospitals" },
   { icon: Settings, label: "Area Management", path: "/areas" },
 ];
 
