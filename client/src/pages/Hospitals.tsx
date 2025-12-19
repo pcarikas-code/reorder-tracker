@@ -5,24 +5,63 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Download, Building2 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, Download, Building2, Pencil, Link2 } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
 import { toast } from "sonner";
+
+type Purchase = {
+  id: number;
+  orderNumber: string;
+  orderDate: Date;
+  customerRef: string | null;
+  rawAreaText: string | null;
+  areaId: number | null;
+  areaName: string | null;
+  totalCurtains: number;
+};
 
 export default function Hospitals() {
   const [selectedHospitalId, setSelectedHospitalId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [areaFilter, setAreaFilter] = useState<string>("all");
+  
+  // Match/Edit dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
+  const [areaInput, setAreaInput] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
+  const utils = trpc.useUtils();
   const { data: hospitals, isLoading: hospitalsLoading } = trpc.hospitals.list.useQuery();
   const { data: purchases, isLoading: purchasesLoading } = trpc.hospitals.getPurchases.useQuery(
     { hospitalId: parseInt(selectedHospitalId) },
     { enabled: !!selectedHospitalId }
   );
-  const { data: areas } = trpc.areas.byHospital.useQuery(
+  const { data: hospitalAreas } = trpc.areas.byHospital.useQuery(
     { hospitalId: parseInt(selectedHospitalId) },
     { enabled: !!selectedHospitalId }
   );
+
+  const linkToArea = trpc.matches.linkToArea.useMutation({
+    onSuccess: () => {
+      utils.hospitals.getPurchases.invalidate();
+      toast.success("Purchase linked to area");
+      setDialogOpen(false);
+    },
+    onError: (error: { message: string }) => toast.error(error.message),
+  });
+
+  const createAreaAndLink = trpc.matches.createAreaAndLink.useMutation({
+    onSuccess: () => {
+      utils.hospitals.getPurchases.invalidate();
+      utils.areas.byHospital.invalidate();
+      toast.success("New area created and purchase linked");
+      setDialogOpen(false);
+    },
+    onError: (error: { message: string }) => toast.error(error.message),
+  });
 
   const selectedHospital = hospitals?.find(h => h.id.toString() === selectedHospitalId);
 
@@ -52,6 +91,19 @@ export default function Hospitals() {
     });
   }, [purchases, searchTerm, areaFilter]);
 
+  // Filter areas based on input
+  const filteredAreas = useMemo(() => {
+    if (!hospitalAreas || !areaInput.trim()) return [];
+    const search = areaInput.toLowerCase();
+    return hospitalAreas.filter(a => a.name.toLowerCase().includes(search)).slice(0, 10);
+  }, [hospitalAreas, areaInput]);
+
+  // Check if exact match exists
+  const exactMatch = useMemo(() => {
+    if (!hospitalAreas || !areaInput.trim()) return null;
+    return hospitalAreas.find(a => a.name.toLowerCase() === areaInput.toLowerCase());
+  }, [hospitalAreas, areaInput]);
+
   const handleExport = () => {
     if (!filteredPurchases.length || !selectedHospital) return;
     const csv = [
@@ -74,6 +126,77 @@ export default function Hospitals() {
     URL.revokeObjectURL(url);
     toast.success('Export downloaded');
   };
+
+  const openDialog = (purchase: Purchase) => {
+    setSelectedPurchase(purchase);
+    setAreaInput(purchase.areaName || "");
+    setShowSuggestions(false);
+    setHighlightedIndex(-1);
+    setDialogOpen(true);
+  };
+
+  const handleSelectArea = (areaName: string) => {
+    setAreaInput(areaName);
+    setShowSuggestions(false);
+    setHighlightedIndex(-1);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || filteredAreas.length === 0) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleConfirm();
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIndex(prev => Math.min(prev + 1, filteredAreas.length - 1));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIndex(prev => Math.max(prev - 1, -1));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (highlightedIndex >= 0 && highlightedIndex < filteredAreas.length) {
+          handleSelectArea(filteredAreas[highlightedIndex].name);
+        } else {
+          handleConfirm();
+        }
+        break;
+      case 'Tab':
+        if (highlightedIndex >= 0 && highlightedIndex < filteredAreas.length) {
+          e.preventDefault();
+          handleSelectArea(filteredAreas[highlightedIndex].name);
+        }
+        break;
+      case 'Escape':
+        setShowSuggestions(false);
+        setHighlightedIndex(-1);
+        break;
+    }
+  };
+
+  const handleConfirm = useCallback(() => {
+    if (!selectedPurchase || !areaInput.trim()) return;
+
+    if (exactMatch) {
+      // Link to existing area
+      linkToArea.mutate({ purchaseId: selectedPurchase.id, areaId: exactMatch.id });
+    } else {
+      // Create new area
+      createAreaAndLink.mutate({
+        purchaseId: selectedPurchase.id,
+        hospitalId: parseInt(selectedHospitalId),
+        areaName: areaInput.trim(),
+      });
+    }
+  }, [selectedPurchase, areaInput, exactMatch, selectedHospitalId, linkToArea, createAreaAndLink]);
+
+  const isLoading = linkToArea.isPending || createAreaAndLink.isPending;
 
   return (
     <DashboardLayout>
@@ -183,6 +306,7 @@ export default function Hospitals() {
                           <TableHead>Customer Reference</TableHead>
                           <TableHead>Area</TableHead>
                           <TableHead className="text-right">Curtains</TableHead>
+                          <TableHead className="w-[100px]">Action</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -202,6 +326,26 @@ export default function Hospitals() {
                             </TableCell>
                             <TableCell className="text-right font-medium">
                               {purchase.totalCurtains > 0 ? purchase.totalCurtains : '-'}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openDialog(purchase)}
+                                className="h-8 px-2"
+                              >
+                                {purchase.areaId ? (
+                                  <>
+                                    <Pencil className="h-4 w-4 mr-1" />
+                                    Edit
+                                  </>
+                                ) : (
+                                  <>
+                                    <Link2 className="h-4 w-4 mr-1" />
+                                    Match
+                                  </>
+                                )}
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -225,6 +369,101 @@ export default function Hospitals() {
           </Card>
         )}
       </div>
+
+      {/* Match/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{selectedPurchase?.areaId ? 'Edit Area Match' : 'Match to Area'}</DialogTitle>
+            <DialogDescription>
+              Type an area name. Matching existing areas will appear as you type.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPurchase && (
+            <div className="space-y-4">
+              {/* Order Info */}
+              <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                <div className="font-medium">Original Reference:</div>
+                <div className="text-muted-foreground">{selectedPurchase.customerRef || selectedPurchase.rawAreaText || 'N/A'}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {selectedPurchase.orderNumber} • {new Date(selectedPurchase.orderDate).toLocaleDateString()}
+                </div>
+              </div>
+
+              {/* Naming Convention Guide */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+                <div className="font-medium text-blue-800 mb-1">Area Naming Convention:</div>
+                <ol className="text-blue-700 text-xs space-y-0.5 list-decimal list-inside">
+                  <li>Where (town)</li>
+                  <li>What (department/function)</li>
+                  <li>Location (building/level)</li>
+                  <li>Sub-location (room number)</li>
+                </ol>
+              </div>
+
+              {/* Area Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Area Name</label>
+                <div className="relative">
+                  <Input
+                    value={areaInput}
+                    onChange={(e) => {
+                      setAreaInput(e.target.value);
+                      setShowSuggestions(true);
+                      setHighlightedIndex(-1);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    onKeyDown={handleInputKeyDown}
+                    placeholder="Type area name..."
+                    autoFocus
+                  />
+                  
+                  {/* Suggestions Dropdown */}
+                  {showSuggestions && filteredAreas.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg max-h-52 overflow-auto">
+                      {filteredAreas.map((area, index) => (
+                        <div
+                          key={area.id}
+                          className={`px-3 py-2 cursor-pointer text-sm ${
+                            index === highlightedIndex ? 'bg-accent' : 'hover:bg-muted'
+                          }`}
+                          onMouseEnter={() => setHighlightedIndex(index)}
+                          onMouseDown={() => handleSelectArea(area.name)}
+                        >
+                          {area.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Status Indicator */}
+                {areaInput.trim() && (
+                  <div className="text-xs">
+                    {exactMatch ? (
+                      <span className="text-green-600">✓ Will link to existing area: {exactMatch.name}</span>
+                    ) : (
+                      <span className="text-blue-600">+ Will create new area: {areaInput.trim()}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button 
+              onClick={handleConfirm} 
+              disabled={!areaInput.trim() || isLoading}
+            >
+              {isLoading ? 'Saving...' : (exactMatch ? 'Link to Area' : 'Create & Link')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

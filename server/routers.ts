@@ -270,6 +270,19 @@ export const appRouter = router({
       await db.unexcludePurchase(input.purchaseId);
       return { success: true };
     }),
+    
+    // Link a purchase directly to an existing area (from Hospital Management)
+    linkToArea: protectedProcedure.input(z.object({ purchaseId: z.number(), areaId: z.number() })).mutation(async ({ input }) => {
+      await db.updatePurchase(input.purchaseId, { areaId: input.areaId });
+      return { success: true };
+    }),
+    
+    // Create a new area and link a purchase to it (from Hospital Management)
+    createAreaAndLink: protectedProcedure.input(z.object({ purchaseId: z.number(), hospitalId: z.number(), areaName: z.string() })).mutation(async ({ input }) => {
+      const area = await db.createArea({ hospitalId: input.hospitalId, name: input.areaName, isConfirmed: true });
+      await db.updatePurchase(input.purchaseId, { areaId: area.id });
+      return { success: true, areaId: area.id };
+    }),
 
   }),
 

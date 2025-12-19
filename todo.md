@@ -85,3 +85,4 @@
 - [x] Add purchase history hover tooltip to Area column on Reorder Status page
 - [x] Create Hospital Management page showing all purchases with area filtering
 - [x] Add total curtains column to Hospital Management page (exclude services)
+- [x] Add Match/Edit button to Hospital Management table rows
