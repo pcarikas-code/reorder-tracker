@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Download, Building2, Pencil, Link2 } from "lucide-react";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useSearch } from "wouter";
 import { toast } from "sonner";
 
 type Purchase = {
@@ -22,6 +23,10 @@ type Purchase = {
 };
 
 export default function Hospitals() {
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+  const hospitalIdFromUrl = urlParams.get('id');
+  
   const [selectedHospitalId, setSelectedHospitalId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [areaFilter, setAreaFilter] = useState<string>("all");
@@ -69,6 +74,17 @@ export default function Hospitals() {
   });
 
   const selectedHospital = hospitals?.find(h => h.id.toString() === selectedHospitalId);
+
+  // Handle URL parameter for hospital selection
+  useEffect(() => {
+    if (hospitalIdFromUrl && hospitals && !selectedHospitalId) {
+      const hospital = hospitals.find(h => h.id.toString() === hospitalIdFromUrl);
+      if (hospital) {
+        setSelectedHospitalId(hospital.id.toString());
+        setHospitalSearch(hospital.customerName);
+      }
+    }
+  }, [hospitalIdFromUrl, hospitals, selectedHospitalId]);
 
   // Filter hospitals based on search input
   const filteredHospitals = useMemo(() => {

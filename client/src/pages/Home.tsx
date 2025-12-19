@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { AlertTriangle, CheckCircle, Clock, Search, Download, Bell } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, Search, Download, Bell, ExternalLink } from "lucide-react";
+import { Link } from "wouter";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
@@ -215,7 +216,12 @@ export default function Home() {
                   <TableBody>
                     {filteredStatuses.map((status) => (
                       <TableRow key={status.areaId}>
-                        <TableCell className="font-medium">{status.hospitalName}</TableCell>
+                        <TableCell className="font-medium">
+                          <Link href={`/hospitals?id=${status.hospitalId}`} className="hover:text-primary hover:underline inline-flex items-center gap-1">
+                            {status.hospitalName}
+                            <ExternalLink className="h-3 w-3 opacity-50" />
+                          </Link>
+                        </TableCell>
                         <TableCell>
                           <AreaNameWithHover areaId={status.areaId} areaName={status.areaName} />
                         </TableCell>

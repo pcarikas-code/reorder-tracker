@@ -87,3 +87,4 @@
 - [x] Add total curtains column to Hospital Management page (exclude services)
 - [x] Add Match/Edit button to Hospital Management table rows
 - [x] Make hospital selector searchable/filterable as user types
+- [x] Add link on hospital name in Reorder Status to open Hospital Management
