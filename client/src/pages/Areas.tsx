@@ -255,6 +255,18 @@ export default function Areas() {
           </Dialog>
         </div>
 
+        {/* Naming Convention Guide */}
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="pt-4 pb-4">
+            <div className="text-sm text-blue-800">
+              <span className="font-medium">Area Naming Convention: </span>
+              <span className="text-blue-700">
+                1. Where (town) → 2. What (department/function) → 3. Location (building/level) → 4. Sub-location (room number)
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Filters */}
         <Card>
           <CardContent className="pt-6">

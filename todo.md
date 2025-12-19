@@ -80,3 +80,5 @@
 - [x] Add original reference (customerRef) to area hover tooltip
 - [x] Update Reorder Status categories: Due Soon (0-90), Near Soon (90-180), Far Soon (180-360)
 - [x] Remove "No Purchase" category from Reorder Status
+- [x] Add area naming convention guide to Resolve Match dialog
+- [x] Add area naming convention guide to Area Management page

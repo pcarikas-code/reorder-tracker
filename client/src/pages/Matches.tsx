@@ -340,6 +340,17 @@ export default function Matches() {
               </div>
             )}
 
+            {/* Naming convention guide */}
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800 mb-3">
+              <div className="font-medium mb-1">Area Naming Convention:</div>
+              <ol className="list-decimal list-inside space-y-0.5">
+                <li><strong>Where</strong> (town)</li>
+                <li><strong>What</strong> (department name or function)</li>
+                <li><strong>Location</strong> (building name or level or both)</li>
+                <li><strong>Sub-location</strong> (room number)</li>
+              </ol>
+            </div>
+
             {/* Single autocomplete input */}
             <div className="space-y-2 mb-4">
               <Label>Area Name</Label>
