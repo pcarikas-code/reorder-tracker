@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Download, Building2, Pencil, Link2, Ban, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Download, Building2, Pencil, Link2, Ban, RotateCcw } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearch } from "wouter";
 import { toast } from "sonner";
@@ -43,9 +43,7 @@ export default function Hospitals() {
   const [areaInput, setAreaInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  
-  // Excluded purchases state
-  const [showExcluded, setShowExcluded] = useState(false);
+
 
   const utils = trpc.useUtils();
   const { data: hospitals, isLoading: hospitalsLoading } = trpc.hospitals.list.useQuery();
@@ -594,66 +592,7 @@ export default function Hospitals() {
           </Card>
         )}
 
-        {/* Excluded Purchases Section */}
-        {selectedHospitalId && hospitalExcludedPurchases.length > 0 && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle 
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => setShowExcluded(!showExcluded)}
-              >
-                <div className="flex items-center gap-2">
-                  <Ban className="h-5 w-5 text-muted-foreground" />
-                  Excluded Purchases ({hospitalExcludedPurchases.length})
-                </div>
-                {showExcluded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-              </CardTitle>
-            </CardHeader>
-            {showExcluded && (
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Order Number</TableHead>
-                        <TableHead>Order Date</TableHead>
-                        <TableHead>Customer Reference</TableHead>
-                        <TableHead>Reason</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {hospitalExcludedPurchases.map((purchase) => (
-                        <TableRow key={purchase.id}>
-                          <TableCell className="font-medium">{purchase.orderNumber}</TableCell>
-                          <TableCell>{new Date(purchase.orderDate).toLocaleDateString()}</TableCell>
-                          <TableCell className="max-w-xs truncate" title={purchase.customerRef || ''}>
-                            {purchase.customerRef || '-'}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">
-                            {purchase.excludeReason || '-'}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => unexcludePurchase.mutate({ purchaseId: purchase.id })}
-                              disabled={unexcludePurchase.isPending}
-                              title="Restore this purchase"
-                            >
-                              <RotateCcw className="h-4 w-4 mr-1" />
-                              Restore
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            )}
-          </Card>
-        )}
+
       </div>
 
       {/* Match/Edit Dialog */}

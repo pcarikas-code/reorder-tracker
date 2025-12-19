@@ -102,3 +102,4 @@
 - [x] Center Curtains and Action columns in Hospital Management table
 - [x] Show area status in Hospital Management: matched area name, Unmatched, or Excluded
 - [x] Add filter for area status (Matched, Unmatched, Excluded) in Hospital Management
+- [x] Remove separate Excluded Purchases card from Hospital Management
