@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean, json } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean, json, uniqueIndex } from "drizzle-orm/mysql-core";
 
 // Core user table backing auth flow
 export const users = mysqlTable("users", {
@@ -38,7 +38,9 @@ export const areas = mysqlTable("areas", {
   isConfirmed: boolean("isConfirmed").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  uniqueHospitalArea: uniqueIndex("unique_hospital_area").on(table.hospitalId, table.name),
+}));
 
 export type Area = typeof areas.$inferSelect;
 export type InsertArea = typeof areas.$inferInsert;

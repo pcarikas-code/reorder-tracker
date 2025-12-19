@@ -156,6 +156,16 @@ export async function createArea(area: InsertArea): Promise<Area> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  // Check if area with same name already exists for this hospital
+  const existing = await db.select().from(areas)
+    .where(and(eq(areas.hospitalId, area.hospitalId), eq(areas.name, area.name)))
+    .limit(1);
+  
+  if (existing.length > 0) {
+    // Return existing area instead of creating duplicate
+    return existing[0];
+  }
+
   const result = await db.insert(areas).values(area);
   const inserted = await db.select().from(areas).where(eq(areas.id, Number(result[0].insertId))).limit(1);
   return inserted[0];

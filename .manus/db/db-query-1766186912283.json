@@ -1,0 +1,37 @@
+{
+  "query": "SELECT * FROM areas WHERE name = 'Maternity South'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT * FROM areas WHERE name = 'Maternity South'",
+  "rows": [
+    {
+      "id": "150018",
+      "hospitalId": "16",
+      "name": "Maternity South",
+      "normalizedName": "NULL",
+      "isConfirmed": "1",
+      "createdAt": "2025-12-18 11:59:08",
+      "updatedAt": "2025-12-19 23:23:18"
+    },
+    {
+      "id": "150022",
+      "hospitalId": "16",
+      "name": "Maternity South",
+      "normalizedName": "NULL",
+      "isConfirmed": "1",
+      "createdAt": "2025-12-18 12:03:24",
+      "updatedAt": "2025-12-19 23:23:31"
+    },
+    {
+      "id": "360006",
+      "hospitalId": "16",
+      "name": "Maternity South",
+      "normalizedName": "NULL",
+      "isConfirmed": "1",
+      "createdAt": "2025-12-19 23:22:45",
+      "updatedAt": "2025-12-19 23:22:45"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\thospitalId\tname\tnormalizedName\tisConfirmed\tcreatedAt\tupdatedAt\n150018\t16\tMaternity South\tNULL\t1\t2025-12-18 11:59:08\t2025-12-19 23:23:18\n150022\t16\tMaternity South\tNULL\t1\t2025-12-18 12:03:24\t2025-12-19 23:23:31\n360006\t16\tMaternity South\tNULL\t1\t2025-12-19 23:22:45\t2025-12-19 23:22:45\n",
+  "stderr": "",
+  "execution_time_ms": 1603
+}

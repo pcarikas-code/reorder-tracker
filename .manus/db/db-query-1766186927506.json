@@ -1,0 +1,22 @@
+{
+  "query": "SELECT id, hospitalId FROM areas WHERE name = 'Maternity South' ORDER BY id ASC",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT id, hospitalId FROM areas WHERE name = 'Maternity South' ORDER BY id ASC",
+  "rows": [
+    {
+      "id": "150018",
+      "hospitalId": "16"
+    },
+    {
+      "id": "150022",
+      "hospitalId": "16"
+    },
+    {
+      "id": "360006",
+      "hospitalId": "16"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\thospitalId\n150018\t16\n150022\t16\n360006\t16\n",
+  "stderr": "",
+  "execution_time_ms": 1556
+}

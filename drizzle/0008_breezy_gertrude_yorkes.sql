@@ -1,0 +1,1 @@
+ALTER TABLE `areas` ADD CONSTRAINT `unique_hospital_area` UNIQUE(`hospitalId`,`name`);

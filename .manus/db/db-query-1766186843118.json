@@ -1,0 +1,16 @@
+{
+  "query": "SELECT hospitalId, name, COUNT(*) as count, GROUP_CONCAT(id ORDER BY createdAt ASC) as ids FROM areas GROUP BY hospitalId, name HAVING COUNT(*) > 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT hospitalId, name, COUNT(*) as count, GROUP_CONCAT(id ORDER BY createdAt ASC) as ids FROM areas GROUP BY hospitalId, name HAVING COUNT(*) > 1",
+  "rows": [
+    {
+      "hospitalId": "16",
+      "name": "Maternity South",
+      "count": "3",
+      "ids": "150018,150022,360006"
+    }
+  ],
+  "messages": [],
+  "stdout": "hospitalId\tname\tcount\tids\n16\tMaternity South\t3\t150018,150022,360006\n",
+  "stderr": "",
+  "execution_time_ms": 1679
+}

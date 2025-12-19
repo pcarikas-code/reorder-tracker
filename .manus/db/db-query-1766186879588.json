@@ -1,0 +1,13 @@
+{
+  "query": "SELECT GROUP_CONCAT(id ORDER BY createdAt ASC) as ids FROM areas WHERE hospitalId = 4 AND name = 'Maternity South'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT GROUP_CONCAT(id ORDER BY createdAt ASC) as ids FROM areas WHERE hospitalId = 4 AND name = 'Maternity South'",
+  "rows": [
+    {
+      "ids": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "ids\nNULL\n",
+  "stderr": "",
+  "execution_time_ms": 1559
+}

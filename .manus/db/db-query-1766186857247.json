@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, hospitalId, name, createdAt FROM areas WHERE name = 'Maternity South' ORDER BY hospitalId, createdAt",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT id, hospitalId, name, createdAt FROM areas WHERE name = 'Maternity South' ORDER BY hospitalId, createdAt",
+  "rows": [
+    {
+      "id": "150018",
+      "hospitalId": "16",
+      "name": "Maternity South",
+      "createdAt": "2025-12-18 11:59:08"
+    },
+    {
+      "id": "150022",
+      "hospitalId": "16",
+      "name": "Maternity South",
+      "createdAt": "2025-12-18 12:03:24"
+    },
+    {
+      "id": "360006",
+      "hospitalId": "16",
+      "name": "Maternity South",
+      "createdAt": "2025-12-19 23:22:45"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\thospitalId\tname\tcreatedAt\n150018\t16\tMaternity South\t2025-12-18 11:59:08\n150022\t16\tMaternity South\t2025-12-18 12:03:24\n360006\t16\tMaternity South\t2025-12-19 23:22:45\n",
+  "stderr": "",
+  "execution_time_ms": 1553
+}

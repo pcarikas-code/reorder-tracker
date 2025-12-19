@@ -105,3 +105,6 @@
 - [x] Remove separate Excluded Purchases card from Hospital Management
 - [x] Fix duplicate key error in Hospital Management table (purchases appearing in both regular and excluded lists)
 - [x] Fix Hospital Management to not show excluded purchases in regular list (filter them out properly)
+- [x] Add unique constraint for area name per hospital (prevent duplicates)
+- [x] Add area merge functionality to combine duplicate areas
+- [x] Fix existing duplicate areas in database
