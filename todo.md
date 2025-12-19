@@ -77,3 +77,4 @@
 - [x] Increase height of Resolve Match dialog
 - [x] Add keyboard navigation for suggestions dropdown (arrow keys + Enter)
 - [x] Add hover tooltip on area cards to show linked purchases
+- [x] Add original reference (customerRef) to area hover tooltip

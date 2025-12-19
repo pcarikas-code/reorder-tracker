@@ -180,13 +180,20 @@ export default function Areas() {
             {!hasHovered || isLoading ? (
               <div className="text-sm text-muted-foreground">Loading...</div>
             ) : purchases && purchases.length > 0 ? (
-              <div className="space-y-1 max-h-48 overflow-auto">
+              <div className="space-y-2 max-h-48 overflow-auto">
                 {purchases.slice(0, 10).map((p) => (
-                  <div key={p.id} className="text-xs border-b pb-1">
-                    <div className="font-medium">{p.orderNumber}</div>
-                    <div className="text-muted-foreground">
-                      {new Date(p.orderDate).toLocaleDateString()}
+                  <div key={p.id} className="text-xs border-b pb-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{p.orderNumber}</span>
+                      <span className="text-muted-foreground">
+                        {new Date(p.orderDate).toLocaleDateString()}
+                      </span>
                     </div>
+                    {p.customerRef && (
+                      <div className="text-muted-foreground truncate mt-0.5" title={p.customerRef}>
+                        {p.customerRef}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {purchases.length > 10 && (
