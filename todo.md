@@ -148,3 +148,4 @@
 - [x] Reorder status cards and table: Overdue → On Order → Due Soon → Near Soon → Far Soon
 - [x] Display SO-U number for On Order items for manual verification
 - [x] Change "Invoice Date" column header to "Last Invoice"
+- [x] Change "Reorder Due" column header to "Next Due"
