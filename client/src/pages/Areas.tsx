@@ -13,6 +13,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { Search, Plus, Ban, Undo2, Pencil, FileText, Unlink, Merge } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
+import { OrderLink } from "@/components/OrderLink";
 
 export default function Areas() {
   const utils = trpc.useUtils();
@@ -185,7 +186,11 @@ export default function Areas() {
                 {purchases.slice(0, 10).map((p) => (
                   <div key={p.id} className="text-xs border-b pb-2">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium">{p.orderNumber}</span>
+                      <OrderLink 
+                        orderNumber={p.orderNumber}
+                        unleashOrderGuid={p.unleashOrderGuid}
+                        className="font-medium text-xs"
+                      />
                       <span className="text-muted-foreground">
                         {new Date(p.orderDate).toLocaleDateString()}
                       </span>
@@ -382,7 +387,12 @@ export default function Areas() {
                     {excludedOrders.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell className="font-medium">{order.hospitalName}</TableCell>
-                        <TableCell>{order.orderNumber}</TableCell>
+                        <TableCell>
+                          <OrderLink 
+                            orderNumber={order.orderNumber}
+                            unleashOrderGuid={order.unleashOrderGuid}
+                          />
+                        </TableCell>
                         <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
                         <TableCell className="max-w-[200px] truncate" title={order.customerRef || undefined}>
                           {order.customerRef || '-'}
@@ -461,7 +471,12 @@ export default function Areas() {
                     <TableBody>
                       {selectedAreaPurchases?.map((purchase) => (
                         <TableRow key={purchase.id}>
-                          <TableCell className="font-medium">{purchase.orderNumber}</TableCell>
+                          <TableCell className="font-medium">
+                            <OrderLink 
+                              orderNumber={purchase.orderNumber}
+                              unleashOrderGuid={purchase.unleashOrderGuid}
+                            />
+                          </TableCell>
                           <TableCell>{new Date(purchase.orderDate).toLocaleDateString()}</TableCell>
                           <TableCell className="max-w-[200px] truncate" title={purchase.customerRef || undefined}>
                             {purchase.customerRef || purchase.rawAreaText || '-'}

@@ -11,10 +11,12 @@ import { Search, Download, Building2, Pencil, Link2, Ban, RotateCcw } from "luci
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearch } from "wouter";
 import { toast } from "sonner";
+import { OrderLink } from "@/components/OrderLink";
 
 type Purchase = {
   id: number;
   orderNumber: string;
+  unleashOrderGuid: string;
   orderDate: Date;
   invoiceDate: Date | null;
   customerRef: string | null;
@@ -162,6 +164,7 @@ export default function Hospitals() {
     const excludedItems = hospitalExcludedPurchases.map(p => ({
       id: p.id,
       orderNumber: p.orderNumber,
+      unleashOrderGuid: p.unleashOrderGuid,
       orderDate: p.orderDate,
       invoiceDate: null as Date | null,
       customerRef: p.customerRef,
@@ -516,7 +519,12 @@ export default function Hospitals() {
                       <TableBody>
                         {filteredPurchases.map((purchase) => (
                           <TableRow key={`${purchase.status}-${purchase.id}`}>
-                            <TableCell className="font-medium">{purchase.orderNumber}</TableCell>
+                            <TableCell className="font-medium">
+                              <OrderLink 
+                                orderNumber={purchase.orderNumber} 
+                                unleashOrderGuid={purchase.unleashOrderGuid} 
+                              />
+                            </TableCell>
                             <TableCell>{new Date(purchase.orderDate).toLocaleDateString()}</TableCell>
                             <TableCell>
                               {purchase.invoiceDate ? (

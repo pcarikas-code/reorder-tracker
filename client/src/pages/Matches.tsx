@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Check, X, ChevronRight, Ban } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
+import { OrderLink } from "@/components/OrderLink";
 
 export default function Matches() {
   const utils = trpc.useUtils();
@@ -271,7 +272,11 @@ export default function Matches() {
                           <Badge variant="outline" className="font-normal">
                             {(match as any).hospitalName || 'Unknown Hospital'}
                           </Badge>
-                          <span className="text-xs">Order: {(match as any).orderNumber || `#${match.purchaseId}`}</span>
+                          <OrderLink 
+                              orderNumber={(match as any).orderNumber || `#${match.purchaseId}`}
+                              unleashOrderGuid={(match as any).unleashOrderGuid}
+                              className="text-xs"
+                            />
                           {(match as any).orderDate && (
                             <span className="text-xs">
                               {new Date((match as any).orderDate).toLocaleDateString()}
@@ -326,10 +331,14 @@ export default function Matches() {
               <div className="p-3 bg-slate-50 border rounded-lg text-sm">
                 <div className="text-xs text-muted-foreground mb-1">Original Reference:</div>
                 <div className="font-mono text-xs break-all">{(selectedMatch as any).customerRef}</div>
-                <div className="mt-2 flex gap-2 text-xs text-muted-foreground">
+                <div className="mt-2 flex gap-2 text-xs text-muted-foreground items-center">
                   <span>{(selectedMatch as any).hospitalName}</span>
                   <span>•</span>
-                  <span>{(selectedMatch as any).orderNumber}</span>
+                  <OrderLink 
+                    orderNumber={(selectedMatch as any).orderNumber}
+                    unleashOrderGuid={(selectedMatch as any).unleashOrderGuid}
+                    className="text-xs"
+                  />
                 </div>
               </div>
             )}

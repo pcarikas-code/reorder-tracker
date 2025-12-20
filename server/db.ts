@@ -376,6 +376,7 @@ export async function getUnmatchedPurchases() {
       id: purchases.id,
       purchaseId: purchases.id, // Alias for compatibility
       orderNumber: purchases.orderNumber,
+      unleashOrderGuid: purchases.unleashOrderGuid,
       orderDate: purchases.orderDate,
       invoiceDate: purchases.invoiceDate,
       customerRef: purchases.customerRef,
@@ -783,6 +784,7 @@ export async function getExcludedPurchases() {
     .select({
       id: purchases.id,
       orderNumber: purchases.orderNumber,
+      unleashOrderGuid: purchases.unleashOrderGuid,
       orderDate: purchases.orderDate,
       customerRef: purchases.customerRef,
       rawAreaText: purchases.rawAreaText,
@@ -814,6 +816,7 @@ export async function getPurchasesForArea(areaId: number) {
     .select({
       id: purchases.id,
       orderNumber: purchases.orderNumber,
+      unleashOrderGuid: purchases.unleashOrderGuid,
       orderDate: purchases.orderDate,
       customerRef: purchases.customerRef,
       rawAreaText: purchases.rawAreaText,
@@ -883,6 +886,7 @@ export async function getPurchasesByHospitalWithArea(hospitalId: number) {
     .select({
       id: purchases.id,
       orderNumber: purchases.orderNumber,
+      unleashOrderGuid: purchases.unleashOrderGuid,
       orderDate: purchases.orderDate,
       invoiceDate: purchases.invoiceDate,
       customerRef: purchases.customerRef,
