@@ -394,11 +394,13 @@ export async function getPendingMatches() {
       status: 'pending' as const,
     }));
     
-    // Insert in batches
+    // Insert in batches using onDuplicateKeyUpdate to handle race conditions
     const BATCH_SIZE = 100;
     for (let i = 0; i < newMatches.length; i += BATCH_SIZE) {
       const batch = newMatches.slice(i, i + BATCH_SIZE);
-      await db.insert(pendingMatches).values(batch);
+      await db.insert(pendingMatches).values(batch).onDuplicateKeyUpdate({
+        set: { rawAreaText: sql`rawAreaText` } // No-op update to ignore duplicates
+      });
     }
   }
   

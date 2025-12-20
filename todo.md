@@ -114,3 +114,4 @@
 - [x] Fix inconsistency: order showing in Pending Matches but already matched in Hospital Management
 - [x] Fix duplicate pending match records (368 purchases have duplicates)
 - [x] Add unique constraint on pendingMatches.purchaseId to prevent future duplicates
+- [x] Fix race condition in getPendingMatches causing duplicate key errors (use onDuplicateKeyUpdate)
