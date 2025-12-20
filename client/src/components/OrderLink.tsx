@@ -9,14 +9,11 @@ interface OrderLinkProps {
 
 /**
  * Clickable order number that links to Unleashed portal
- * URL format: https://go.unleashedsoftware.com/v2/SalesOrders/View/{GUID}
+ * URL format: https://au.unleashedsoftware.com/v2/SalesOrder/Update/{OrderNumber}
  */
 export function OrderLink({ orderNumber, unleashOrderGuid, className = "", showIcon = true }: OrderLinkProps) {
-  if (!unleashOrderGuid) {
-    return <span className={className}>{orderNumber}</span>;
-  }
-
-  const unleashUrl = `https://go.unleashedsoftware.com/v2/SalesOrders/View/${unleashOrderGuid}`;
+  // Use order number for the URL (Unleashed web app uses OrderNumber, not GUID)
+  const unleashUrl = `https://au.unleashedsoftware.com/v2/SalesOrder/Update/${orderNumber}`;
 
   return (
     <a

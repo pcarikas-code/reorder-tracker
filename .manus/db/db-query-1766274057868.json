@@ -1,0 +1,15 @@
+{
+  "query": "SELECT id, orderNumber, unleashOrderGuid FROM purchases WHERE orderNumber = 'SO-U-00000916' LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT id, orderNumber, unleashOrderGuid FROM purchases WHERE orderNumber = 'SO-U-00000916' LIMIT 1;",
+  "rows": [
+    {
+      "id": "6173",
+      "orderNumber": "SO-U-00000916",
+      "unleashOrderGuid": "F4A208DA-EFC6-4725-B49C-45A281868196"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torderNumber\tunleashOrderGuid\n6173\tSO-U-00000916\tF4A208DA-EFC6-4725-B49C-45A281868196\n",
+  "stderr": "",
+  "execution_time_ms": 1642
+}
