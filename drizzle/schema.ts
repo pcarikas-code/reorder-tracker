@@ -93,7 +93,10 @@ export const purchaseLines = mysqlTable("purchaseLines", {
   quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
   unitPrice: decimal("unitPrice", { precision: 10, scale: 2 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (table) => ({
+  // Unique constraint to prevent duplicate lines per purchase+product
+  uniquePurchaseProduct: uniqueIndex("unique_purchase_product").on(table.purchaseId, table.unleashProductGuid),
+}));
 
 export type PurchaseLine = typeof purchaseLines.$inferSelect;
 export type InsertPurchaseLine = typeof purchaseLines.$inferInsert;

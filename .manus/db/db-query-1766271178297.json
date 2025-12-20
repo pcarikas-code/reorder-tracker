@@ -1,0 +1,25 @@
+{
+  "query": "SELECT pl.productCode, COUNT(*) as cnt, SUM(CAST(pl.quantity AS DECIMAL)) as total_qty FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000892' GROUP BY pl.productCode ORDER BY pl.productCode",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT pl.productCode, COUNT(*) as cnt, SUM(CAST(pl.quantity AS DECIMAL)) as total_qty FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000892' GROUP BY pl.productCode ORDER BY pl.productCode",
+  "rows": [
+    {
+      "productCode": "sc-fw-e-py",
+      "cnt": "5",
+      "total_qty": "20"
+    },
+    {
+      "productCode": "sc-hw-e-py",
+      "cnt": "5",
+      "total_qty": "35"
+    },
+    {
+      "productCode": "sc-mw-e-py",
+      "cnt": "5",
+      "total_qty": "35"
+    }
+  ],
+  "messages": [],
+  "stdout": "productCode\tcnt\ttotal_qty\nsc-fw-e-py\t5\t20\nsc-hw-e-py\t5\t35\nsc-mw-e-py\t5\t35\n",
+  "stderr": "",
+  "execution_time_ms": 1657
+}

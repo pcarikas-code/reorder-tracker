@@ -1,0 +1,17 @@
+{
+  "query": "SELECT p.orderNumber, p.id as purchaseId, h.id as hospitalId, h.customerName, h.customerCode FROM purchases p JOIN hospitals h ON p.hospitalId = h.id WHERE p.orderNumber = 'SO-U-00000892'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT p.orderNumber, p.id as purchaseId, h.id as hospitalId, h.customerName, h.customerCode FROM purchases p JOIN hospitals h ON p.hospitalId = h.id WHERE p.orderNumber = 'SO-U-00000892'",
+  "rows": [
+    {
+      "orderNumber": "SO-U-00000892",
+      "purchaseId": "6193",
+      "hospitalId": "4",
+      "customerName": "Allevia Hospitals",
+      "customerCode": "Mercy Ascot Group"
+    }
+  ],
+  "messages": [],
+  "stdout": "orderNumber\tpurchaseId\thospitalId\tcustomerName\tcustomerCode\nSO-U-00000892\t6193\t4\tAllevia Hospitals\tMercy Ascot Group\n",
+  "stderr": "",
+  "execution_time_ms": 1511
+}

@@ -1,0 +1,16 @@
+{
+  "query": "SELECT p.orderNumber, h.customerName, p.customerRef, (SELECT SUM(CAST(pl.quantity AS DECIMAL)) FROM purchaseLines pl WHERE pl.purchaseId = p.id) as totalCurtains FROM purchases p JOIN hospitals h ON p.hospitalId = h.id WHERE p.orderNumber = 'SO-U-00000892'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT p.orderNumber, h.customerName, p.customerRef, (SELECT SUM(CAST(pl.quantity AS DECIMAL)) FROM purchaseLines pl WHERE pl.purchaseId = p.id) as totalCurtains FROM purchases p JOIN hospitals h ON p.hospitalId = h.id WHERE p.orderNumber = 'SO-U-00000892'",
+  "rows": [
+    {
+      "orderNumber": "SO-U-00000892",
+      "customerName": "Allevia Hospitals",
+      "customerRef": "036-26-268 - CIU - 2 yr changeover - due Jan 2026",
+      "totalCurtains": "90"
+    }
+  ],
+  "messages": [],
+  "stdout": "orderNumber\tcustomerName\tcustomerRef\ttotalCurtains\nSO-U-00000892\tAllevia Hospitals\t036-26-268 - CIU - 2 yr changeover - due Jan 2026\t90\n",
+  "stderr": "",
+  "execution_time_ms": 1565
+}

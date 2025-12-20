@@ -1,0 +1,9 @@
+{
+  "query": "DELETE pl1 FROM purchaseLines pl1 INNER JOIN purchaseLines pl2 WHERE pl1.purchaseId = pl2.purchaseId AND pl1.unleashProductGuid = pl2.unleashProductGuid AND pl1.id > pl2.id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute DELETE pl1 FROM purchaseLines pl1 INNER JOIN purchaseLines pl2 WHERE pl1.purchaseId = pl2.purchaseId AND pl1.unleashProductGuid = pl2.unleashProductGuid AND pl1.id > pl2.id",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1652
+}

@@ -1,0 +1,9 @@
+{
+  "query": "SELECT purchaseId, unleashProductGuid, COUNT(*) as cnt FROM purchaseLines WHERE unleashProductGuid IS NOT NULL GROUP BY purchaseId, unleashProductGuid HAVING cnt > 1 LIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT purchaseId, unleashProductGuid, COUNT(*) as cnt FROM purchaseLines WHERE unleashProductGuid IS NOT NULL GROUP BY purchaseId, unleashProductGuid HAVING cnt > 1 LIMIT 10",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1517
+}

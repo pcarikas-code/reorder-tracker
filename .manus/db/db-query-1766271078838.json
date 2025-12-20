@@ -1,0 +1,18 @@
+{
+  "query": "SELECT p.id, p.orderNumber, p.unleashOrderGuid, h.customerName, COUNT(pl.id) as line_count, SUM(CAST(pl.quantity AS DECIMAL)) as total_qty FROM purchases p JOIN hospitals h ON p.hospitalId = h.id LEFT JOIN purchaseLines pl ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000892' GROUP BY p.id, p.orderNumber, p.unleashOrderGuid, h.customerName",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT p.id, p.orderNumber, p.unleashOrderGuid, h.customerName, COUNT(pl.id) as line_count, SUM(CAST(pl.quantity AS DECIMAL)) as total_qty FROM purchases p JOIN hospitals h ON p.hospitalId = h.id LEFT JOIN purchaseLines pl ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000892' GROUP BY p.id, p.orderNumber, p.unleashOrderGuid, h.customerName",
+  "rows": [
+    {
+      "id": "6193",
+      "orderNumber": "SO-U-00000892",
+      "unleashOrderGuid": "741121F9-B716-4C94-BAA0-BB10C591EE66",
+      "customerName": "Allevia Hospitals",
+      "line_count": "15",
+      "total_qty": "90"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torderNumber\tunleashOrderGuid\tcustomerName\tline_count\ttotal_qty\n6193\tSO-U-00000892\t741121F9-B716-4C94-BAA0-BB10C591EE66\tAllevia Hospitals\t15\t90\n",
+  "stderr": "",
+  "execution_time_ms": 1626
+}

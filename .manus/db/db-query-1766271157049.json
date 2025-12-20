@@ -1,0 +1,110 @@
+{
+  "query": "SELECT purchaseId, productCode, COUNT(*) as cnt FROM purchaseLines GROUP BY purchaseId, productCode HAVING cnt > 1 LIMIT 20",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT purchaseId, productCode, COUNT(*) as cnt FROM purchaseLines GROUP BY purchaseId, productCode HAVING cnt > 1 LIMIT 20",
+  "rows": [
+    {
+      "purchaseId": "6673",
+      "productCode": "smtc-fw-e-sdpb",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6904",
+      "productCode": "smtc-mw-e-mb",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6275",
+      "productCode": "smtc-fw-e-ggowh",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6937",
+      "productCode": "smtc-hw-e-mb",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6284",
+      "productCode": "smtc-hw-e-te",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6418",
+      "productCode": "smtc-hw-e-te",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6313",
+      "productCode": "smtc-fw-e-te",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6693",
+      "productCode": "smtc-mw-e-te",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6538",
+      "productCode": "sc-hw-e-mb",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6513",
+      "productCode": "smtc-mw-e-te",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6646",
+      "productCode": "smtc-hw-e-te",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6662",
+      "productCode": "sc-hw-e-te",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6533",
+      "productCode": "sc-hw-e-gy",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6542",
+      "productCode": "smtc-hw-e-te",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6523",
+      "productCode": "sc-hw-e-gmbpb",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6402",
+      "productCode": "smtc-fw-e-mb",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6782",
+      "productCode": "sc-mw-e-mb",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6337",
+      "productCode": "sc-mw-e-mb",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6374",
+      "productCode": "smtc-fw-e-te",
+      "cnt": "5"
+    },
+    {
+      "purchaseId": "6489",
+      "productCode": "sc-mw-e-gy",
+      "cnt": "5"
+    }
+  ],
+  "messages": [],
+  "stdout": "purchaseId\tproductCode\tcnt\n6673\tsmtc-fw-e-sdpb\t5\n6904\tsmtc-mw-e-mb\t5\n6275\tsmtc-fw-e-ggowh\t5\n6937\tsmtc-hw-e-mb\t5\n6284\tsmtc-hw-e-te\t5\n6418\tsmtc-hw-e-te\t5\n6313\tsmtc-fw-e-te\t5\n6693\tsmtc-mw-e-te\t5\n6538\tsc-hw-e-mb\t5\n6513\tsmtc-mw-e-te\t5\n6646\tsmtc-hw-e-te\t5\n6662\tsc-hw-e-te\t5\n6533\tsc-hw-e-gy\t5\n6542\tsmtc-hw-e-te\t5\n6523\tsc-hw-e-gmbpb\t5\n6402\tsmtc-fw-e-mb\t5\n6782\tsc-mw-e-mb\t5\n6337\tsc-mw-e-mb\t5\n6374\tsmtc-fw-e-te\t5\n6489\tsc-mw-e-gy\t5\n",
+  "stderr": "",
+  "execution_time_ms": 1622
+}

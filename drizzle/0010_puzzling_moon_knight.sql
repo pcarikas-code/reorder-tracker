@@ -1,0 +1,1 @@
+ALTER TABLE `purchaseLines` ADD CONSTRAINT `unique_purchase_product` UNIQUE(`purchaseId`,`unleashProductGuid`);

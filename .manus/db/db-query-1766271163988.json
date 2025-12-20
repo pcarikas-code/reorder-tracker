@@ -1,0 +1,13 @@
+{
+  "query": "SELECT COUNT(*) as duplicate_groups FROM (SELECT purchaseId, productCode FROM purchaseLines GROUP BY purchaseId, productCode HAVING COUNT(*) > 1) as dups",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT COUNT(*) as duplicate_groups FROM (SELECT purchaseId, productCode FROM purchaseLines GROUP BY purchaseId, productCode HAVING COUNT(*) > 1) as dups",
+  "rows": [
+    {
+      "duplicate_groups": "1529"
+    }
+  ],
+  "messages": [],
+  "stdout": "duplicate_groups\n1529\n",
+  "stderr": "",
+  "execution_time_ms": 1537
+}

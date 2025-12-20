@@ -172,3 +172,11 @@
 - [ ] Fix Hospital Management curtain count to only include curtain products (not all items)
 - [ ] Make SO-U numbers clickable links to Unleashed portal
 - [x] Remove obsolete "creating pending matches" step from sync process (now uses direct purchase query)
+
+## Critical Data Integrity Issues (Dec 21, 2025)
+- [x] Fix SO-U-00000892 showing 90 curtains instead of 18 (root cause: missing unique constraint on purchaseLines)
+- [x] Fix Stock Forecast showing duplicate entries (same hospital/area appearing multiple times)
+- [x] Full review of data structure to ensure it matches Unleashed
+- [x] Added unique constraint on purchaseLines (purchaseId, unleashProductGuid) to prevent duplicate lines
+- [x] Cleaned up existing duplicate purchase lines in database
+- [x] Review and fix all queries that calculate curtain counts

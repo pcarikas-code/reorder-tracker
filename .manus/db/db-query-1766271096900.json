@@ -1,0 +1,115 @@
+{
+  "query": "SELECT pl.id, pl.purchaseId, pl.productCode, pl.productDescription, pl.quantity FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000892' ORDER BY pl.id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT pl.id, pl.purchaseId, pl.productCode, pl.productDescription, pl.quantity FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000892' ORDER BY pl.id",
+  "rows": [
+    {
+      "id": "106",
+      "purchaseId": "6193",
+      "productCode": "sc-hw-e-py",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Pastel yellow",
+      "quantity": "7.00"
+    },
+    {
+      "id": "117",
+      "purchaseId": "6193",
+      "productCode": "sc-mw-e-py",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Pastel yellow",
+      "quantity": "7.00"
+    },
+    {
+      "id": "126",
+      "purchaseId": "6193",
+      "productCode": "sc-fw-e-py",
+      "productDescription": "Full Width antimicrobial and sporicidal standard disposable: Pastel yellow",
+      "quantity": "4.00"
+    },
+    {
+      "id": "94738",
+      "purchaseId": "6193",
+      "productCode": "sc-hw-e-py",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Pastel yellow",
+      "quantity": "7.00"
+    },
+    {
+      "id": "94749",
+      "purchaseId": "6193",
+      "productCode": "sc-mw-e-py",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Pastel yellow",
+      "quantity": "7.00"
+    },
+    {
+      "id": "94758",
+      "purchaseId": "6193",
+      "productCode": "sc-fw-e-py",
+      "productDescription": "Full Width antimicrobial and sporicidal standard disposable: Pastel yellow",
+      "quantity": "4.00"
+    },
+    {
+      "id": "96282",
+      "purchaseId": "6193",
+      "productCode": "sc-hw-e-py",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Pastel yellow",
+      "quantity": "7.00"
+    },
+    {
+      "id": "96293",
+      "purchaseId": "6193",
+      "productCode": "sc-mw-e-py",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Pastel yellow",
+      "quantity": "7.00"
+    },
+    {
+      "id": "96302",
+      "purchaseId": "6193",
+      "productCode": "sc-fw-e-py",
+      "productDescription": "Full Width antimicrobial and sporicidal standard disposable: Pastel yellow",
+      "quantity": "4.00"
+    },
+    {
+      "id": "120106",
+      "purchaseId": "6193",
+      "productCode": "sc-hw-e-py",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Pastel yellow",
+      "quantity": "7.00"
+    },
+    {
+      "id": "120117",
+      "purchaseId": "6193",
+      "productCode": "sc-mw-e-py",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Pastel yellow",
+      "quantity": "7.00"
+    },
+    {
+      "id": "120125",
+      "purchaseId": "6193",
+      "productCode": "sc-fw-e-py",
+      "productDescription": "Full Width antimicrobial and sporicidal standard disposable: Pastel yellow",
+      "quantity": "4.00"
+    },
+    {
+      "id": "150106",
+      "purchaseId": "6193",
+      "productCode": "sc-hw-e-py",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Pastel yellow",
+      "quantity": "7.00"
+    },
+    {
+      "id": "150117",
+      "purchaseId": "6193",
+      "productCode": "sc-mw-e-py",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Pastel yellow",
+      "quantity": "7.00"
+    },
+    {
+      "id": "150125",
+      "purchaseId": "6193",
+      "productCode": "sc-fw-e-py",
+      "productDescription": "Full Width antimicrobial and sporicidal standard disposable: Pastel yellow",
+      "quantity": "4.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tpurchaseId\tproductCode\tproductDescription\tquantity\n106\t6193\tsc-hw-e-py\tHalf Width antimicrobial and sporicidal standard disposable: Pastel yellow\t7.00\n117\t6193\tsc-mw-e-py\tMedium Width Antimicrobial and Sporicidal standard disposable: Pastel yellow\t7.00\n126\t6193\tsc-fw-e-py\tFull Width antimicrobial and sporicidal standard disposable: Pastel yellow\t4.00\n94738\t6193\tsc-hw-e-py\tHalf Width antimicrobial and sporicidal standard disposable: Pastel yellow\t7.00\n94749\t6193\tsc-mw-e-py\tMedium Width Antimicrobial and Sporicidal standard disposable: Pastel yellow\t7.00\n94758\t6193\tsc-fw-e-py\tFull Width antimicrobial and sporicidal standard disposable: Pastel yellow\t4.00\n96282\t6193\tsc-hw-e-py\tHalf Width antimicrobial and sporicidal standard disposable: Pastel yellow\t7.00\n96293\t6193\tsc-mw-e-py\tMedium Width Antimicrobial and Sporicidal standard disposable: Pastel yellow\t7.00\n96302\t6193\tsc-fw-e-py\tFull Width antimicrobial and sporicidal standard disposable: Pastel yellow\t4.00\n120106\t6193\tsc-hw-e-py\tHalf Width antimicrobial and sporicidal standard disposable: Pastel yellow\t7.00\n120117\t6193\tsc-mw-e-py\tMedium Width Antimicrobial and Sporicidal standard disposable: Pastel yellow\t7.00\n120125\t6193\tsc-fw-e-py\tFull Width antimicrobial and sporicidal standard disposable: Pastel yellow\t4.00\n150106\t6193\tsc-hw-e-py\tHalf Width antimicrobial and sporicidal standard disposable: Pastel yellow\t7.00\n150117\t6193\tsc-mw-e-py\tMedium Width Antimicrobial and Sporicidal standard disposable: Pastel yellow\t7.00\n150125\t6193\tsc-fw-e-py\tFull Width antimicrobial and sporicidal standard disposable: Pastel yellow\t4.00\n",
+  "stderr": "",
+  "execution_time_ms": 1551
+}
