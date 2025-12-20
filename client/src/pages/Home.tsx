@@ -216,7 +216,7 @@ export default function Home() {
                       <TableHead>Area</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Order Date</TableHead>
-                      <TableHead>Invoice Date</TableHead>
+                      <TableHead>Last Invoice</TableHead>
                       <TableHead>Reorder Due</TableHead>
                       <TableHead className="text-right">Days</TableHead>
                     </TableRow>
