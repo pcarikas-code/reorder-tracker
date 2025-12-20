@@ -511,6 +511,7 @@ export interface AreaReorderStatus {
   hospitalName: string;
   lastPurchaseDate: Date | null; // This is now invoiceDate (or orderDate if no invoice)
   lastOrderDate: Date | null; // The sales order date
+  orderNumber: string | null; // The SO-U number for On Order items
   reorderDueDate: Date | null;
   status: 'on_order' | 'overdue' | 'due_soon' | 'near_soon' | 'far_soon';
   daysUntilDue: number | null;
@@ -581,6 +582,7 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
         hospitalName: area.hospitalName,
         lastPurchaseDate: lastDelivered?.invoiceDate || null,
         lastOrderDate: onOrderPurchase.orderDate,
+        orderNumber: onOrderPurchase.orderNumber,
         reorderDueDate: null,
         status: 'on_order',
         daysUntilDue: null,
@@ -617,14 +619,15 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
       hospitalName: area.hospitalName,
       lastPurchaseDate: lastDelivered.invoiceDate,
       lastOrderDate: lastDelivered.orderDate,
+      orderNumber: null,
       reorderDueDate,
       status,
       daysUntilDue,
     });
   }
 
-  // Sort by status priority (on_order first, then by daysUntilDue)
-  const statusOrder = { 'on_order': 0, 'overdue': 1, 'due_soon': 2, 'near_soon': 3, 'far_soon': 4 };
+  // Sort by status priority (overdue first, then on_order, then by daysUntilDue)
+  const statusOrder = { 'overdue': 0, 'on_order': 1, 'due_soon': 2, 'near_soon': 3, 'far_soon': 4 };
   statuses.sort((a, b) => {
     // First sort by status priority
     const statusDiff = statusOrder[a.status] - statusOrder[b.status];

@@ -145,3 +145,5 @@
 
 ## Bug Report (Dec 20, 2025)
 - [x] Fix: On Order status should only apply when Sales Order is placed 18+ months after last invoice (to exclude spares/additions)
+- [x] Reorder status cards and table: Overdue → On Order → Due Soon → Near Soon → Far Soon
+- [x] Display SO-U number for On Order items for manual verification

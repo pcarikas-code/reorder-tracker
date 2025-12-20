@@ -147,13 +147,13 @@ export default function Home() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-5">
-          <Card className="cursor-pointer hover:border-purple-500 transition-colors" onClick={() => setStatusFilter('on_order')}>
-            <CardHeader className="pb-2"><CardDescription>On Order</CardDescription><CardTitle className="text-3xl text-purple-600">{statusCounts.on_order}</CardTitle></CardHeader>
-            <CardContent><p className="text-xs text-muted-foreground">Awaiting delivery</p></CardContent>
-          </Card>
           <Card className="cursor-pointer hover:border-destructive transition-colors" onClick={() => setStatusFilter('overdue')}>
             <CardHeader className="pb-2"><CardDescription>Overdue</CardDescription><CardTitle className="text-3xl text-destructive">{statusCounts.overdue}</CardTitle></CardHeader>
             <CardContent><p className="text-xs text-muted-foreground">Past 2-year replacement date</p></CardContent>
+          </Card>
+          <Card className="cursor-pointer hover:border-purple-500 transition-colors" onClick={() => setStatusFilter('on_order')}>
+            <CardHeader className="pb-2"><CardDescription>On Order</CardDescription><CardTitle className="text-3xl text-purple-600">{statusCounts.on_order}</CardTitle></CardHeader>
+            <CardContent><p className="text-xs text-muted-foreground">Awaiting delivery</p></CardContent>
           </Card>
           <Card className="cursor-pointer hover:border-amber-500 transition-colors" onClick={() => setStatusFilter('due_soon')}>
             <CardHeader className="pb-2"><CardDescription>Due Soon</CardDescription><CardTitle className="text-3xl text-amber-600">{statusCounts.due_soon}</CardTitle></CardHeader>
@@ -181,8 +181,8 @@ export default function Home() {
                 <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="on_order">On Order</SelectItem>
                   <SelectItem value="overdue">Overdue</SelectItem>
+                  <SelectItem value="on_order">On Order</SelectItem>
                   <SelectItem value="due_soon">Due Soon (0-90)</SelectItem>
                   <SelectItem value="near_soon">Near Soon (90-180)</SelectItem>
                   <SelectItem value="far_soon">Far Soon (180-360)</SelectItem>
@@ -233,7 +233,12 @@ export default function Home() {
                         <TableCell>
                           <AreaNameWithHover areaId={status.areaId} areaName={status.areaName} />
                         </TableCell>
-                        <TableCell>{getStatusBadge(status.status)}</TableCell>
+                        <TableCell>
+                          {getStatusBadge(status.status)}
+                          {status.orderNumber && (
+                            <span className="ml-2 text-xs text-muted-foreground font-mono">{status.orderNumber}</span>
+                          )}
+                        </TableCell>
                         <TableCell>{status.lastOrderDate ? new Date(status.lastOrderDate).toLocaleDateString() : '-'}</TableCell>
                         <TableCell>{status.lastPurchaseDate ? new Date(status.lastPurchaseDate).toLocaleDateString() : <span className="text-purple-600 text-xs">Awaiting</span>}</TableCell>
                         <TableCell>{status.reorderDueDate ? new Date(status.reorderDueDate).toLocaleDateString() : '-'}</TableCell>
