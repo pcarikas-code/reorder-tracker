@@ -427,7 +427,7 @@ export async function getPendingMatches() {
     .from(pendingMatches)
     .innerJoin(purchases, eq(pendingMatches.purchaseId, purchases.id))
     .innerJoin(hospitals, eq(purchases.hospitalId, hospitals.id))
-    .where(and(eq(pendingMatches.status, 'pending'), eq(purchases.isExcluded, false)))
+    .where(and(eq(pendingMatches.status, 'pending'), eq(purchases.isExcluded, false), isNull(purchases.areaId)))
     .orderBy(hospitals.customerName, pendingMatches.rawAreaText);
   
   return results;

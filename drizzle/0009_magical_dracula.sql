@@ -1,0 +1,1 @@
+ALTER TABLE `pendingMatches` ADD CONSTRAINT `pendingMatches_purchaseId_unique` UNIQUE(`purchaseId`);

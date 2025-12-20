@@ -1,0 +1,36 @@
+{
+  "query": "SELECT pm.*, p.areaId FROM pendingMatches pm JOIN purchases p ON pm.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000439'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT pm.*, p.areaId FROM pendingMatches pm JOIN purchases p ON pm.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000439'",
+  "rows": [
+    {
+      "id": "62080",
+      "purchaseId": "6626",
+      "rawAreaText": "Urology Associates CHC",
+      "suggestedAreaId": "NULL",
+      "suggestedAreaName": "NULL",
+      "matchScore": "NULL",
+      "llmSuggestion": "NULL",
+      "status": "new_area",
+      "createdAt": "2025-12-18 09:45:41",
+      "resolvedAt": "2025-12-19 01:34:07",
+      "areaId": "210044"
+    },
+    {
+      "id": "120201",
+      "purchaseId": "6626",
+      "rawAreaText": "Urology Associates CHC",
+      "suggestedAreaId": "NULL",
+      "suggestedAreaName": "NULL",
+      "matchScore": "NULL",
+      "llmSuggestion": "NULL",
+      "status": "pending",
+      "createdAt": "2025-12-19 22:29:31",
+      "resolvedAt": "NULL",
+      "areaId": "210044"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tpurchaseId\trawAreaText\tsuggestedAreaId\tsuggestedAreaName\tmatchScore\tllmSuggestion\tstatus\tcreatedAt\tresolvedAt\tareaId\n62080\t6626\tUrology Associates CHC\tNULL\tNULL\tNULL\tNULL\tnew_area\t2025-12-18 09:45:41\t2025-12-19 01:34:07\t210044\n120201\t6626\tUrology Associates CHC\tNULL\tNULL\tNULL\tNULL\tpending\t2025-12-19 22:29:31\tNULL\t210044\n",
+  "stderr": "",
+  "execution_time_ms": 1523
+}

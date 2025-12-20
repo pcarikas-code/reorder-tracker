@@ -1,0 +1,32 @@
+{
+  "query": "SELECT p.id as purchaseId, p.orderNumber, p.hospitalId, p.areaId, p.isExcluded, p.customerRef, pm.id as pendingMatchId, pm.status as pendingStatus, pm.rawAreaText FROM purchases p LEFT JOIN pendingMatches pm ON p.id = pm.purchaseId WHERE p.orderNumber = 'SO-U-00000439'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT p.id as purchaseId, p.orderNumber, p.hospitalId, p.areaId, p.isExcluded, p.customerRef, pm.id as pendingMatchId, pm.status as pendingStatus, pm.rawAreaText FROM purchases p LEFT JOIN pendingMatches pm ON p.id = pm.purchaseId WHERE p.orderNumber = 'SO-U-00000439'",
+  "rows": [
+    {
+      "purchaseId": "6626",
+      "orderNumber": "SO-U-00000439",
+      "hospitalId": "18",
+      "areaId": "210044",
+      "isExcluded": "0",
+      "customerRef": "G9051 - Urology Associates CHC",
+      "pendingMatchId": "62080",
+      "pendingStatus": "new_area",
+      "rawAreaText": "Urology Associates CHC"
+    },
+    {
+      "purchaseId": "6626",
+      "orderNumber": "SO-U-00000439",
+      "hospitalId": "18",
+      "areaId": "210044",
+      "isExcluded": "0",
+      "customerRef": "G9051 - Urology Associates CHC",
+      "pendingMatchId": "120201",
+      "pendingStatus": "pending",
+      "rawAreaText": "Urology Associates CHC"
+    }
+  ],
+  "messages": [],
+  "stdout": "purchaseId\torderNumber\thospitalId\tareaId\tisExcluded\tcustomerRef\tpendingMatchId\tpendingStatus\trawAreaText\n6626\tSO-U-00000439\t18\t210044\t0\tG9051 - Urology Associates CHC\t62080\tnew_area\tUrology Associates CHC\n6626\tSO-U-00000439\t18\t210044\t0\tG9051 - Urology Associates CHC\t120201\tpending\tUrology Associates CHC\n",
+  "stderr": "",
+  "execution_time_ms": 1561
+}

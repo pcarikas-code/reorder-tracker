@@ -1,0 +1,26 @@
+{
+  "query": "SELECT p.id, p.orderNumber, p.areaId, p.isExcluded, pm.id as pendingMatchId, pm.status as pendingStatus FROM purchases p LEFT JOIN pendingMatches pm ON p.id = pm.purchaseId WHERE p.orderNumber = 'SO-U-00000439'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT p.id, p.orderNumber, p.areaId, p.isExcluded, pm.id as pendingMatchId, pm.status as pendingStatus FROM purchases p LEFT JOIN pendingMatches pm ON p.id = pm.purchaseId WHERE p.orderNumber = 'SO-U-00000439'",
+  "rows": [
+    {
+      "id": "6626",
+      "orderNumber": "SO-U-00000439",
+      "areaId": "210044",
+      "isExcluded": "0",
+      "pendingMatchId": "62080",
+      "pendingStatus": "new_area"
+    },
+    {
+      "id": "6626",
+      "orderNumber": "SO-U-00000439",
+      "areaId": "210044",
+      "isExcluded": "0",
+      "pendingMatchId": "120201",
+      "pendingStatus": "pending"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torderNumber\tareaId\tisExcluded\tpendingMatchId\tpendingStatus\n6626\tSO-U-00000439\t210044\t0\t62080\tnew_area\n6626\tSO-U-00000439\t210044\t0\t120201\tpending\n",
+  "stderr": "",
+  "execution_time_ms": 1557
+}

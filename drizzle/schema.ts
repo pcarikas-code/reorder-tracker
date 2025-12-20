@@ -101,7 +101,7 @@ export type InsertPurchaseLine = typeof purchaseLines.$inferInsert;
 // Pending area matches for manual confirmation
 export const pendingMatches = mysqlTable("pendingMatches", {
   id: int("id").autoincrement().primaryKey(),
-  purchaseId: int("purchaseId").notNull(),
+  purchaseId: int("purchaseId").notNull().unique(),
   rawAreaText: varchar("rawAreaText", { length: 500 }).notNull(),
   suggestedAreaId: int("suggestedAreaId"),
   suggestedAreaName: varchar("suggestedAreaName", { length: 255 }),

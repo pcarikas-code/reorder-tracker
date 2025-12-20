@@ -1,0 +1,13 @@
+{
+  "query": "SELECT COUNT(*) as orphanPendingMatches FROM pendingMatches pm JOIN purchases p ON pm.purchaseId = p.id WHERE pm.status = 'pending' AND p.areaId IS NOT NULL",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT COUNT(*) as orphanPendingMatches FROM pendingMatches pm JOIN purchases p ON pm.purchaseId = p.id WHERE pm.status = 'pending' AND p.areaId IS NOT NULL",
+  "rows": [
+    {
+      "orphanPendingMatches": "7"
+    }
+  ],
+  "messages": [],
+  "stdout": "orphanPendingMatches\n7\n",
+  "stderr": "",
+  "execution_time_ms": 1520
+}

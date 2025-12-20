@@ -1,0 +1,9 @@
+{
+  "query": "DELETE pm1 FROM pendingMatches pm1 INNER JOIN pendingMatches pm2 ON pm1.purchaseId = pm2.purchaseId AND pm1.id > pm2.id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute DELETE pm1 FROM pendingMatches pm1 INNER JOIN pendingMatches pm2 ON pm1.purchaseId = pm2.purchaseId AND pm1.id > pm2.id",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1516
+}

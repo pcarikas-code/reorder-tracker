@@ -1,0 +1,20 @@
+{
+  "query": "SELECT pm.id, pm.status, pm.purchaseId FROM pendingMatches pm JOIN purchases p ON pm.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000439'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT pm.id, pm.status, pm.purchaseId FROM pendingMatches pm JOIN purchases p ON pm.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000439'",
+  "rows": [
+    {
+      "id": "62080",
+      "status": "new_area",
+      "purchaseId": "6626"
+    },
+    {
+      "id": "120201",
+      "status": "pending",
+      "purchaseId": "6626"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tstatus\tpurchaseId\n62080\tnew_area\t6626\n120201\tpending\t6626\n",
+  "stderr": "",
+  "execution_time_ms": 1540
+}

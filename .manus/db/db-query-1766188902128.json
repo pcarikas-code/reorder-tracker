@@ -1,0 +1,238 @@
+{
+  "query": "SELECT a.name, h.customerName as hospital FROM areas a JOIN hospitals h ON a.hospitalId = h.id WHERE a.name IN (SELECT name FROM areas GROUP BY name HAVING COUNT(DISTINCT hospitalId) > 1) ORDER BY a.name, h.customerName",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT a.name, h.customerName as hospital FROM areas a JOIN hospitals h ON a.hospitalId = h.id WHERE a.name IN (SELECT name FROM areas GROUP BY name HAVING COUNT(DISTINCT hospitalId) > 1) ORDER BY a.name, h.customerName",
+  "rows": [
+    {
+      "name": "AMU",
+      "hospital": "Allevia Hospitals"
+    },
+    {
+      "name": "AMU",
+      "hospital": "Window Treatments NZ LTD"
+    },
+    {
+      "name": "Children's Ward",
+      "hospital": "Lakes - Health New Zealand"
+    },
+    {
+      "name": "Children's Ward",
+      "hospital": "SCDHB Health New Zealand"
+    },
+    {
+      "name": "CIU",
+      "hospital": "Allevia Hospitals"
+    },
+    {
+      "name": "CIU",
+      "hospital": "Mercy Hospital - Mount Eden"
+    },
+    {
+      "name": "CTU",
+      "hospital": "Allevia Hospitals"
+    },
+    {
+      "name": "CTU",
+      "hospital": "Mercy Hospital - Mount Eden"
+    },
+    {
+      "name": "Day Stay",
+      "hospital": "Norfolk Southern Cross Partnership - Grace Hospital"
+    },
+    {
+      "name": "Day Stay",
+      "hospital": "Southern Cross - Brightside Hospital"
+    },
+    {
+      "name": "Day Stay",
+      "hospital": "Southern Cross Healthcare Ltd. Wellington"
+    },
+    {
+      "name": "Default",
+      "hospital": "Central Otago Health Services"
+    },
+    {
+      "name": "Default",
+      "hospital": "Hamilton East Medical Centre"
+    },
+    {
+      "name": "Default",
+      "hospital": "Hamilton Skin Cancer Centre"
+    },
+    {
+      "name": "Default",
+      "hospital": "OneSixOne Medical Group Ltd"
+    },
+    {
+      "name": "Default",
+      "hospital": "Pakuranga Physio"
+    },
+    {
+      "name": "Default",
+      "hospital": "Quay Park Surgical"
+    },
+    {
+      "name": "Default",
+      "hospital": "Ropata Health"
+    },
+    {
+      "name": "Default",
+      "hospital": "Skin Institute - Richmond"
+    },
+    {
+      "name": "Default",
+      "hospital": "Southern Cross Healthcare Hospital - Rotorua"
+    },
+    {
+      "name": "Default",
+      "hospital": "Southern Cross Healthcare Ltd. - Hamilton"
+    },
+    {
+      "name": "Default",
+      "hospital": "Tend Pakuranga Medical Centre"
+    },
+    {
+      "name": "ED",
+      "hospital": "Capital & Coast Health New Zealand"
+    },
+    {
+      "name": "ED",
+      "hospital": "Nelson Marlborough - Health New Zealand"
+    },
+    {
+      "name": "ED",
+      "hospital": "SCDHB Health New Zealand"
+    },
+    {
+      "name": "ED",
+      "hospital": "Taranaki - Health New Zealand"
+    },
+    {
+      "name": "Endoscopy",
+      "hospital": "Nelson Marlborough - Health New Zealand"
+    },
+    {
+      "name": "Endoscopy",
+      "hospital": "SCDHB Health New Zealand"
+    },
+    {
+      "name": "Endoscopy",
+      "hospital": "Taranaki - Health New Zealand"
+    },
+    {
+      "name": "Endoscopy",
+      "hospital": "Window Treatments NZ LTD"
+    },
+    {
+      "name": "ICU",
+      "hospital": "Capital & Coast Health New Zealand"
+    },
+    {
+      "name": "ICU",
+      "hospital": "Nelson Marlborough - Health New Zealand"
+    },
+    {
+      "name": "ICU",
+      "hospital": "SCDHB Health New Zealand"
+    },
+    {
+      "name": "ICU",
+      "hospital": "Southern Cross Healthcare Ltd. Wellington"
+    },
+    {
+      "name": "ICU",
+      "hospital": "Taranaki - Health New Zealand"
+    },
+    {
+      "name": "Oncology",
+      "hospital": "Nelson Marlborough - Health New Zealand"
+    },
+    {
+      "name": "Oncology",
+      "hospital": "Taranaki - Health New Zealand"
+    },
+    {
+      "name": "PACU",
+      "hospital": "Boulcott Hospital"
+    },
+    {
+      "name": "PACU",
+      "hospital": "Capital & Coast Health New Zealand"
+    },
+    {
+      "name": "PACU",
+      "hospital": "Nelson Marlborough - Health New Zealand"
+    },
+    {
+      "name": "PACU",
+      "hospital": "Norfolk Southern Cross Partnership - Grace Hospital"
+    },
+    {
+      "name": "PACU",
+      "hospital": "Southern Cross Healthcare Ltd. - Gillies Hospital"
+    },
+    {
+      "name": "PACU",
+      "hospital": "Southern Cross Healthcare Ltd. Invercargill"
+    },
+    {
+      "name": "PACU Lvl 3",
+      "hospital": "Capital & Coast Health New Zealand"
+    },
+    {
+      "name": "PACU Lvl 3",
+      "hospital": "Mercy Hospital - Mount Eden"
+    },
+    {
+      "name": "PACU Lvl 3",
+      "hospital": "Window Treatments NZ LTD"
+    },
+    {
+      "name": "Radiology",
+      "hospital": "Capital & Coast Health New Zealand"
+    },
+    {
+      "name": "Radiology",
+      "hospital": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "name": "Radiology",
+      "hospital": "Lakes - Health New Zealand"
+    },
+    {
+      "name": "Radiology",
+      "hospital": "Nelson Marlborough - Health New Zealand"
+    },
+    {
+      "name": "Recovery",
+      "hospital": "Bidwill Trust Hospital"
+    },
+    {
+      "name": "Recovery",
+      "hospital": "Mercy Hospital - Mount Eden"
+    },
+    {
+      "name": "Recovery",
+      "hospital": "Southern Cross Healthcare Ltd. Wellington"
+    },
+    {
+      "name": "Theatres",
+      "hospital": "SCDHB Health New Zealand"
+    },
+    {
+      "name": "Theatres",
+      "hospital": "Southern Cross Healthcare Ltd. - Gillies Hospital"
+    },
+    {
+      "name": "Ward 1",
+      "hospital": "Boulcott Hospital"
+    },
+    {
+      "name": "Ward 1",
+      "hospital": "Southern Cross Healthcare Hospital - Rotorua"
+    }
+  ],
+  "messages": [],
+  "stdout": "name\thospital\nAMU\tAllevia Hospitals\nAMU\tWindow Treatments NZ LTD\nChildren's Ward\tLakes - Health New Zealand\nChildren's Ward\tSCDHB Health New Zealand\nCIU\tAllevia Hospitals\nCIU\tMercy Hospital - Mount Eden\nCTU\tAllevia Hospitals\nCTU\tMercy Hospital - Mount Eden\nDay Stay\tNorfolk Southern Cross Partnership - Grace Hospital\nDay Stay\tSouthern Cross - Brightside Hospital\nDay Stay\tSouthern Cross Healthcare Ltd. Wellington\nDefault\tCentral Otago Health Services\nDefault\tHamilton East Medical Centre\nDefault\tHamilton Skin Cancer Centre\nDefault\tOneSixOne Medical Group Ltd\nDefault\tPakuranga Physio\nDefault\tQuay Park Surgical\nDefault\tRopata Health\nDefault\tSkin Institute - Richmond\nDefault\tSouthern Cross Healthcare Hospital - Rotorua\nDefault\tSouthern Cross Healthcare Ltd. - Hamilton\nDefault\tTend Pakuranga Medical Centre\nED\tCapital & Coast Health New Zealand\nED\tNelson Marlborough - Health New Zealand\nED\tSCDHB Health New Zealand\nED\tTaranaki - Health New Zealand\nEndoscopy\tNelson Marlborough - Health New Zealand\nEndoscopy\tSCDHB Health New Zealand\nEndoscopy\tTaranaki - Health New Zealand\nEndoscopy\tWindow Treatments NZ LTD\nICU\tCapital & Coast Health New Zealand\nICU\tNelson Marlborough - Health New Zealand\nICU\tSCDHB Health New Zealand\nICU\tSouthern Cross Healthcare Ltd. Wellington\nICU\tTaranaki - Health New Zealand\nOncology\tNelson Marlborough - Health New Zealand\nOncology\tTaranaki - Health New Zealand\nPACU\tBoulcott Hospital\nPACU\tCapital & Coast Health New Zealand\nPACU\tNelson Marlborough - Health New Zealand\nPACU\tNorfolk Southern Cross Partnership - Grace Hospital\nPACU\tSouthern Cross Healthcare Ltd. - Gillies Hospital\nPACU\tSouthern Cross Healthcare Ltd. Invercargill\nPACU Lvl 3\tCapital & Coast Health New Zealand\nPACU Lvl 3\tMercy Hospital - Mount Eden\nPACU Lvl 3\tWindow Treatments NZ LTD\nRadiology\tCapital & Coast Health New Zealand\nRadiology\tCounties Manukau - Health New Zealand\nRadiology\tLakes - Health New Zealand\nRadiology\tNelson Marlborough - Health New Zealand\nRecovery\tBidwill Trust Hospital\nRecovery\tMercy Hospital - Mount Eden\nRecovery\tSouthern Cross Healthcare Ltd. Wellington\nTheatres\tSCDHB Health New Zealand\nTheatres\tSouthern Cross Healthcare Ltd. - Gillies Hospital\nWard 1\tBoulcott Hospital\nWard 1\tSouthern Cross Healthcare Hospital - Rotorua\n",
+  "stderr": "",
+  "execution_time_ms": 1614
+}

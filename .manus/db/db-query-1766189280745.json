@@ -1,0 +1,1482 @@
+{
+  "query": "SELECT purchaseId, COUNT(*) as count FROM pendingMatches GROUP BY purchaseId HAVING COUNT(*) > 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT purchaseId, COUNT(*) as count FROM pendingMatches GROUP BY purchaseId HAVING COUNT(*) > 1",
+  "rows": [
+    {
+      "purchaseId": "6293",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6573",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6499",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6609",
+      "count": "3"
+    },
+    {
+      "purchaseId": "6562",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6235",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6220",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6755",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6974",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6441",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6232",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6265",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6532",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6950",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6390",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6577",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6544",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6592",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6690",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6471",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6463",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6486",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6566",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6551",
+      "count": "4"
+    },
+    {
+      "purchaseId": "6954",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6557",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6579",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6882",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6386",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6502",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6189",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6477",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6739",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6920",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6413",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6640",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6398",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6884",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6706",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6880",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6581",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6371",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6921",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6154",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6261",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6597",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6271",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6324",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6419",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6343",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6644",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6228",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6910",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6155",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6725",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6680",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6779",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6296",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6799",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6730",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6439",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6481",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6163",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6785",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6542",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6929",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6494",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6790",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6951",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6533",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6447",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6895",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6771",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6500",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6484",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6239",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6660",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6539",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6489",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6215",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6699",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6346",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6345",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6234",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6184",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6529",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6780",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6383",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6497",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6904",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6280",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6290",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6437",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6376",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6388",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6503",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6241",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6453",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6599",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6175",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6897",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6469",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6888",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6709",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6299",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6514",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6240",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6325",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6217",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6878",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6534",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6558",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6943",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6187",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6822",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6555",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6756",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6170",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6250",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6661",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6641",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6608",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6331",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6681",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6242",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6613",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6329",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6548",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6687",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6517",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6697",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6769",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6393",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6392",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6612",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6659",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6461",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6412",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6716",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6694",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6474",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6825",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6821",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6164",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6418",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6578",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6936",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6719",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6930",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6227",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6508",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6488",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6722",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6593",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6288",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6166",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6201",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6172",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6765",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6545",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6835",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6679",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6200",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6656",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6651",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6649",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6676",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6415",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6454",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6832",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6146",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6778",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6269",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6770",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6869",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6896",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6295",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6194",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6161",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6886",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6342",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6629",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6595",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6403",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6696",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6153",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6446",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6396",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6211",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6382",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6233",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6147",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6816",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6248",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6942",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6405",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6823",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6186",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6704",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6952",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6894",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6625",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6501",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6183",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6584",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6349",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6554",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6440",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6377",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6946",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6179",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6291",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6359",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6205",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6559",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6811",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6940",
+      "count": "3"
+    },
+    {
+      "purchaseId": "6863",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6462",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6238",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6244",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6214",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6243",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6973",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6370",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6630",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6510",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6322",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6165",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6264",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6912",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6614",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6908",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6969",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6833",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6423",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6364",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6689",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6496",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6729",
+      "count": "3"
+    },
+    {
+      "purchaseId": "6601",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6406",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6360",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6543",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6715",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6948",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6585",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6300",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6292",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6580",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6571",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6657",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6199",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6275",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6490",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6622",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6891",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6372",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6698",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6327",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6354",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6691",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6902",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6426",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6700",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6654",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6432",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6590",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6636",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6550",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6340",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6871",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6218",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6516",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6338",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6190",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6445",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6385",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6541",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6538",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6473",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6491",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6414",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6229",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6323",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6355",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6251",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6495",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6328",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6837",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6583",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6520",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6922",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6348",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6304",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6693",
+      "count": "3"
+    },
+    {
+      "purchaseId": "6827",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6263",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6465",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6671",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6319",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6282",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6638",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6526",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6945",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6574",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6237",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6294",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6287",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6512",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6231",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6836",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6662",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6470",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6191",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6260",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6180",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6617",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6356",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6479",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6482",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6182",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6673",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6812",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6801",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6193",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6655",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6174",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6144",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6281",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6246",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6860",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6535",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6586",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6310",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6150",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6847",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6637",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6389",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6658",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6650",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6380",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6198",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6795",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6653",
+      "count": "5"
+    },
+    {
+      "purchaseId": "6149",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6459",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6509",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6204",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6777",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6724",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6286",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6303",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6927",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6373",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6431",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6791",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6686",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6938",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6399",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6438",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6525",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6623",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6528",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6874",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6844",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6708",
+      "count": "2"
+    },
+    {
+      "purchaseId": "6404",
+      "count": "2"
+    }
+  ],
+  "messages": [],
+  "stdout": "purchaseId\tcount\n6293\t2\n6573\t2\n6499\t2\n6609\t3\n6562\t2\n6235\t2\n6220\t2\n6755\t2\n6974\t2\n6441\t2\n6232\t2\n6265\t2\n6532\t2\n6950\t2\n6390\t2\n6577\t2\n6544\t2\n6592\t2\n6690\t2\n6471\t2\n6463\t2\n6486\t2\n6566\t2\n6551\t4\n6954\t2\n6557\t2\n6579\t2\n6882\t2\n6386\t2\n6502\t2\n6189\t2\n6477\t2\n6739\t2\n6920\t2\n6413\t2\n6640\t2\n6398\t2\n6884\t2\n6706\t2\n6880\t2\n6581\t2\n6371\t2\n6921\t2\n6154\t2\n6261\t2\n6597\t2\n6271\t2\n6324\t2\n6419\t2\n6343\t2\n6644\t2\n6228\t2\n6910\t2\n6155\t2\n6725\t2\n6680\t2\n6779\t2\n6296\t2\n6799\t2\n6730\t2\n6439\t2\n6481\t2\n6163\t2\n6785\t2\n6542\t2\n6929\t2\n6494\t2\n6790\t2\n6951\t2\n6533\t2\n6447\t2\n6895\t2\n6771\t2\n6500\t2\n6484\t2\n6239\t2\n6660\t2\n6539\t2\n6489\t2\n6215\t2\n6699\t2\n6346\t2\n6345\t2\n6234\t2\n6184\t2\n6529\t2\n6780\t2\n6383\t2\n6497\t2\n6904\t2\n6280\t2\n6290\t2\n6437\t2\n6376\t2\n6388\t2\n6503\t2\n6241\t2\n6453\t2\n6599\t2\n6175\t2\n6897\t2\n6469\t2\n6888\t2\n6709\t2\n6299\t2\n6514\t2\n6240\t2\n6325\t2\n6217\t2\n6878\t2\n6534\t2\n6558\t2\n6943\t2\n6187\t2\n6822\t2\n6555\t2\n6756\t2\n6170\t2\n6250\t2\n6661\t2\n6641\t2\n6608\t2\n6331\t2\n6681\t2\n6242\t2\n6613\t2\n6329\t2\n6548\t2\n6687\t2\n6517\t2\n6697\t2\n6769\t2\n6393\t2\n6392\t2\n6612\t2\n6659\t2\n6461\t2\n6412\t2\n6716\t2\n6694\t2\n6474\t2\n6825\t2\n6821\t2\n6164\t2\n6418\t2\n6578\t2\n6936\t2\n6719\t2\n6930\t2\n6227\t2\n6508\t2\n6488\t2\n6722\t2\n6593\t2\n6288\t2\n6166\t2\n6201\t2\n6172\t2\n6765\t2\n6545\t2\n6835\t2\n6679\t2\n6200\t2\n6656\t2\n6651\t2\n6649\t2\n6676\t2\n6415\t2\n6454\t2\n6832\t2\n6146\t2\n6778\t2\n6269\t2\n6770\t2\n6869\t2\n6896\t2\n6295\t2\n6194\t2\n6161\t2\n6886\t2\n6342\t2\n6629\t2\n6595\t2\n6403\t2\n6696\t2\n6153\t2\n6446\t2\n6396\t2\n6211\t2\n6382\t2\n6233\t2\n6147\t2\n6816\t2\n6248\t2\n6942\t2\n6405\t2\n6823\t2\n6186\t2\n6704\t2\n6952\t2\n6894\t2\n6625\t2\n6501\t2\n6183\t2\n6584\t2\n6349\t2\n6554\t2\n6440\t2\n6377\t2\n6946\t2\n6179\t2\n6291\t2\n6359\t2\n6205\t2\n6559\t2\n6811\t2\n6940\t3\n6863\t2\n6462\t2\n6238\t2\n6244\t2\n6214\t2\n6243\t2\n6973\t2\n6370\t2\n6630\t2\n6510\t2\n6322\t2\n6165\t2\n6264\t2\n6912\t2\n6614\t2\n6908\t2\n6969\t2\n6833\t2\n6423\t2\n6364\t2\n6689\t2\n6496\t2\n6729\t3\n6601\t2\n6406\t2\n6360\t2\n6543\t2\n6715\t2\n6948\t2\n6585\t2\n6300\t2\n6292\t2\n6580\t2\n6571\t2\n6657\t2\n6199\t2\n6275\t2\n6490\t2\n6622\t2\n6891\t2\n6372\t2\n6698\t2\n6327\t2\n6354\t2\n6691\t2\n6902\t2\n6426\t2\n6700\t2\n6654\t2\n6432\t2\n6590\t2\n6636\t2\n6550\t2\n6340\t2\n6871\t2\n6218\t2\n6516\t2\n6338\t2\n6190\t2\n6445\t2\n6385\t2\n6541\t2\n6538\t2\n6473\t2\n6491\t2\n6414\t2\n6229\t2\n6323\t2\n6355\t2\n6251\t2\n6495\t2\n6328\t2\n6837\t2\n6583\t2\n6520\t2\n6922\t2\n6348\t2\n6304\t2\n6693\t3\n6827\t2\n6263\t2\n6465\t2\n6671\t2\n6319\t2\n6282\t2\n6638\t2\n6526\t2\n6945\t2\n6574\t2\n6237\t2\n6294\t2\n6287\t2\n6512\t2\n6231\t2\n6836\t2\n6662\t2\n6470\t2\n6191\t2\n6260\t2\n6180\t2\n6617\t2\n6356\t2\n6479\t2\n6482\t2\n6182\t2\n6673\t2\n6812\t2\n6801\t2\n6193\t2\n6655\t2\n6174\t2\n6144\t2\n6281\t2\n6246\t2\n6860\t2\n6535\t2\n6586\t2\n6310\t2\n6150\t2\n6847\t2\n6637\t2\n6389\t2\n6658\t2\n6650\t2\n6380\t2\n6198\t2\n6795\t2\n6653\t5\n6149\t2\n6459\t2\n6509\t2\n6204\t2\n6777\t2\n6724\t2\n6286\t2\n6303\t2\n6927\t2\n6373\t2\n6431\t2\n6791\t2\n6686\t2\n6938\t2\n6399\t2\n6438\t2\n6525\t2\n6623\t2\n6528\t2\n6874\t2\n6844\t2\n6708\t2\n6404\t2\n",
+  "stderr": "",
+  "execution_time_ms": 1522
+}

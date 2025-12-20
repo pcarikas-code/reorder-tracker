@@ -1,0 +1,74 @@
+{
+  "query": "SELECT name, COUNT(DISTINCT hospitalId) as hospitalCount FROM areas GROUP BY name HAVING COUNT(DISTINCT hospitalId) > 1 LIMIT 20",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT name, COUNT(DISTINCT hospitalId) as hospitalCount FROM areas GROUP BY name HAVING COUNT(DISTINCT hospitalId) > 1 LIMIT 20",
+  "rows": [
+    {
+      "name": "AMU",
+      "hospitalCount": "2"
+    },
+    {
+      "name": "CIU",
+      "hospitalCount": "2"
+    },
+    {
+      "name": "CTU",
+      "hospitalCount": "2"
+    },
+    {
+      "name": "Recovery",
+      "hospitalCount": "3"
+    },
+    {
+      "name": "PACU",
+      "hospitalCount": "6"
+    },
+    {
+      "name": "Ward 1",
+      "hospitalCount": "2"
+    },
+    {
+      "name": "ED",
+      "hospitalCount": "4"
+    },
+    {
+      "name": "ICU",
+      "hospitalCount": "5"
+    },
+    {
+      "name": "PACU Lvl 3",
+      "hospitalCount": "3"
+    },
+    {
+      "name": "Radiology",
+      "hospitalCount": "4"
+    },
+    {
+      "name": "Default",
+      "hospitalCount": "11"
+    },
+    {
+      "name": "Children's Ward",
+      "hospitalCount": "2"
+    },
+    {
+      "name": "Endoscopy",
+      "hospitalCount": "4"
+    },
+    {
+      "name": "Oncology",
+      "hospitalCount": "2"
+    },
+    {
+      "name": "Day Stay",
+      "hospitalCount": "3"
+    },
+    {
+      "name": "Theatres",
+      "hospitalCount": "2"
+    }
+  ],
+  "messages": [],
+  "stdout": "name\thospitalCount\nAMU\t2\nCIU\t2\nCTU\t2\nRecovery\t3\nPACU\t6\nWard 1\t2\nED\t4\nICU\t5\nPACU Lvl 3\t3\nRadiology\t4\nDefault\t11\nChildren's Ward\t2\nEndoscopy\t4\nOncology\t2\nDay Stay\t3\nTheatres\t2\n",
+  "stderr": "",
+  "execution_time_ms": 1552
+}

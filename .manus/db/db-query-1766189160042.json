@@ -1,0 +1,29 @@
+{
+  "query": "SELECT * FROM purchases WHERE orderNumber = 'SO-U-00000439'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT * FROM purchases WHERE orderNumber = 'SO-U-00000439'",
+  "rows": [
+    {
+      "id": "6626",
+      "unleashOrderGuid": "CF9D7C2E-C6C4-4161-AE09-1E297C15F05A",
+      "orderNumber": "SO-U-00000439",
+      "orderDate": "2024-04-19 00:00:00",
+      "hospitalId": "18",
+      "areaId": "210044",
+      "customerRef": "G9051 - Urology Associates CHC",
+      "rawAreaText": "Urology Associates CHC",
+      "orderStatus": "Completed",
+      "isReorder": "NULL",
+      "reorderConfirmed": "0",
+      "linkedPurchaseId": "NULL",
+      "createdAt": "2025-12-17 11:54:43",
+      "updatedAt": "2025-12-19 23:52:00",
+      "isExcluded": "0",
+      "excludeReason": "NULL",
+      "invoiceDate": "2024-04-22 00:00:00"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tunleashOrderGuid\torderNumber\torderDate\thospitalId\tareaId\tcustomerRef\trawAreaText\torderStatus\tisReorder\treorderConfirmed\tlinkedPurchaseId\tcreatedAt\tupdatedAt\tisExcluded\texcludeReason\tinvoiceDate\n6626\tCF9D7C2E-C6C4-4161-AE09-1E297C15F05A\tSO-U-00000439\t2024-04-19 00:00:00\t18\t210044\tG9051 - Urology Associates CHC\tUrology Associates CHC\tCompleted\tNULL\t0\tNULL\t2025-12-17 11:54:43\t2025-12-19 23:52:00\t0\tNULL\t2024-04-22 00:00:00\n",
+  "stderr": "",
+  "execution_time_ms": 1625
+}

@@ -109,3 +109,8 @@
 - [x] Add area merge functionality to combine duplicate areas
 - [x] Fix existing duplicate areas in database
 - [x] Fix: Matching in Hospital Management should update/remove pending matches
+- [x] Check data consistency: sales orders should only have one hospital (verified OK)
+- [x] Check data consistency: areas should only belong to one hospital (verified OK - same names across hospitals is expected)
+- [x] Fix inconsistency: order showing in Pending Matches but already matched in Hospital Management
+- [x] Fix duplicate pending match records (368 purchases have duplicates)
+- [x] Add unique constraint on pendingMatches.purchaseId to prevent future duplicates
