@@ -4,7 +4,6 @@ import {
   InsertUser, users, 
   hospitals, Hospital, InsertHospital,
   areas, Area, InsertArea,
-
   purchases, Purchase, InsertPurchase,
   purchaseLines, PurchaseLine, InsertPurchaseLine,
   pendingMatches, PendingMatch, InsertPendingMatch,
@@ -240,11 +239,7 @@ export async function getPurchasesByHospital(hospitalId: number): Promise<Purcha
   return db.select().from(purchases).where(eq(purchases.hospitalId, hospitalId)).orderBy(desc(purchases.orderDate));
 }
 
-export async function getUnmatchedPurchases(): Promise<Purchase[]> {
-  const db = await getDb();
-  if (!db) return [];
-  return db.select().from(purchases).where(isNull(purchases.areaId)).orderBy(desc(purchases.orderDate));
-}
+// Old simple version removed - replaced by comprehensive version below
 
 export async function updatePurchase(id: number, data: Partial<InsertPurchase>): Promise<void> {
   const db = await getDb();
@@ -363,77 +358,39 @@ export async function batchCreatePendingMatches(matches: InsertPendingMatch[]): 
   }
 }
 
-export async function getPendingMatches() {
+// SIMPLIFIED: Get all unmatched purchases directly from purchases table
+// A purchase is unmatched if: areaId IS NULL AND isExcluded = false
+// This replaces the complex pending_matches logic
+export async function getUnmatchedPurchases() {
   const db = await getDb();
   if (!db) return [];
   
-  // First, find all purchases with null areaId that don't have a pending match yet
-  // and create pending matches for them
-  const unmatchedPurchases = await db
-    .select({
-      id: purchases.id,
-      rawAreaText: purchases.rawAreaText,
-      customerRef: purchases.customerRef,
-    })
-    .from(purchases)
-    .leftJoin(pendingMatches, and(
-      eq(pendingMatches.purchaseId, purchases.id),
-      eq(pendingMatches.status, 'pending')
-    ))
-    .where(and(
-      isNull(purchases.areaId),
-      eq(purchases.isExcluded, false),
-      isNull(pendingMatches.id)
-    ));
-  
-  // Create pending matches for any unmatched purchases that don't have one
-  if (unmatchedPurchases.length > 0) {
-    const newMatches = unmatchedPurchases.map(p => ({
-      purchaseId: p.id,
-      rawAreaText: p.rawAreaText || p.customerRef || 'Unknown',
-      status: 'pending' as const,
-    }));
-    
-    // Insert in batches using onDuplicateKeyUpdate to handle race conditions
-    const BATCH_SIZE = 100;
-    for (let i = 0; i < newMatches.length; i += BATCH_SIZE) {
-      const batch = newMatches.slice(i, i + BATCH_SIZE);
-      await db.insert(pendingMatches).values(batch).onDuplicateKeyUpdate({
-        set: { rawAreaText: sql`rawAreaText` } // No-op update to ignore duplicates
-      });
-    }
-  }
-  
-  // Join with purchases and hospitals to get context
   const results = await db
     .select({
-      id: pendingMatches.id,
-      purchaseId: pendingMatches.purchaseId,
-      rawAreaText: pendingMatches.rawAreaText,
-      suggestedAreaId: pendingMatches.suggestedAreaId,
-      suggestedAreaName: pendingMatches.suggestedAreaName,
-      matchScore: pendingMatches.matchScore,
-      llmSuggestion: pendingMatches.llmSuggestion,
-      status: pendingMatches.status,
-      createdAt: pendingMatches.createdAt,
-      resolvedAt: pendingMatches.resolvedAt,
-      // Purchase info
+      id: purchases.id,
+      purchaseId: purchases.id, // Alias for compatibility
       orderNumber: purchases.orderNumber,
       orderDate: purchases.orderDate,
+      invoiceDate: purchases.invoiceDate,
       customerRef: purchases.customerRef,
-      // Hospital info
+      rawAreaText: purchases.rawAreaText,
       hospitalId: hospitals.id,
       hospitalName: hospitals.customerName,
       hospitalCode: hospitals.customerCode,
     })
-    .from(pendingMatches)
-    .innerJoin(purchases, eq(pendingMatches.purchaseId, purchases.id))
+    .from(purchases)
     .innerJoin(hospitals, eq(purchases.hospitalId, hospitals.id))
-    .where(and(eq(pendingMatches.status, 'pending'), eq(purchases.isExcluded, false), isNull(purchases.areaId)))
-    .orderBy(hospitals.customerName, pendingMatches.rawAreaText);
+    .where(and(
+      isNull(purchases.areaId),
+      eq(purchases.isExcluded, false)
+    ))
+    .orderBy(hospitals.customerName, desc(purchases.orderDate));
   
   return results;
 }
+
+// Keep old function name as alias for backward compatibility
+export const getPendingMatches = getUnmatchedPurchases;
 
 export async function updatePendingMatch(id: number, data: Partial<InsertPendingMatch>): Promise<void> {
   const db = await getDb();

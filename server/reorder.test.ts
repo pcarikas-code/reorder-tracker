@@ -124,7 +124,7 @@ describe("forecasts.summary", () => {
 });
 
 describe("matches.pending", () => {
-  it("returns an array of pending matches", async () => {
+  it("returns an array of unmatched purchases", async () => {
     const ctx = createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
@@ -132,12 +132,13 @@ describe("matches.pending", () => {
 
     expect(Array.isArray(result)).toBe(true);
     if (result.length > 0) {
-      const match = result[0];
-      expect(match).toHaveProperty("id");
-      expect(match).toHaveProperty("purchaseId");
-      expect(match).toHaveProperty("rawAreaText");
-      expect(match).toHaveProperty("status");
-      expect(match.status).toBe("pending");
+      const purchase = result[0];
+      // Simplified structure - directly from purchases table
+      expect(purchase).toHaveProperty("id");
+      expect(purchase).toHaveProperty("purchaseId"); // Alias for compatibility
+      expect(purchase).toHaveProperty("orderNumber");
+      expect(purchase).toHaveProperty("hospitalId");
+      expect(purchase).toHaveProperty("hospitalName");
     }
   });
 });

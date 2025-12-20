@@ -52,14 +52,6 @@ export default function Matches() {
     onError: (error) => toast.error(`Failed: ${error.message}`),
   });
 
-  const rejectMatch = trpc.matches.reject.useMutation({
-    onSuccess: () => {
-      toast.success("Match rejected");
-      utils.matches.pending.invalidate();
-    },
-    onError: (error) => toast.error(`Failed: ${error.message}`),
-  });
-
   const excludeMatch = trpc.matches.exclude.useMutation({
     onSuccess: () => {
       toast.success("Order excluded - it won't appear again");
@@ -193,7 +185,7 @@ export default function Matches() {
     if (exactMatch) {
       // Link to existing area
       confirmMatch.mutate({
-        matchId: selectedMatch.id,
+        purchaseId: selectedMatch.id,
         areaId: exactMatch.id,
       });
     } else {
@@ -204,7 +196,7 @@ export default function Matches() {
         return;
       }
       createNewArea.mutate({
-        matchId: selectedMatch.id,
+        purchaseId: selectedMatch.id,
         hospitalId: hospitalId,
         areaName: areaInput.trim(),
       });
@@ -297,7 +289,7 @@ export default function Matches() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => excludeMatch.mutate({ matchId: match.id })}
+                        onClick={() => excludeMatch.mutate({ purchaseId: match.id })}
                         title="Exclude - this order won't appear in pending matches or reorder tracking"
                         disabled={excludeMatch.isPending}
                       >
@@ -418,7 +410,7 @@ export default function Matches() {
                 <Button variant="outline" onClick={closeDialog}>Cancel</Button>
                 <Button 
                   variant="destructive"
-                  onClick={() => selectedMatch && excludeMatch.mutate({ matchId: selectedMatch.id, reason: "Not a curtain order" })}
+                  onClick={() => selectedMatch && excludeMatch.mutate({ purchaseId: selectedMatch.id, reason: "Not a curtain order" })}
                   disabled={excludeMatch.isPending || confirmMatch.isPending || createNewArea.isPending}
                 >
                   <Ban className="h-4 w-4 mr-2" />

@@ -154,3 +154,12 @@
 - [x] Fix: SO-U-00000935 shows as Unmatched in Hospital Management but doesn't appear in Pending Matches
 - [x] Added repairOrphanedPendingMatches function to reset confirmed matches where purchase areaId is still NULL
 - [x] Repaired 54 orphaned pending matches
+- [x] Trace Pending Matches data derivation logic - simplified to direct purchase query
+
+## Data Structure Simplification (Dec 20, 2025)
+- [x] Remove pending_matches table dependency
+- [x] Replace getPendingMatches with getUnmatchedPurchases (simple query: areaId IS NULL AND isExcluded = false)
+- [x] Simplify matches router - remove pending match status management (use purchaseId directly)
+- [x] Update Pending Matches UI to use simplified data
+- [x] Ensure consistency between Pending Matches and Hospital Management
+- [x] Verified: 205 unmatched purchases showing correctly in both views

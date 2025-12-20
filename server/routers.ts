@@ -236,68 +236,58 @@ export const appRouter = router({
     }),
   }),
 
+  // SIMPLIFIED: All operations now use purchaseId directly
+  // No more pending_matches table complexity
   matches: router({
-    pending: protectedProcedure.query(async () => db.getPendingMatches()),
-    confirm: protectedProcedure.input(z.object({ matchId: z.number(), areaId: z.number() })).mutation(async ({ input }) => {
-      const matches = await db.getPendingMatches();
-      const match = matches.find(m => m.id === input.matchId);
-      if (!match) throw new Error("Match not found");
-      await db.updatePurchase(match.purchaseId, { areaId: input.areaId });
-      await db.updatePendingMatch(input.matchId, { status: 'confirmed', resolvedAt: new Date() });
+    // Get all unmatched purchases (areaId IS NULL AND isExcluded = false)
+    pending: protectedProcedure.query(async () => db.getUnmatchedPurchases()),
+    
+    // Link a purchase to an existing area
+    confirm: protectedProcedure.input(z.object({ purchaseId: z.number(), areaId: z.number() })).mutation(async ({ input }) => {
+      await db.updatePurchase(input.purchaseId, { areaId: input.areaId });
       return { success: true };
     }),
-    createNewArea: protectedProcedure.input(z.object({ matchId: z.number(), hospitalId: z.number(), areaName: z.string() })).mutation(async ({ input }) => {
-      const matches = await db.getPendingMatches();
-      const match = matches.find(m => m.id === input.matchId);
-      if (!match) throw new Error("Match not found");
+    
+    // Create a new area and link the purchase to it
+    createNewArea: protectedProcedure.input(z.object({ purchaseId: z.number(), hospitalId: z.number(), areaName: z.string() })).mutation(async ({ input }) => {
       const area = await db.createArea({ hospitalId: input.hospitalId, name: input.areaName, isConfirmed: true });
-      await db.updatePurchase(match.purchaseId, { areaId: area.id });
-
-      await db.updatePendingMatch(input.matchId, { status: 'new_area', resolvedAt: new Date() });
+      await db.updatePurchase(input.purchaseId, { areaId: area.id });
       return { success: true, areaId: area.id };
     }),
-    reject: protectedProcedure.input(z.object({ matchId: z.number() })).mutation(async ({ input }) => { await db.updatePendingMatch(input.matchId, { status: 'rejected', resolvedAt: new Date() }); return { success: true }; }),
-    exclude: protectedProcedure.input(z.object({ matchId: z.number(), reason: z.string().optional() })).mutation(async ({ input }) => {
-      const matches = await db.getPendingMatches();
-      const match = matches.find(m => m.id === input.matchId);
-      if (!match) throw new Error("Match not found");
-      await db.excludePurchase(match.purchaseId, input.reason);
-      await db.updatePendingMatch(input.matchId, { status: 'rejected', resolvedAt: new Date() });
+    
+    // Exclude a purchase from tracking
+    exclude: protectedProcedure.input(z.object({ purchaseId: z.number(), reason: z.string().optional() })).mutation(async ({ input }) => {
+      await db.excludePurchase(input.purchaseId, input.reason);
       return { success: true };
     }),
+    
+    // Get all excluded purchases
     excluded: protectedProcedure.query(async () => db.getExcludedPurchases()),
+    
+    // Un-exclude a purchase (bring it back to unmatched)
     unexclude: protectedProcedure.input(z.object({ purchaseId: z.number() })).mutation(async ({ input }) => {
       await db.unexcludePurchase(input.purchaseId);
       return { success: true };
     }),
+    
+    // Alias for exclude (backward compatibility)
     excludeByPurchaseId: protectedProcedure.input(z.object({ purchaseId: z.number(), reason: z.string().optional() })).mutation(async ({ input }) => {
       await db.excludePurchase(input.purchaseId, input.reason);
       return { success: true };
     }),
     
-    // Link a purchase directly to an existing area (from Hospital Management)
+    // Link a purchase directly to an existing area (same as confirm, kept for compatibility)
     linkToArea: protectedProcedure.input(z.object({ purchaseId: z.number(), areaId: z.number() })).mutation(async ({ input }) => {
       await db.updatePurchase(input.purchaseId, { areaId: input.areaId });
-      // Remove from pending matches if exists
-      await db.deletePendingMatchByPurchaseId(input.purchaseId);
       return { success: true };
     }),
     
-    // Create a new area and link a purchase to it (from Hospital Management)
+    // Create a new area and link a purchase to it (same as createNewArea, kept for compatibility)
     createAreaAndLink: protectedProcedure.input(z.object({ purchaseId: z.number(), hospitalId: z.number(), areaName: z.string() })).mutation(async ({ input }) => {
       const area = await db.createArea({ hospitalId: input.hospitalId, name: input.areaName, isConfirmed: true });
       await db.updatePurchase(input.purchaseId, { areaId: area.id });
-      // Remove from pending matches if exists
-      await db.deletePendingMatchByPurchaseId(input.purchaseId);
       return { success: true, areaId: area.id };
     }),
-    
-    // Repair orphaned pending matches (confirmed but purchase areaId is still NULL)
-    repair: protectedProcedure.mutation(async () => {
-      const result = await db.repairOrphanedPendingMatches();
-      return { success: true, repaired: result.repaired };
-    }),
-
   }),
 
   sync: router({
