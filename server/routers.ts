@@ -83,7 +83,6 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     console.log(`[Sync ${syncLogId}] ${ordersWithEndurocide.size} orders have Endurocide products (filtering out ${orders.length - ordersWithEndurocide.size} orders without)`);
     
     const purchasesToUpsert: Parameters<typeof db.batchUpsertPurchases>[0] = [];
-    const pendingMatchesToCreate: { rawAreaText: string; orderGuid: string }[] = [];
     
     let skippedNoHospital = 0;
     let skippedNoRawArea = 0;
@@ -105,9 +104,9 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
         skippedNoRawArea++;
       }
       purchasesToUpsert.push({ unleashOrderGuid: order.Guid, orderNumber: order.OrderNumber, orderDate: order.OrderDate, invoiceDate: order.InvoiceDate || null, hospitalId, areaId, customerRef: order.CustomerRef, rawAreaText, orderStatus: order.OrderStatus });
-      if (!areaId && rawAreaText) pendingMatchesToCreate.push({ rawAreaText, orderGuid: order.Guid });
     }
-    console.log(`[Sync ${syncLogId}] Order processing: ${skippedNoEndurocide} skipped (no Endurocide products), ${skippedNoHospital} skipped (no hospital), ${skippedNoRawArea} skipped (no area text), ${matchedToArea} matched to existing areas, ${pendingMatchesToCreate.length} need matching`);
+    const unmatchedCount = purchasesToUpsert.filter(p => !p.areaId && p.rawAreaText).length;
+    console.log(`[Sync ${syncLogId}] Order processing: ${skippedNoEndurocide} skipped (no Endurocide products), ${skippedNoHospital} skipped (no hospital), ${skippedNoRawArea} skipped (no area text), ${matchedToArea} matched to existing areas, ${unmatchedCount} need matching`);
     
     // Check for cancellation
     if (await checkSyncCancelled(syncLogId)) {
@@ -116,7 +115,7 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     }
     
     // Step 4: Batch upsert purchases
-    await updateSyncProgress(syncLogId, 'Step 4/6', `Saving ${purchasesToUpsert.length} purchases...`);
+    await updateSyncProgress(syncLogId, 'Step 4/5', `Saving ${purchasesToUpsert.length} purchases...`);
     console.log(`[Sync ${syncLogId}] Step 4: Upserting ${purchasesToUpsert.length} purchases...`);
     await db.batchUpsertPurchases(purchasesToUpsert);
     recordsProcessed += purchasesToUpsert.length;
@@ -128,29 +127,17 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
       return;
     }
     
-    // Step 5: Get all purchases for mapping and create pending matches
-    await updateSyncProgress(syncLogId, 'Step 5/6', 'Creating pending matches...');
-    console.log(`[Sync ${syncLogId}] Step 5: Creating pending matches...`);
+    // Step 5: Process order lines (already fetched in Step 3b)
+    // Note: Pending matches are no longer stored separately - unmatched purchases are
+    // identified directly from the purchases table (areaId IS NULL AND isExcluded = false)
     const allPurchases = await db.getAllPurchases();
     const purchaseMap = new Map<string, number>();
-    // Normalize GUIDs to lowercase for case-insensitive matching
     for (const p of allPurchases) purchaseMap.set(p.unleashOrderGuid.toLowerCase(), p.id);
     
-    // Batch create pending matches
-    const pendingMatchInserts: Parameters<typeof db.batchCreatePendingMatches>[0] = [];
-    for (const pm of pendingMatchesToCreate) {
-      const purchaseId = purchaseMap.get(pm.orderGuid.toLowerCase());
-      if (purchaseId) pendingMatchInserts.push({ purchaseId, rawAreaText: pm.rawAreaText, status: 'pending' });
-    }
-    await db.batchCreatePendingMatches(pendingMatchInserts);
-    
-    console.log(`[Sync ${syncLogId}] Created ${pendingMatchInserts.length} pending matches`);
-    
-    // Step 6: Process order lines (already fetched in Step 3b)
-    await updateSyncProgress(syncLogId, 'Step 6/6', `Processing ${allLines.length} order lines...`);
-    console.log(`[Sync ${syncLogId}] Step 6: Processing ${allLines.length} order lines...`);
+    await updateSyncProgress(syncLogId, 'Step 5/5', `Processing ${allLines.length} order lines...`);
+    console.log(`[Sync ${syncLogId}] Step 5: Processing ${allLines.length} order lines...`);
     if (allLines.length > 0) {
-      await updateSyncProgress(syncLogId, 'Step 6/6', 'Fetching product catalog...');
+      await updateSyncProgress(syncLogId, 'Step 5/5', 'Fetching product catalog...');
       const products = await synchub.fetchProducts();
       const productMap = new Map<string, typeof products[0]>();
       for (const p of products) productMap.set(p.Guid, p);
@@ -168,7 +155,7 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
       }
       console.log(`[Sync ${syncLogId}] Line processing: ${lineInserts.length} to insert, skipped: ${skippedNoPurchase} no purchase, ${skippedNoProduct} no product`);
       if (lineInserts.length > 0) {
-        await updateSyncProgress(syncLogId, 'Step 6/6', `Saving ${lineInserts.length} purchase lines...`);
+        await updateSyncProgress(syncLogId, 'Step 5/5', `Saving ${lineInserts.length} purchase lines...`);
         console.log(`[Sync ${syncLogId}] Inserting ${lineInserts.length} purchase lines...`);
         await db.createPurchaseLines(lineInserts);
         console.log(`[Sync ${syncLogId}] Purchase lines inserted`);

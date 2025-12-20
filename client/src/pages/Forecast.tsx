@@ -2,7 +2,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -128,13 +128,18 @@ export default function Forecast() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search by SKU, hospital, or area..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
               </div>
-              <Select value={hospitalFilter} onValueChange={setHospitalFilter}>
-                <SelectTrigger className="w-full md:w-[250px]"><SelectValue placeholder="Hospital" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Hospitals</SelectItem>
-                  {hospitals?.map(h => <SelectItem key={h.id} value={h.id.toString()}>{h.customerName}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Combobox
+                className="w-full md:w-[250px]"
+                placeholder="All Hospitals"
+                searchPlaceholder="Search hospitals..."
+                emptyText="No hospitals found."
+                value={hospitalFilter}
+                onValueChange={setHospitalFilter}
+                options={[
+                  { value: "all", label: "All Hospitals" },
+                  ...(hospitals?.map(h => ({ value: h.id.toString(), label: h.customerName })) || [])
+                ]}
+              />
               {(hospitalFilter !== 'all' || searchTerm) && (
                 <Button variant="ghost" onClick={() => { setHospitalFilter('all'); setSearchTerm(''); }}>Clear</Button>
               )}

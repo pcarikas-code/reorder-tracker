@@ -1,0 +1,16 @@
+{
+  "query": "SELECT p.orderNumber, h.customerName, COUNT(pl.id) as line_count, SUM(CAST(pl.quantity AS DECIMAL)) as total_curtains FROM purchases p JOIN hospitals h ON p.hospitalId = h.id LEFT JOIN purchaseLines pl ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000839' GROUP BY p.orderNumber, h.customerName",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT p.orderNumber, h.customerName, COUNT(pl.id) as line_count, SUM(CAST(pl.quantity AS DECIMAL)) as total_curtains FROM purchases p JOIN hospitals h ON p.hospitalId = h.id LEFT JOIN purchaseLines pl ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000839' GROUP BY p.orderNumber, h.customerName",
+  "rows": [
+    {
+      "orderNumber": "SO-U-00000839",
+      "customerName": "Nelson Marlborough - Health New Zealand",
+      "line_count": "20",
+      "total_curtains": "135"
+    }
+  ],
+  "messages": [],
+  "stdout": "orderNumber\tcustomerName\tline_count\ttotal_curtains\nSO-U-00000839\tNelson Marlborough - Health New Zealand\t20\t135\n",
+  "stderr": "",
+  "execution_time_ms": 1542
+}

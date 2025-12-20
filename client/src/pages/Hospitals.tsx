@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -459,17 +460,18 @@ export default function Hospitals() {
                       <SelectItem value="excluded">Excluded</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={areaFilter} onValueChange={setAreaFilter}>
-                    <SelectTrigger className="w-full md:w-[250px]">
-                      <SelectValue placeholder="Filter by area" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Areas</SelectItem>
-                      {purchaseAreas.map(a => (
-                        <SelectItem key={a.id} value={a.id.toString()}>{a.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Combobox
+                    className="w-full md:w-[250px]"
+                    placeholder="All Areas"
+                    searchPlaceholder="Search areas..."
+                    emptyText="No areas found."
+                    value={areaFilter}
+                    onValueChange={setAreaFilter}
+                    options={[
+                      { value: "all", label: "All Areas" },
+                      ...purchaseAreas.map(a => ({ value: a.id.toString(), label: a.name }))
+                    ]}
+                  />
                   {(areaFilter !== 'all' || searchTerm || statusFilter !== 'all') && (
                     <Button variant="ghost" onClick={() => { setAreaFilter('all'); setSearchTerm(''); setStatusFilter('all'); }}>Clear</Button>
                   )}

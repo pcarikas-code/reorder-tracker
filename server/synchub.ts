@@ -180,7 +180,7 @@ export async function fetchSalesOrderLines(orderRemoteIds: string[]): Promise<Un
           WHERE sol.SalesOrderRemoteID IN (${placeholders})
           AND sol.IsDeleted = 0
           AND p.IsDeleted = 0
-          AND (p.ProductCode LIKE 'sc-%' OR p.ProductCode LIKE 'smtc-%' OR p.ProductCode LIKE 'sld-%')
+          AND p.ProductGroupGuid = '${SPORICIDAL_CURTAINS_GROUP_GUID}'
         `);
         allResults.push(...result.recordset);
         

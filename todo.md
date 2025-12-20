@@ -163,3 +163,12 @@
 - [x] Update Pending Matches UI to use simplified data
 - [x] Ensure consistency between Pending Matches and Hospital Management
 - [x] Verified: 205 unmatched purchases showing correctly in both views
+
+## Bug Report (Dec 20, 2025) - Continued
+- [ ] Fix: SO-U-00000586, SO-U-00000572, SO-U-00000555, SO-U-00000521 show as unmatched in Hospital Management but don't appear in Pending Matches
+
+## Bug Fixes (Dec 21, 2025)
+- [x] Make all dropdowns filterable by typing (type to filter) - Added Combobox component to Home, Hospitals, Forecast, Areas pages
+- [ ] Fix Hospital Management curtain count to only include curtain products (not all items)
+- [ ] Make SO-U numbers clickable links to Unleashed portal
+- [x] Remove obsolete "creating pending matches" step from sync process (now uses direct purchase query)

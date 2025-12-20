@@ -1,0 +1,16 @@
+{
+  "query": "SELECT \n  (SELECT COUNT(*) FROM purchases WHERE areaId IS NULL AND isExcluded = 0) as unmatched,\n  (SELECT COUNT(*) FROM purchases WHERE areaId IS NOT NULL) as matched,\n  (SELECT COUNT(*) FROM purchases WHERE isExcluded = 1) as excluded,\n  (SELECT COUNT(*) FROM purchases) as total",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT \n  (SELECT COUNT(*) FROM purchases WHERE areaId IS NULL AND isExcluded = 0) as unmatched,\n  (SELECT COUNT(*) FROM purchases WHERE areaId IS NOT NULL) as matched,\n  (SELECT COUNT(*) FROM purchases WHERE isExcluded = 1) as excluded,\n  (SELECT COUNT(*) FROM purchases) as total",
+  "rows": [
+    {
+      "unmatched": "362",
+      "matched": "299",
+      "excluded": "93",
+      "total": "746"
+    }
+  ],
+  "messages": [],
+  "stdout": "unmatched\tmatched\texcluded\ttotal\n362\t299\t93\t746\n",
+  "stderr": "",
+  "execution_time_ms": 1619
+}

@@ -1,0 +1,25 @@
+{
+  "query": "SELECT productType, COUNT(*) as count, SUM(quantity) as total_qty FROM purchaseLines GROUP BY productType ORDER BY count DESC",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT productType, COUNT(*) as count, SUM(quantity) as total_qty FROM purchaseLines GROUP BY productType ORDER BY count DESC",
+  "rows": [
+    {
+      "productType": "mesh_top",
+      "count": "3212",
+      "total_qty": "20808.00"
+    },
+    {
+      "productType": "standard",
+      "count": "2914",
+      "total_qty": "15703.00"
+    },
+    {
+      "productType": "long_drop",
+      "count": "52",
+      "total_qty": "320.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "productType\tcount\ttotal_qty\nmesh_top\t3212\t20808.00\nstandard\t2914\t15703.00\nlong_drop\t52\t320.00\n",
+  "stderr": "",
+  "execution_time_ms": 1536
+}

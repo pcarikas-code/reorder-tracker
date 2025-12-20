@@ -1,0 +1,13 @@
+{
+  "query": "SELECT COUNT(*) as unmatched_count FROM purchases WHERE areaId IS NULL AND isExcluded = 0",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT COUNT(*) as unmatched_count FROM purchases WHERE areaId IS NULL AND isExcluded = 0",
+  "rows": [
+    {
+      "unmatched_count": "362"
+    }
+  ],
+  "messages": [],
+  "stdout": "unmatched_count\n362\n",
+  "stderr": "",
+  "execution_time_ms": 1550
+}

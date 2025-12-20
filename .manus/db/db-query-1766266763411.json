@@ -1,0 +1,106 @@
+{
+  "query": "SELECT pl.productCode, pl.productDescription, pl.productType, pl.quantity FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000839'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT pl.productCode, pl.productDescription, pl.productType, pl.quantity FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000839'",
+  "rows": [
+    {
+      "productCode": "sc-hw-e-mb",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Medical blue",
+      "productType": "standard",
+      "quantity": "6.00"
+    },
+    {
+      "productCode": "sc-mw-e-mb",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Medical blue",
+      "productType": "standard",
+      "quantity": "3.00"
+    },
+    {
+      "productCode": "sc-mw-e-sdwh",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Simply dotty white",
+      "productType": "standard",
+      "quantity": "3.00"
+    },
+    {
+      "productCode": "sc-hw-e-sdwh",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Simply dotty white",
+      "productType": "standard",
+      "quantity": "15.00"
+    },
+    {
+      "productCode": "sc-hw-e-mb",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Medical blue",
+      "productType": "standard",
+      "quantity": "6.00"
+    },
+    {
+      "productCode": "sc-mw-e-mb",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Medical blue",
+      "productType": "standard",
+      "quantity": "3.00"
+    },
+    {
+      "productCode": "sc-mw-e-sdwh",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Simply dotty white",
+      "productType": "standard",
+      "quantity": "3.00"
+    },
+    {
+      "productCode": "sc-hw-e-sdwh",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Simply dotty white",
+      "productType": "standard",
+      "quantity": "15.00"
+    },
+    {
+      "productCode": "sc-hw-e-mb",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Medical blue",
+      "productType": "standard",
+      "quantity": "6.00"
+    },
+    {
+      "productCode": "sc-mw-e-mb",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Medical blue",
+      "productType": "standard",
+      "quantity": "3.00"
+    },
+    {
+      "productCode": "sc-mw-e-sdwh",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Simply dotty white",
+      "productType": "standard",
+      "quantity": "3.00"
+    },
+    {
+      "productCode": "sc-hw-e-sdwh",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Simply dotty white",
+      "productType": "standard",
+      "quantity": "15.00"
+    },
+    {
+      "productCode": "sc-hw-e-mb",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Medical blue",
+      "productType": "standard",
+      "quantity": "6.00"
+    },
+    {
+      "productCode": "sc-mw-e-mb",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Medical blue",
+      "productType": "standard",
+      "quantity": "3.00"
+    },
+    {
+      "productCode": "sc-mw-e-sdwh",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal standard disposable: Simply dotty white",
+      "productType": "standard",
+      "quantity": "3.00"
+    },
+    {
+      "productCode": "sc-hw-e-sdwh",
+      "productDescription": "Half Width antimicrobial and sporicidal standard disposable: Simply dotty white",
+      "productType": "standard",
+      "quantity": "15.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "productCode\tproductDescription\tproductType\tquantity\nsc-hw-e-mb\tHalf Width antimicrobial and sporicidal standard disposable: Medical blue\tstandard\t6.00\nsc-mw-e-mb\tMedium Width Antimicrobial and Sporicidal standard disposable: Medical blue\tstandard\t3.00\nsc-mw-e-sdwh\tMedium Width Antimicrobial and Sporicidal standard disposable: Simply dotty white\tstandard\t3.00\nsc-hw-e-sdwh\tHalf Width antimicrobial and sporicidal standard disposable: Simply dotty white\tstandard\t15.00\nsc-hw-e-mb\tHalf Width antimicrobial and sporicidal standard disposable: Medical blue\tstandard\t6.00\nsc-mw-e-mb\tMedium Width Antimicrobial and Sporicidal standard disposable: Medical blue\tstandard\t3.00\nsc-mw-e-sdwh\tMedium Width Antimicrobial and Sporicidal standard disposable: Simply dotty white\tstandard\t3.00\nsc-hw-e-sdwh\tHalf Width antimicrobial and sporicidal standard disposable: Simply dotty white\tstandard\t15.00\nsc-hw-e-mb\tHalf Width antimicrobial and sporicidal standard disposable: Medical blue\tstandard\t6.00\nsc-mw-e-mb\tMedium Width Antimicrobial and Sporicidal standard disposable: Medical blue\tstandard\t3.00\nsc-mw-e-sdwh\tMedium Width Antimicrobial and Sporicidal standard disposable: Simply dotty white\tstandard\t3.00\nsc-hw-e-sdwh\tHalf Width antimicrobial and sporicidal standard disposable: Simply dotty white\tstandard\t15.00\nsc-hw-e-mb\tHalf Width antimicrobial and sporicidal standard disposable: Medical blue\tstandard\t6.00\nsc-mw-e-mb\tMedium Width Antimicrobial and Sporicidal standard disposable: Medical blue\tstandard\t3.00\nsc-mw-e-sdwh\tMedium Width Antimicrobial and Sporicidal standard disposable: Simply dotty white\tstandard\t3.00\nsc-hw-e-sdwh\tHalf Width antimicrobial and sporicidal standard disposable: Simply dotty white\tstandard\t15.00\n",
+  "stderr": "",
+  "execution_time_ms": 5470
+}

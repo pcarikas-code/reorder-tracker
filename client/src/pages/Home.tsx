@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -188,13 +189,18 @@ export default function Home() {
                   <SelectItem value="far_soon">Far Soon (180-360)</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={hospitalFilter} onValueChange={setHospitalFilter}>
-                <SelectTrigger className="w-full md:w-[220px]"><SelectValue placeholder="Hospital" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Hospitals</SelectItem>
-                  {hospitals?.map(h => <SelectItem key={h.id} value={h.id.toString()}>{h.customerName}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Combobox
+                className="w-full md:w-[250px]"
+                placeholder="All Hospitals"
+                searchPlaceholder="Search hospitals..."
+                emptyText="No hospitals found."
+                value={hospitalFilter}
+                onValueChange={setHospitalFilter}
+                options={[
+                  { value: "all", label: "All Hospitals" },
+                  ...(hospitals?.map(h => ({ value: h.id.toString(), label: h.customerName })) || [])
+                ]}
+              />
               {(statusFilter !== 'all' || hospitalFilter !== 'all' || searchTerm) && <Button variant="ghost" onClick={() => { setStatusFilter('all'); setHospitalFilter('all'); setSearchTerm(''); }}>Clear</Button>}
             </div>
           </CardContent>

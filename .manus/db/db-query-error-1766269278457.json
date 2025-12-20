@@ -1,0 +1,8 @@
+{
+  "query": "SELECT p.orderNumber, p.hospitalId, h.customerName, SUM(CAST(pl.quantity AS DECIMAL)) as total_curtains FROM purchases p JOIN hospitals h ON p.hospitalId = h.id LEFT JOIN purchaseLines pl ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000839' GROUP BY p.id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT p.orderNumber, p.hospitalId, h.customerName, SUM(CAST(pl.quantity AS DECIMAL)) as total_curtains FROM purchases p JOIN hospitals h ON p.hospitalId = h.id LEFT JOIN purchaseLines pl ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000839' GROUP BY p.id",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1055 (42000) at line 1: Expression #3 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'DxAqoJ22pGdNTCdjRs8uzu.h.customerName' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by"
+  ]
+}

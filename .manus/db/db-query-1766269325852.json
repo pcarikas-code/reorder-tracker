@@ -1,0 +1,13 @@
+{
+  "query": "SELECT h.customerName FROM purchases p JOIN hospitals h ON p.hospitalId = h.id WHERE p.orderNumber = 'SO-U-00000839'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT h.customerName FROM purchases p JOIN hospitals h ON p.hospitalId = h.id WHERE p.orderNumber = 'SO-U-00000839'",
+  "rows": [
+    {
+      "customerName": "Nelson Marlborough - Health New Zealand"
+    }
+  ],
+  "messages": [],
+  "stdout": "customerName\nNelson Marlborough - Health New Zealand\n",
+  "stderr": "",
+  "execution_time_ms": 1619
+}

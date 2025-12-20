@@ -1,0 +1,15 @@
+{
+  "query": "SELECT p.orderNumber, SUM(CAST(pl.quantity AS DECIMAL)) as total_curtains, COUNT(*) as line_count FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000839' GROUP BY p.orderNumber",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT p.orderNumber, SUM(CAST(pl.quantity AS DECIMAL)) as total_curtains, COUNT(*) as line_count FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000839' GROUP BY p.orderNumber",
+  "rows": [
+    {
+      "orderNumber": "SO-U-00000839",
+      "total_curtains": "135",
+      "line_count": "20"
+    }
+  ],
+  "messages": [],
+  "stdout": "orderNumber\ttotal_curtains\tline_count\nSO-U-00000839\t135\t20\n",
+  "stderr": "",
+  "execution_time_ms": 1509
+}
