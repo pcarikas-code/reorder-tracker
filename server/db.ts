@@ -961,3 +961,33 @@ export async function getPurchasesByHospitalWithArea(hospitalId: number) {
     totalCurtains: curtainTotals.get(p.id) || 0,
   }));
 }
+
+// Repair orphaned pending matches - reset confirmed matches where purchase areaId is still NULL
+export async function repairOrphanedPendingMatches(): Promise<{ repaired: number }> {
+  const db = await getDb();
+  if (!db) return { repaired: 0 };
+  
+  // Find all confirmed pending matches where the purchase areaId is NULL
+  const orphaned = await db
+    .select({
+      pmId: pendingMatches.id,
+      purchaseId: purchases.id,
+      areaId: purchases.areaId,
+    })
+    .from(pendingMatches)
+    .innerJoin(purchases, eq(pendingMatches.purchaseId, purchases.id))
+    .where(and(
+      eq(pendingMatches.status, 'confirmed'),
+      isNull(purchases.areaId)
+    ));
+  
+  if (orphaned.length === 0) return { repaired: 0 };
+  
+  // Reset these pending matches back to 'pending' status
+  const pmIds = orphaned.map(o => o.pmId);
+  await db.update(pendingMatches)
+    .set({ status: 'pending', resolvedAt: null })
+    .where(inArray(pendingMatches.id, pmIds));
+  
+  return { repaired: orphaned.length };
+}

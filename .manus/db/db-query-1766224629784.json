@@ -1,0 +1,20 @@
+{
+  "query": "SELECT \n  p.id,\n  p.orderNumber,\n  p.orderDate,\n  p.invoiceDate,\n  p.areaId,\n  p.isExcluded,\n  p.hospitalId,\n  h.customerName as hospitalName\nFROM purchases p\nLEFT JOIN hospitals h ON p.hospitalId = h.id\nWHERE p.orderNumber = 'SO-U-00000935'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT \n  p.id,\n  p.orderNumber,\n  p.orderDate,\n  p.invoiceDate,\n  p.areaId,\n  p.isExcluded,\n  p.hospitalId,\n  h.customerName as hospitalName\nFROM purchases p\nLEFT JOIN hospitals h ON p.hospitalId = h.id\nWHERE p.orderNumber = 'SO-U-00000935'",
+  "rows": [
+    {
+      "id": "6153",
+      "orderNumber": "SO-U-00000935",
+      "orderDate": "2025-12-10 00:00:00",
+      "invoiceDate": "NULL",
+      "areaId": "NULL",
+      "isExcluded": "0",
+      "hospitalId": "28",
+      "hospitalName": "Lakes - Health New Zealand"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torderNumber\torderDate\tinvoiceDate\tareaId\tisExcluded\thospitalId\thospitalName\n6153\tSO-U-00000935\t2025-12-10 00:00:00\tNULL\tNULL\t0\t28\tLakes - Health New Zealand\n",
+  "stderr": "",
+  "execution_time_ms": 1521
+}

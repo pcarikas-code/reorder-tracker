@@ -291,6 +291,12 @@ export const appRouter = router({
       await db.deletePendingMatchByPurchaseId(input.purchaseId);
       return { success: true, areaId: area.id };
     }),
+    
+    // Repair orphaned pending matches (confirmed but purchase areaId is still NULL)
+    repair: protectedProcedure.mutation(async () => {
+      const result = await db.repairOrphanedPendingMatches();
+      return { success: true, repaired: result.repaired };
+    }),
 
   }),
 

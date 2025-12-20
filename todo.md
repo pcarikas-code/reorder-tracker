@@ -151,3 +151,6 @@
 - [x] Change "Reorder Due" column header to "Next Due"
 - [x] Investigate data inconsistencies between Pending Matches and Reorder Status across full dataset
 - [x] Fix: Add isExcluded filter when building onOrderByArea and lastDeliveredByArea maps
+- [x] Fix: SO-U-00000935 shows as Unmatched in Hospital Management but doesn't appear in Pending Matches
+- [x] Added repairOrphanedPendingMatches function to reset confirmed matches where purchase areaId is still NULL
+- [x] Repaired 54 orphaned pending matches

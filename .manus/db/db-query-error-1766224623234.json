@@ -1,0 +1,8 @@
+{
+  "query": "SELECT \n  p.id,\n  p.orderNumber,\n  p.orderDate,\n  p.invoiceDate,\n  p.areaId,\n  p.isExcluded,\n  p.hospitalId,\n  h.customerName as hospitalName,\n  pm.id as pendingMatchId,\n  pm.status as pendingMatchStatus\nFROM purchases p\nLEFT JOIN hospitals h ON p.hospitalId = h.id\nLEFT JOIN pending_matches pm ON pm.purchaseId = p.id\nWHERE p.orderNumber = 'SO-U-00000935'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT \n  p.id,\n  p.orderNumber,\n  p.orderDate,\n  p.invoiceDate,\n  p.areaId,\n  p.isExcluded,\n  p.hospitalId,\n  h.customerName as hospitalName,\n  pm.id as pendingMatchId,\n  pm.status as pendingMatchStatus\nFROM purchases p\nLEFT JOIN hospitals h ON p.hospitalId = h.id\nLEFT JOIN pending_matches pm ON pm.purchaseId = p.id\nWHERE p.orderNumber = 'SO-U-00000935'",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'dxaqoj22pgdntcdjrs8uzu.pending_matches' doesn't exist"
+  ]
+}
