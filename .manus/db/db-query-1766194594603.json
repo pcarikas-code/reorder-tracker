@@ -1,0 +1,55 @@
+{
+  "query": "SELECT \n  p.id,\n  p.orderNumber,\n  DATE_FORMAT(p.orderDate, '%Y-%m-%d') as orderDate,\n  DATE_FORMAT(p.invoiceDate, '%Y-%m-%d') as invoiceDate,\n  p.areaId,\n  a.name as areaName,\n  p.isExcluded\nFROM purchases p\nLEFT JOIN areas a ON p.areaId = a.id\nWHERE a.name LIKE '%Ward 33%' \nORDER BY p.orderDate DESC\nLIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT \n  p.id,\n  p.orderNumber,\n  DATE_FORMAT(p.orderDate, '%Y-%m-%d') as orderDate,\n  DATE_FORMAT(p.invoiceDate, '%Y-%m-%d') as invoiceDate,\n  p.areaId,\n  a.name as areaName,\n  p.isExcluded\nFROM purchases p\nLEFT JOIN areas a ON p.areaId = a.id\nWHERE a.name LIKE '%Ward 33%' \nORDER BY p.orderDate DESC\nLIMIT 10",
+  "rows": [
+    {
+      "id": "6162",
+      "orderNumber": "SO-U-00000926",
+      "orderDate": "2025-12-03",
+      "invoiceDate": "NULL",
+      "areaId": "150047",
+      "areaName": "Ward 33 North",
+      "isExcluded": "0"
+    },
+    {
+      "id": "6166",
+      "orderNumber": "SO-U-00000922",
+      "orderDate": "2025-11-26",
+      "invoiceDate": "NULL",
+      "areaId": "150007",
+      "areaName": "Ward 33 East",
+      "isExcluded": "0"
+    },
+    {
+      "id": "6778",
+      "orderNumber": "SO-U-00000254",
+      "orderDate": "2023-08-10",
+      "invoiceDate": "2023-08-14",
+      "areaId": "150039",
+      "areaName": "Ward 33 North - Rm 319",
+      "isExcluded": "0"
+    },
+    {
+      "id": "6964",
+      "orderNumber": "SO-U-00000004",
+      "orderDate": "2022-06-09",
+      "invoiceDate": "2022-10-03",
+      "areaId": "150047",
+      "areaName": "Ward 33 North",
+      "isExcluded": "0"
+    },
+    {
+      "id": "6970",
+      "orderNumber": "SO-U-00000012",
+      "orderDate": "2022-06-03",
+      "invoiceDate": "2022-10-03",
+      "areaId": "150007",
+      "areaName": "Ward 33 East",
+      "isExcluded": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torderNumber\torderDate\tinvoiceDate\tareaId\tareaName\tisExcluded\n6162\tSO-U-00000926\t2025-12-03\tNULL\t150047\tWard 33 North\t0\n6166\tSO-U-00000922\t2025-11-26\tNULL\t150007\tWard 33 East\t0\n6778\tSO-U-00000254\t2023-08-10\t2023-08-14\t150039\tWard 33 North - Rm 319\t0\n6964\tSO-U-00000004\t2022-06-09\t2022-10-03\t150047\tWard 33 North\t0\n6970\tSO-U-00000012\t2022-06-03\t2022-10-03\t150007\tWard 33 East\t0\n",
+  "stderr": "",
+  "execution_time_ms": 1625
+}

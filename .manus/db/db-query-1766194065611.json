@@ -1,0 +1,30 @@
+{
+  "query": "SELECT \n  CASE WHEN invoiceDate IS NULL THEN 'On Order' ELSE 'Delivered' END as status,\n  CASE WHEN areaId IS NULL THEN 'Unmatched' ELSE 'Matched' END as match_status,\n  COUNT(*) as count\nFROM purchases\nWHERE isExcluded = 0\nGROUP BY \n  CASE WHEN invoiceDate IS NULL THEN 'On Order' ELSE 'Delivered' END,\n  CASE WHEN areaId IS NULL THEN 'Unmatched' ELSE 'Matched' END\nORDER BY status, match_status",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT \n  CASE WHEN invoiceDate IS NULL THEN 'On Order' ELSE 'Delivered' END as status,\n  CASE WHEN areaId IS NULL THEN 'Unmatched' ELSE 'Matched' END as match_status,\n  COUNT(*) as count\nFROM purchases\nWHERE isExcluded = 0\nGROUP BY \n  CASE WHEN invoiceDate IS NULL THEN 'On Order' ELSE 'Delivered' END,\n  CASE WHEN areaId IS NULL THEN 'Unmatched' ELSE 'Matched' END\nORDER BY status, match_status",
+  "rows": [
+    {
+      "status": "Delivered",
+      "match_status": "Matched",
+      "count": "313"
+    },
+    {
+      "status": "Delivered",
+      "match_status": "Unmatched",
+      "count": "161"
+    },
+    {
+      "status": "On Order",
+      "match_status": "Matched",
+      "count": "118"
+    },
+    {
+      "status": "On Order",
+      "match_status": "Unmatched",
+      "count": "63"
+    }
+  ],
+  "messages": [],
+  "stdout": "status\tmatch_status\tcount\nDelivered\tMatched\t313\nDelivered\tUnmatched\t161\nOn Order\tMatched\t118\nOn Order\tUnmatched\t63\n",
+  "stderr": "",
+  "execution_time_ms": 1553
+}

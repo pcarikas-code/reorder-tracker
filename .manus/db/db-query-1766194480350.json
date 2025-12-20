@@ -1,0 +1,40 @@
+{
+  "query": "SELECT \n  p.id,\n  p.orderNumber,\n  p.orderDate,\n  p.invoiceDate,\n  p.areaId,\n  a.name as areaName,\n  p.isExcluded,\n  p.customerRef\nFROM purchases p\nLEFT JOIN areas a ON p.areaId = a.id\nWHERE a.name LIKE '%Ward 33 North%' OR p.customerRef LIKE '%Ward 33 North%'\nORDER BY p.orderDate DESC",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT \n  p.id,\n  p.orderNumber,\n  p.orderDate,\n  p.invoiceDate,\n  p.areaId,\n  a.name as areaName,\n  p.isExcluded,\n  p.customerRef\nFROM purchases p\nLEFT JOIN areas a ON p.areaId = a.id\nWHERE a.name LIKE '%Ward 33 North%' OR p.customerRef LIKE '%Ward 33 North%'\nORDER BY p.orderDate DESC",
+  "rows": [
+    {
+      "id": "6162",
+      "orderNumber": "SO-U-00000926",
+      "orderDate": "2025-12-03 00:00:00",
+      "invoiceDate": "NULL",
+      "areaId": "150047",
+      "areaName": "Ward 33 North",
+      "isExcluded": "0",
+      "customerRef": "2848590 - Ward 33 North - 2-yr Changeover"
+    },
+    {
+      "id": "6778",
+      "orderNumber": "SO-U-00000254",
+      "orderDate": "2023-08-10 02:14:29",
+      "invoiceDate": "2023-08-14 00:00:00",
+      "areaId": "150039",
+      "areaName": "Ward 33 North - Rm 319",
+      "isExcluded": "0",
+      "customerRef": "Ward 33 North - Rm 319"
+    },
+    {
+      "id": "6964",
+      "orderNumber": "SO-U-00000004",
+      "orderDate": "2022-06-09 00:00:00",
+      "invoiceDate": "2022-10-03 22:59:03",
+      "areaId": "150047",
+      "areaName": "Ward 33 North",
+      "isExcluded": "0",
+      "customerRef": "PO2382762 Ward 33 North"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torderNumber\torderDate\tinvoiceDate\tareaId\tareaName\tisExcluded\tcustomerRef\n6162\tSO-U-00000926\t2025-12-03 00:00:00\tNULL\t150047\tWard 33 North\t0\t2848590 - Ward 33 North - 2-yr Changeover\n6778\tSO-U-00000254\t2023-08-10 02:14:29\t2023-08-14 00:00:00\t150039\tWard 33 North - Rm 319\t0\tWard 33 North - Rm 319\n6964\tSO-U-00000004\t2022-06-09 00:00:00\t2022-10-03 22:59:03\t150047\tWard 33 North\t0\tPO2382762 Ward 33 North\n",
+  "stderr": "",
+  "execution_time_ms": 2239
+}

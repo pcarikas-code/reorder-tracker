@@ -533,7 +533,7 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
   const lastDeliveredByArea = new Map<number, typeof allPurchases[0]>();
   
   for (const p of allPurchases) {
-    if (!p.areaId) continue;
+    if (!p.areaId || p.isExcluded) continue;
     
     // Track On Order purchases (no invoiceDate)
     if (!p.invoiceDate && !onOrderByArea.has(p.areaId)) {

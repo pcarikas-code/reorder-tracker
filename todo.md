@@ -149,3 +149,5 @@
 - [x] Display SO-U number for On Order items for manual verification
 - [x] Change "Invoice Date" column header to "Last Invoice"
 - [x] Change "Reorder Due" column header to "Next Due"
+- [x] Investigate data inconsistencies between Pending Matches and Reorder Status across full dataset
+- [x] Fix: Add isExcluded filter when building onOrderByArea and lastDeliveredByArea maps
