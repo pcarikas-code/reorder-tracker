@@ -115,3 +115,30 @@
 - [x] Fix duplicate pending match records (368 purchases have duplicates)
 - [x] Add unique constraint on pendingMatches.purchaseId to prevent future duplicates
 - [x] Fix race condition in getPendingMatches causing duplicate key errors (use onDuplicateKeyUpdate)
+
+## Code Review Findings (Dec 20, 2025)
+
+### Issues Found and Fixed
+- [x] Fix race condition in getPendingMatches causing duplicate key errors (use onDuplicateKeyUpdate)
+
+### Issues Found - Need Fixing
+- [x] unlinkPurchaseFromArea creates pending match without onDuplicateKeyUpdate (potential duplicate key error)
+- [x] getStockForecasts uses orderDate instead of invoiceDate for reorder calculations (inconsistent with getAreaReorderStatuses)
+- [x] getPurchasesByHospitalWithArea missing invoiceDate field (needed for Hospital Management display)
+- [x] Hospital Management page doesn't show invoice date column
+- [ ] Missing error handling in excludeMatch mutation (should handle case where match not found gracefully)
+
+### Optimization Opportunities
+- [ ] getAreaReorderStatuses fetches all purchases then filters - could use SQL GROUP BY for better performance
+- [ ] getStockForecasts fetches all purchases and lines - could be optimized with SQL aggregation
+- [ ] Hospital Management page fetches excludedPurchases for all hospitals - should filter by hospital in query
+
+### Code Quality Issues
+- [ ] Type casting with (match as any) in Matches.tsx - should use proper types
+- [ ] Type casting with (selectedMatch as any) in Matches.tsx - should use proper types
+- [ ] Unused rejectMatch mutation in Matches.tsx (never called)
+
+### Test Fixes
+- [x] Updated reorder.test.ts to include all valid status values (on_order, overdue, due_soon, near_soon, far_soon)
+- [x] Fixed parseCustomerRef to handle "2025 Reorder" suffix pattern
+- [x] Added lounge/transit/reception/waiting to area keyword patterns

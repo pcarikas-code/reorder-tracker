@@ -634,10 +634,11 @@ export async function getStockForecasts(): Promise<StockForecast[]> {
   const twoYearsMs = 2 * 365 * 24 * 60 * 60 * 1000;
 
   // Get all purchases and lines in bulk
-  const allPurchases = await db.select().from(purchases).orderBy(desc(purchases.orderDate));
+  // Sort by invoiceDate first (for delivered orders), then orderDate - consistent with getAreaReorderStatuses
+  const allPurchases = await db.select().from(purchases).orderBy(desc(purchases.invoiceDate), desc(purchases.orderDate));
   const allLines = await db.select().from(purchaseLines);
   
-  // Build lookup maps
+  // Build lookup maps - prioritize purchases with invoiceDate (delivered orders)
   const purchasesByArea = new Map<number, typeof allPurchases[0]>();
   for (const p of allPurchases) {
     if (p.areaId && !purchasesByArea.has(p.areaId)) {
@@ -676,7 +677,10 @@ export async function getStockForecasts(): Promise<StockForecast[]> {
         productSize: line.productSize || 'other',
         productColor: line.productColor || 'Unknown',
         expectedQuantity: Number(line.quantity),
-        expectedReorderDate: new Date(lastPurchase.orderDate.getTime() + twoYearsMs),
+        // Use invoiceDate for reorder calculation (when curtains were delivered), fall back to orderDate
+        expectedReorderDate: lastPurchase.invoiceDate 
+          ? new Date(lastPurchase.invoiceDate.getTime() + twoYearsMs)
+          : new Date(lastPurchase.orderDate.getTime() + twoYearsMs),
       });
     }
   }
@@ -841,11 +845,13 @@ export async function unlinkPurchaseFromArea(purchaseId: number): Promise<void> 
   // Set areaId to null
   await db.update(purchases).set({ areaId: null }).where(eq(purchases.id, purchaseId));
   
-  // Create a pending match for this purchase
+  // Create a pending match for this purchase (use onDuplicateKeyUpdate to handle race conditions)
   await db.insert(pendingMatches).values({
     purchaseId: purchase.id,
     rawAreaText: purchase.rawAreaText || purchase.customerRef || 'Unknown',
     status: 'pending',
+  }).onDuplicateKeyUpdate({
+    set: { status: 'pending', rawAreaText: sql`VALUES(rawAreaText)` }
   });
 }
 
@@ -883,6 +889,7 @@ export async function getPurchasesByHospitalWithArea(hospitalId: number) {
       id: purchases.id,
       orderNumber: purchases.orderNumber,
       orderDate: purchases.orderDate,
+      invoiceDate: purchases.invoiceDate,
       customerRef: purchases.customerRef,
       rawAreaText: purchases.rawAreaText,
       areaId: purchases.areaId,

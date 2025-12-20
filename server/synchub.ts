@@ -347,7 +347,8 @@ export function parseCustomerRef(ref: string | null): string | null {
   const parts = text.split(/\s*[-–]\s*/);
   
   // Find the best part that looks like an area name (not a number, not a date suffix)
-  const suffixPatterns = /^(2\s*y(ea)?r?|\d_YR_TEMP|reorder|replacement|changeover|install|due|oct|nov|dec|jan|feb|mar|apr|may|jun|jul|aug|sep|\d{4}|D)$/i;
+  // Match: "2yr", "2 year", "reorder", "2025 Reorder", "2025", etc.
+  const suffixPatterns = /^(2\s*y(ea)?r?|\d_YR_TEMP|reorder|replacement|changeover|install|due|oct|nov|dec|jan|feb|mar|apr|may|jun|jul|aug|sep|\d{4}(\s+reorder)?|D)$/i;
   const numberOnlyPattern = /^[\d\s&]+$/;
   
   let bestPart = '';
@@ -402,7 +403,7 @@ export function parseCustomerRef(ref: string | null): string | null {
   // Filter out entries that look like person names (First Last pattern with no other context)
   // But keep entries like "Ward 1", "ICU", "PACU Lvl 3"
   const looksLikePersonName = /^[A-Z][a-z]+\s+[A-Z][a-z]+$/;
-  const hasAreaKeyword = /ward|unit|icu|pacu|theatre|clinic|hospital|room|bed|floor|level|lvl|endoscopy|dialysis|radiology|recovery|surgery|surgical|medical|med|ortho|stroke|children|maternity|emergency|ed|er|day\s*stay|pre-?op|post-?op|ccu|nicu|mapu|atu|ssu|ssr|ctu/i;
+  const hasAreaKeyword = /ward|unit|icu|pacu|theatre|clinic|hospital|room|bed|floor|level|lvl|endoscopy|dialysis|radiology|recovery|surgery|surgical|medical|med|ortho|stroke|children|maternity|emergency|ed|er|day\s*stay|pre-?op|post-?op|ccu|nicu|mapu|atu|ssu|ssr|ctu|lounge|transit|reception|waiting/i;
   
   if (looksLikePersonName.test(text) && !hasAreaKeyword.test(text)) {
     return null; // Likely a person name, not an area

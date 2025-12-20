@@ -15,6 +15,7 @@ type Purchase = {
   id: number;
   orderNumber: string;
   orderDate: Date;
+  invoiceDate: Date | null;
   customerRef: string | null;
   rawAreaText: string | null;
   areaId: number | null;
@@ -161,6 +162,7 @@ export default function Hospitals() {
       id: p.id,
       orderNumber: p.orderNumber,
       orderDate: p.orderDate,
+      invoiceDate: null as Date | null,
       customerRef: p.customerRef,
       rawAreaText: p.rawAreaText,
       areaId: null,
@@ -502,6 +504,7 @@ export default function Hospitals() {
                         <TableRow>
                           <TableHead>Order Number</TableHead>
                           <TableHead>Order Date</TableHead>
+                          <TableHead>Invoice Date</TableHead>
                           <TableHead>Customer Reference</TableHead>
                           <TableHead>Area</TableHead>
                           <TableHead className="text-center">Curtains</TableHead>
@@ -513,6 +516,13 @@ export default function Hospitals() {
                           <TableRow key={`${purchase.status}-${purchase.id}`}>
                             <TableCell className="font-medium">{purchase.orderNumber}</TableCell>
                             <TableCell>{new Date(purchase.orderDate).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              {purchase.invoiceDate ? (
+                                new Date(purchase.invoiceDate).toLocaleDateString()
+                              ) : (
+                                <span className="text-muted-foreground">On Order</span>
+                              )}
+                            </TableCell>
                             <TableCell className="max-w-[300px] truncate" title={purchase.customerRef || undefined}>
                               {purchase.customerRef || '-'}
                             </TableCell>

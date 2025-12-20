@@ -45,7 +45,7 @@ describe("reorders.statuses", () => {
       expect(status).toHaveProperty("hospitalId");
       expect(status).toHaveProperty("hospitalName");
       expect(status).toHaveProperty("status");
-      expect(["overdue", "due_soon", "on_track", "no_purchase"]).toContain(status.status);
+      expect(["on_order", "overdue", "due_soon", "near_soon", "far_soon"]).toContain(status.status);
     }
   });
 });
