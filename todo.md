@@ -142,3 +142,6 @@
 - [x] Updated reorder.test.ts to include all valid status values (on_order, overdue, due_soon, near_soon, far_soon)
 - [x] Fixed parseCustomerRef to handle "2025 Reorder" suffix pattern
 - [x] Added lounge/transit/reception/waiting to area keyword patterns
+
+## Bug Report (Dec 20, 2025)
+- [x] Fix: On Order status should only apply when Sales Order is placed 18+ months after last invoice (to exclude spares/additions)

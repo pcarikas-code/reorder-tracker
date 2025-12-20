@@ -522,18 +522,32 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
 
   const allAreas = await getAllAreas();
   
-  // Get all purchases in one query and group by area
-  // Sort by invoiceDate first (for delivered orders), then orderDate
-  const allPurchases = await db.select().from(purchases).orderBy(desc(purchases.invoiceDate), desc(purchases.orderDate));
-  const purchasesByArea = new Map<number, typeof allPurchases[0]>();
+  // Get all purchases in one query
+  const allPurchases = await db.select().from(purchases).orderBy(desc(purchases.orderDate));
+  
+  // Build two maps:
+  // 1. onOrderByArea: Areas that have a purchase without invoiceDate (On Order)
+  // 2. lastDeliveredByArea: Most recent delivered purchase (with invoiceDate) per area
+  const onOrderByArea = new Map<number, typeof allPurchases[0]>();
+  const lastDeliveredByArea = new Map<number, typeof allPurchases[0]>();
+  
   for (const p of allPurchases) {
-    if (p.areaId && !purchasesByArea.has(p.areaId)) {
-      purchasesByArea.set(p.areaId, p); // First one is the most recent
+    if (!p.areaId) continue;
+    
+    // Track On Order purchases (no invoiceDate)
+    if (!p.invoiceDate && !onOrderByArea.has(p.areaId)) {
+      onOrderByArea.set(p.areaId, p);
+    }
+    
+    // Track delivered purchases (with invoiceDate) - sorted by orderDate, so first one is most recent
+    if (p.invoiceDate && !lastDeliveredByArea.has(p.areaId)) {
+      lastDeliveredByArea.set(p.areaId, p);
     }
   }
   
   const now = new Date();
   const twoYearsMs = 2 * 365 * 24 * 60 * 60 * 1000;
+  const eighteenMonthsMs = 18 * 30 * 24 * 60 * 60 * 1000; // 18 months threshold for On Order
   const dueSoonThresholdMs = 90 * 24 * 60 * 60 * 1000; // 0-90 days
   const nearSoonThresholdMs = 180 * 24 * 60 * 60 * 1000; // 90-180 days
   const farSoonThresholdMs = 360 * 24 * 60 * 60 * 1000; // 180-360 days
@@ -541,20 +555,32 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
   const statuses: AreaReorderStatus[] = [];
 
   for (const area of allAreas) {
-    const lastPurchase = purchasesByArea.get(area.id);
+    const onOrderPurchase = onOrderByArea.get(area.id);
+    const lastDelivered = lastDeliveredByArea.get(area.id);
 
-    // Skip areas with no purchase history
-    if (!lastPurchase) continue;
+    // Skip areas with no purchase history at all
+    if (!onOrderPurchase && !lastDelivered) continue;
 
-    // If no invoiceDate, this is "On Order" - not yet delivered
-    if (!lastPurchase.invoiceDate) {
+    // Check if there's a qualifying On Order purchase
+    // Only count as "On Order" if the Sales Order was placed 18+ months after the last invoice
+    // This excludes spares/additions which are typically ordered shortly after delivery
+    let isQualifyingOnOrder = false;
+    if (onOrderPurchase && lastDelivered?.invoiceDate) {
+      const monthsSinceLastInvoice = onOrderPurchase.orderDate.getTime() - lastDelivered.invoiceDate.getTime();
+      isQualifyingOnOrder = monthsSinceLastInvoice >= eighteenMonthsMs;
+    } else if (onOrderPurchase && !lastDelivered) {
+      // No previous delivery - this is a first order, show as On Order
+      isQualifyingOnOrder = true;
+    }
+
+    if (isQualifyingOnOrder && onOrderPurchase) {
       statuses.push({
         areaId: area.id,
         areaName: area.name,
         hospitalId: area.hospitalId,
         hospitalName: area.hospitalName,
-        lastPurchaseDate: null,
-        lastOrderDate: lastPurchase.orderDate,
+        lastPurchaseDate: lastDelivered?.invoiceDate || null,
+        lastOrderDate: onOrderPurchase.orderDate,
         reorderDueDate: null,
         status: 'on_order',
         daysUntilDue: null,
@@ -562,8 +588,11 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
       continue;
     }
 
+    // No On Order purchase - use the last delivered order for reorder calculations
+    if (!lastDelivered || !lastDelivered.invoiceDate) continue;
+
     // Use invoiceDate for reorder calculations (when curtains were actually delivered)
-    const reorderDueDate = new Date(lastPurchase.invoiceDate.getTime() + twoYearsMs);
+    const reorderDueDate = new Date(lastDelivered.invoiceDate.getTime() + twoYearsMs);
     const timeDiff = reorderDueDate.getTime() - now.getTime();
     const daysUntilDue = Math.ceil(timeDiff / (24 * 60 * 60 * 1000));
 
@@ -586,8 +615,8 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
       areaName: area.name,
       hospitalId: area.hospitalId,
       hospitalName: area.hospitalName,
-      lastPurchaseDate: lastPurchase.invoiceDate,
-      lastOrderDate: lastPurchase.orderDate,
+      lastPurchaseDate: lastDelivered.invoiceDate,
+      lastOrderDate: lastDelivered.orderDate,
       reorderDueDate,
       status,
       daysUntilDue,
