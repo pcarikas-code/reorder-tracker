@@ -137,6 +137,7 @@ export async function fetchSalesOrdersInChunks(
 
 export interface UnleashedSalesOrderLine {
   SalesOrderRemoteID: string;
+  LineGuid: string; // Unique GUID for each line item
   ProductGuid: string;
   OrderQuantity: number;
   UnitPrice: number;
@@ -174,7 +175,7 @@ export async function fetchSalesOrderLines(orderRemoteIds: string[]): Promise<Un
         // JOIN with Product table to filter for Sporicidal Curtains only
         // Filters: Brand=Endurocide, ProductCode starts with sc-/smtc-/sld-, IsDeleted=0
         const result = await request.query(`
-          SELECT sol.SalesOrderRemoteID, sol.ProductGuid, sol.OrderQuantity, sol.UnitPrice, sol.Comments
+          SELECT sol.SalesOrderRemoteID, sol.Guid as LineGuid, sol.ProductGuid, sol.OrderQuantity, sol.UnitPrice, sol.Comments
           FROM [${SCHEMA}].[SalesOrderLine] sol
           INNER JOIN [${SCHEMA}].[Product] p ON sol.ProductGuid = p.Guid
           WHERE sol.SalesOrderRemoteID IN (${placeholders})

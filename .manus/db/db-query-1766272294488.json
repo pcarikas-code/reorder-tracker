@@ -1,0 +1,25 @@
+{
+  "query": "SELECT pl.productCode, pl.productDescription, pl.quantity FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000567' ORDER BY pl.productCode",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT pl.productCode, pl.productDescription, pl.quantity FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000567' ORDER BY pl.productCode",
+  "rows": [
+    {
+      "productCode": "smtc-fw-e-ggowh",
+      "productDescription": "Full Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white",
+      "quantity": "40.00"
+    },
+    {
+      "productCode": "smtc-hw-e-ggowh",
+      "productDescription": "Half Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white",
+      "quantity": "2.00"
+    },
+    {
+      "productCode": "smtc-mw-e-ggowh",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white",
+      "quantity": "56.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "productCode\tproductDescription\tquantity\nsmtc-fw-e-ggowh\tFull Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white\t40.00\nsmtc-hw-e-ggowh\tHalf Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white\t2.00\nsmtc-mw-e-ggowh\tMedium Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white\t56.00\n",
+  "stderr": "",
+  "execution_time_ms": 1621
+}

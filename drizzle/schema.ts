@@ -84,6 +84,7 @@ export type InsertPurchase = typeof purchases.$inferInsert;
 export const purchaseLines = mysqlTable("purchaseLines", {
   id: int("id").autoincrement().primaryKey(),
   purchaseId: int("purchaseId").notNull(),
+  unleashLineGuid: varchar("unleashLineGuid", { length: 64 }), // Unique GUID for each line item
   unleashProductGuid: varchar("unleashProductGuid", { length: 64 }),
   productCode: varchar("productCode", { length: 50 }),
   productDescription: text("productDescription"),
@@ -94,8 +95,8 @@ export const purchaseLines = mysqlTable("purchaseLines", {
   unitPrice: decimal("unitPrice", { precision: 10, scale: 2 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (table) => ({
-  // Unique constraint to prevent duplicate lines per purchase+product
-  uniquePurchaseProduct: uniqueIndex("unique_purchase_product").on(table.purchaseId, table.unleashProductGuid),
+  // Unique constraint to prevent duplicate lines - use line GUID which is unique per line
+  uniquePurchaseLine: uniqueIndex("unique_purchase_line").on(table.purchaseId, table.unleashLineGuid),
 }));
 
 export type PurchaseLine = typeof purchaseLines.$inferSelect;

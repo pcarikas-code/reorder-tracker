@@ -1,0 +1,35 @@
+{
+  "query": "SELECT pl.productCode, pl.quantity, pl.unleashLineGuid FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000567' ORDER BY pl.productCode",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT pl.productCode, pl.quantity, pl.unleashLineGuid FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000567' ORDER BY pl.productCode",
+  "rows": [
+    {
+      "productCode": "smtc-fw-e-ggowh",
+      "quantity": "5.00",
+      "unleashLineGuid": "DCC56FA8-EB04-404F-92AF-1DBDCF96C899"
+    },
+    {
+      "productCode": "smtc-fw-e-ggowh",
+      "quantity": "40.00",
+      "unleashLineGuid": "E806E93D-C9B2-4451-9674-251F8B990F4B"
+    },
+    {
+      "productCode": "smtc-hw-e-ggowh",
+      "quantity": "2.00",
+      "unleashLineGuid": "510D021C-9F6D-4F13-B580-854F1F838BCF"
+    },
+    {
+      "productCode": "smtc-mw-e-ggowh",
+      "quantity": "7.00",
+      "unleashLineGuid": "25502F2B-BF34-42DA-9BF2-2A0C519276B8"
+    },
+    {
+      "productCode": "smtc-mw-e-ggowh",
+      "quantity": "56.00",
+      "unleashLineGuid": "C43EB157-879B-497B-8530-EF3A9B4B9106"
+    }
+  ],
+  "messages": [],
+  "stdout": "productCode\tquantity\tunleashLineGuid\nsmtc-fw-e-ggowh\t5.00\tDCC56FA8-EB04-404F-92AF-1DBDCF96C899\nsmtc-fw-e-ggowh\t40.00\tE806E93D-C9B2-4451-9674-251F8B990F4B\nsmtc-hw-e-ggowh\t2.00\t510D021C-9F6D-4F13-B580-854F1F838BCF\nsmtc-mw-e-ggowh\t7.00\t25502F2B-BF34-42DA-9BF2-2A0C519276B8\nsmtc-mw-e-ggowh\t56.00\tC43EB157-879B-497B-8530-EF3A9B4B9106\n",
+  "stderr": "",
+  "execution_time_ms": 1546
+}

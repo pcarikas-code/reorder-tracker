@@ -1,0 +1,15 @@
+{
+  "query": "SELECT p.orderNumber, COUNT(pl.id) as lineCount, SUM(CAST(pl.quantity AS DECIMAL)) as totalQty FROM purchases p JOIN purchaseLines pl ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000567' GROUP BY p.orderNumber",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT p.orderNumber, COUNT(pl.id) as lineCount, SUM(CAST(pl.quantity AS DECIMAL)) as totalQty FROM purchases p JOIN purchaseLines pl ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000567' GROUP BY p.orderNumber",
+  "rows": [
+    {
+      "orderNumber": "SO-U-00000567",
+      "lineCount": "5",
+      "totalQty": "110"
+    }
+  ],
+  "messages": [],
+  "stdout": "orderNumber\tlineCount\ttotalQty\nSO-U-00000567\t5\t110\n",
+  "stderr": "",
+  "execution_time_ms": 1514
+}

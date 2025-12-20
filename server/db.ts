@@ -291,6 +291,12 @@ export async function createPurchaseLines(lines: InsertPurchaseLine[]): Promise<
     try {
       await db.insert(purchaseLines).values(batch).onDuplicateKeyUpdate({
         set: {
+          unleashProductGuid: sql`VALUES(unleashProductGuid)`,
+          productCode: sql`VALUES(productCode)`,
+          productDescription: sql`VALUES(productDescription)`,
+          productType: sql`VALUES(productType)`,
+          productSize: sql`VALUES(productSize)`,
+          productColor: sql`VALUES(productColor)`,
           quantity: sql`VALUES(quantity)`,
           unitPrice: sql`VALUES(unitPrice)`,
         }

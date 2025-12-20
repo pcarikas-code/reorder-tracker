@@ -1,0 +1,14 @@
+{
+  "query": "SELECT COUNT(*) as total, COUNT(DISTINCT unleashLineGuid) as uniqueGuids FROM purchaseLines",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT COUNT(*) as total, COUNT(DISTINCT unleashLineGuid) as uniqueGuids FROM purchaseLines",
+  "rows": [
+    {
+      "total": "1545",
+      "uniqueGuids": "1545"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\tuniqueGuids\n1545\t1545\n",
+  "stderr": "",
+  "execution_time_ms": 1545
+}

@@ -151,7 +151,7 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
         if (!product) { skippedNoProduct++; continue; }
         // No need to check isSporicidalCurtain - allLines already filtered at SQL level
         const parsed = synchub.parseProductCode(product.ProductCode);
-        lineInserts.push({ purchaseId, unleashProductGuid: line.ProductGuid, productCode: product.ProductCode, productDescription: product.ProductDescription, productType: parsed.type, productSize: parsed.size, productColor: parsed.color, quantity: String(line.OrderQuantity), unitPrice: String(line.UnitPrice) });
+        lineInserts.push({ purchaseId, unleashLineGuid: line.LineGuid, unleashProductGuid: line.ProductGuid, productCode: product.ProductCode, productDescription: product.ProductDescription, productType: parsed.type, productSize: parsed.size, productColor: parsed.color, quantity: String(line.OrderQuantity), unitPrice: String(line.UnitPrice) });
       }
       console.log(`[Sync ${syncLogId}] Line processing: ${lineInserts.length} to insert, skipped: ${skippedNoPurchase} no purchase, ${skippedNoProduct} no product`);
       if (lineInserts.length > 0) {

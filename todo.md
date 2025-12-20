@@ -180,3 +180,4 @@
 - [x] Added unique constraint on purchaseLines (purchaseId, unleashProductGuid) to prevent duplicate lines
 - [x] Cleaned up existing duplicate purchase lines in database
 - [x] Review and fix all queries that calculate curtain counts
+- [x] Fix unique constraint on purchaseLines - use unleashLineGuid (SalesOrderLine GUID) not ProductGuid (allows multiple lines with same product)

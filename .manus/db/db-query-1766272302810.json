@@ -1,0 +1,31 @@
+{
+  "query": "SELECT pl.id, pl.productCode, pl.productDescription, pl.quantity, pl.unleashProductGuid FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000567'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT pl.id, pl.productCode, pl.productDescription, pl.quantity, pl.unleashProductGuid FROM purchaseLines pl JOIN purchases p ON pl.purchaseId = p.id WHERE p.orderNumber = 'SO-U-00000567'",
+  "rows": [
+    {
+      "id": "621",
+      "productCode": "smtc-mw-e-ggowh",
+      "productDescription": "Medium Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white",
+      "quantity": "56.00",
+      "unleashProductGuid": "38EF85F4-20D3-43CA-ADD6-7BFCC41D68B8"
+    },
+    {
+      "id": "646",
+      "productCode": "smtc-hw-e-ggowh",
+      "productDescription": "Half Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white",
+      "quantity": "2.00",
+      "unleashProductGuid": "8CB32BAC-0FDF-4BE2-A323-03B502570E9D"
+    },
+    {
+      "id": "685",
+      "productCode": "smtc-fw-e-ggowh",
+      "productDescription": "Full Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white",
+      "quantity": "40.00",
+      "unleashProductGuid": "D471E201-4B2A-433B-A6B1-7BA9A1021CF4"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tproductCode\tproductDescription\tquantity\tunleashProductGuid\n621\tsmtc-mw-e-ggowh\tMedium Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white\t56.00\t38EF85F4-20D3-43CA-ADD6-7BFCC41D68B8\n646\tsmtc-hw-e-ggowh\tHalf Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white\t2.00\t8CB32BAC-0FDF-4BE2-A323-03B502570E9D\n685\tsmtc-fw-e-ggowh\tFull Width Antimicrobial and Sporicidal meshtop disposable: Geometric gold on white\t40.00\tD471E201-4B2A-433B-A6B1-7BA9A1021CF4\n",
+  "stderr": "",
+  "execution_time_ms": 1518
+}
