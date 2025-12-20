@@ -12,6 +12,7 @@ import { AlertTriangle, CheckCircle, Clock, Search, Download, Bell, ExternalLink
 import { Link } from "wouter";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
+import { OrderLink } from "@/components/OrderLink";
 
 type StatusFilter = 'all' | 'on_order' | 'overdue' | 'due_soon' | 'near_soon' | 'far_soon';
 
@@ -242,7 +243,13 @@ export default function Home() {
                         <TableCell>
                           {getStatusBadge(status.status)}
                           {status.orderNumber && (
-                            <span className="ml-2 text-xs text-muted-foreground font-mono">{status.orderNumber}</span>
+                            <span className="ml-2">
+                              <OrderLink 
+                                orderNumber={status.orderNumber}
+                                unleashOrderGuid={status.unleashOrderGuid}
+                                className="text-xs font-mono"
+                              />
+                            </span>
                           )}
                         </TableCell>
                         <TableCell>{status.lastOrderDate ? new Date(status.lastOrderDate).toLocaleDateString() : '-'}</TableCell>

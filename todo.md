@@ -182,3 +182,4 @@
 - [x] Review and fix all queries that calculate curtain counts
 - [x] Fix unique constraint on purchaseLines - use unleashLineGuid (SalesOrderLine GUID) not ProductGuid (allows multiple lines with same product)
 - [x] Make SO-U order numbers clickable to link to Unleashed portal (Hospital Management, Pending Matches, Area Management)
+- [x] Fix clickable links on Reorder Status page (added unleashOrderGuid to AreaReorderStatus)

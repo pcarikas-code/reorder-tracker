@@ -476,6 +476,7 @@ export interface AreaReorderStatus {
   lastPurchaseDate: Date | null; // This is now invoiceDate (or orderDate if no invoice)
   lastOrderDate: Date | null; // The sales order date
   orderNumber: string | null; // The SO-U number for On Order items
+  unleashOrderGuid: string | null; // GUID for linking to Unleashed
   reorderDueDate: Date | null;
   status: 'on_order' | 'overdue' | 'due_soon' | 'near_soon' | 'far_soon';
   daysUntilDue: number | null;
@@ -547,6 +548,7 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
         lastPurchaseDate: lastDelivered?.invoiceDate || null,
         lastOrderDate: onOrderPurchase.orderDate,
         orderNumber: onOrderPurchase.orderNumber,
+        unleashOrderGuid: onOrderPurchase.unleashOrderGuid,
         reorderDueDate: null,
         status: 'on_order',
         daysUntilDue: null,
@@ -584,6 +586,7 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
       lastPurchaseDate: lastDelivered.invoiceDate,
       lastOrderDate: lastDelivered.orderDate,
       orderNumber: null,
+      unleashOrderGuid: null,
       reorderDueDate,
       status,
       daysUntilDue,
