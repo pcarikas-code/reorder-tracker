@@ -1,0 +1,8 @@
+{
+  "query": "SELECT p.id, p.orderNumber, p.rawAreaText, p.customerRef, h.hospitalName \nFROM purchases p \nJOIN hospitals h ON p.hospitalId = h.id \nWHERE p.rawAreaText LIKE '%Wellington Hospital%' \nAND p.areaId IS NULL \nAND p.isExcluded = false\nLIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT p.id, p.orderNumber, p.rawAreaText, p.customerRef, h.hospitalName \nFROM purchases p \nJOIN hospitals h ON p.hospitalId = h.id \nWHERE p.rawAreaText LIKE '%Wellington Hospital%' \nAND p.areaId IS NULL \nAND p.isExcluded = false\nLIMIT 10",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'h.hospitalname' in 'field list'"
+  ]
+}

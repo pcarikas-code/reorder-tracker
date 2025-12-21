@@ -352,7 +352,14 @@ export function parseCustomerRef(ref: string | null): string | null {
   const suffixPatterns = /^(2\s*y(ea)?r?|\d_YR_TEMP|reorder|replacement|changeover|install|due|oct|nov|dec|jan|feb|mar|apr|may|jun|jul|aug|sep|\d{4}(\s+reorder)?|D)$/i;
   const numberOnlyPattern = /^[\d\s&]+$/;
   
-  let bestPart = '';
+  // Area keywords that indicate a meaningful area name part
+  const areaKeywordPattern = /ward|unit|icu|pacu|theatre|clinic|room|rm|bed|floor|level|lvl|endoscopy|dialysis|radiology|recovery|surgery|surgical|medical|med|ortho|stroke|children|maternity|emergency|ed|er|day\s*stay|pre-?op|post-?op|ccu|nicu|mapu|atu|ssu|ssr|ctu|outpatient|inpatient|x-?ray|procedure|admission|zone|care|lounge|transit|reception|waiting|hdu|gastro|spect|ct/i;
+  
+  // Hospital/location patterns that indicate a "Where" component
+  const locationPattern = /hospital|hosp|health|medical\s*centre|medical\s*center|clinic$/i;
+  
+  // Collect meaningful parts
+  const meaningfulParts: string[] = [];
   for (const part of parts) {
     const trimmed = part.trim();
     // Skip empty parts, pure numbers, and suffix patterns
@@ -360,19 +367,34 @@ export function parseCustomerRef(ref: string | null): string | null {
     if (numberOnlyPattern.test(trimmed)) continue;
     if (suffixPatterns.test(trimmed)) continue;
     
-    // This looks like a meaningful part
-    if (!bestPart) {
-      bestPart = trimmed;
-    } else {
-      // If we already have a part, only replace if this one has area keywords
-      const hasAreaKeyword = /ward|unit|icu|pacu|theatre|clinic|room|rm|bed|floor|level|lvl|endoscopy|dialysis|radiology|recovery|surgery|surgical|medical|med|ortho|stroke|children|maternity|emergency|ed|er|day\s*stay|pre-?op|post-?op|ccu|nicu|mapu|atu|ssu|ssr|ctu|outpatient|inpatient|x-?ray|procedure|admission/i;
-      if (hasAreaKeyword.test(trimmed)) {
-        bestPart = trimmed;
-      }
-    }
+    meaningfulParts.push(trimmed);
   }
   
-  text = bestPart || parts[0]?.trim() || text;
+  // Strategy: If we have multiple parts, try to combine "Where" + "What"
+  // e.g., "Wellington Hospital" + "Minor Care Zone" = "Wellington Hospital - Minor Care Zone"
+  if (meaningfulParts.length >= 2) {
+    // Check if first part is a location (Where) and second has area keywords (What)
+    const firstIsLocation = locationPattern.test(meaningfulParts[0]);
+    const secondHasAreaKeyword = areaKeywordPattern.test(meaningfulParts[1]);
+    
+    if (firstIsLocation && secondHasAreaKeyword) {
+      // Combine both parts
+      text = meaningfulParts[0] + ' - ' + meaningfulParts[1];
+    } else if (secondHasAreaKeyword) {
+      // Second part has area keywords, prefer it but keep first if it adds context
+      text = meaningfulParts[1];
+    } else if (areaKeywordPattern.test(meaningfulParts[0])) {
+      // First part has area keywords
+      text = meaningfulParts[0];
+    } else {
+      // Neither has keywords, combine them
+      text = meaningfulParts.slice(0, 2).join(' - ');
+    }
+  } else if (meaningfulParts.length === 1) {
+    text = meaningfulParts[0];
+  } else {
+    text = parts[0]?.trim() || text;
+  }
   
   // Restore protected compound words
   text = text.replace(/X_RAY_TEMP/gi, 'X-Ray');

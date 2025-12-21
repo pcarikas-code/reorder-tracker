@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, orderNumber, rawAreaText, customerRef FROM purchases WHERE rawAreaText LIKE '%Wellington Hospital%' AND areaId IS NULL AND isExcluded = 0 LIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT id, orderNumber, rawAreaText, customerRef FROM purchases WHERE rawAreaText LIKE '%Wellington Hospital%' AND areaId IS NULL AND isExcluded = 0 LIMIT 10",
+  "rows": [
+    {
+      "id": "6562",
+      "orderNumber": "SO-U-00000507",
+      "rawAreaText": "Wellington Hospital",
+      "customerRef": "PO293774 - Wellington Hospital - Minor Care Zone"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torderNumber\trawAreaText\tcustomerRef\n6562\tSO-U-00000507\tWellington Hospital\tPO293774 - Wellington Hospital - Minor Care Zone\n",
+  "stderr": "",
+  "execution_time_ms": 1533
+}
