@@ -1,0 +1,330 @@
+{
+  "query": "SELECT DISTINCT rawAreaText, hospitalId \nFROM purchases \nWHERE rawAreaText IS NOT NULL AND rawAreaText != '' AND areaId IS NULL \nORDER BY hospitalId, rawAreaText \nLIMIT 80",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT DISTINCT rawAreaText, hospitalId \nFROM purchases \nWHERE rawAreaText IS NOT NULL AND rawAreaText != '' AND areaId IS NULL \nORDER BY hospitalId, rawAreaText \nLIMIT 80",
+  "rows": [
+    {
+      "rawAreaText": "Cardio ICU",
+      "hospitalId": "5"
+    },
+    {
+      "rawAreaText": "Medical Blue",
+      "hospitalId": "5"
+    },
+    {
+      "rawAreaText": "extra curtain for Bay 8/9",
+      "hospitalId": "8"
+    },
+    {
+      "rawAreaText": "SO0007567",
+      "hospitalId": "9"
+    },
+    {
+      "rawAreaText": "Extra endoscopy curtain",
+      "hospitalId": "11"
+    },
+    {
+      "rawAreaText": "20",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Gastro Unit swap",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "ICU 5 x Med",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "ICU, Lvl 3 swap",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Level 3 ICU",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Lvl 3 Orthopaedic Clinic",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Lvl 3 Orthopaedics",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Lvl 3 PACU",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "MAPU Replacements",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "MAPU Replacements Balance",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "New HDU",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "New Renal & Urology",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Piko Ward",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Replacement Curtains MAPU",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Rms 5 & 6",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Shinea Kelly, Heike Schoenfelder",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "SSR Lv3 2nd Stage recovery",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Transit Lounge 2yr Change",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Ward 5 South replacements",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Wellington Hospital",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "Wellington Hospital Gastro Unit",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "WRH 6 South",
+      "hospitalId": "12"
+    },
+    {
+      "rawAreaText": "year changeover",
+      "hospitalId": "13"
+    },
+    {
+      "rawAreaText": "2-yr Curtain changeover",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "ASSU",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "ED",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Galbraith Med/Mat [ward 21]",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Galbraith Medical (Ward 21)",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "LVL 5 Gailbraith (A)",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "LVL 5 Gailbraith (B)",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Manukau Super Clinic",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Maternity",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Middlemore Ward 4",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Minimal Assist Unit",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Monitored & Resus 1",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "MSSU",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Paediatric Bed spaces",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Paeds ED",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Puke Delivery Rm 1 + H room blind",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Puke Delivery Rm 2 + I room Blind",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Pukekohe",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Radiology & CT",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Radiology CT Area",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Respite",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Rm 319",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Room 106 screen",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "SLED and WRA Triage",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Toto Ora Dialysis Unit",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Ward 21 Maternity",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Ward 21 Middlemore",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Ward 21 Replacement",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "WRA & Triage",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "Z Boy Rm",
+      "hospitalId": "16"
+    },
+    {
+      "rawAreaText": "(J09727 )",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "(J09729)",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "(J9746) Bay of Islands Renal Unit",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "(Toi Whanau Health Onehunga)",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "/1 Toi Whanau Health",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "/JO9649",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Allevia Epsom Day Stay (J09662)",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "BOI Renal Unit replacement",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Dargaville Hospital General Ward",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Frazerhurst Swaps",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Hastings Health Ctr",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "J09824  Wellington Hosp SPECT/CT",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Kakariki Hospital (J09712)",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Long Stay Surgical",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Mangere Comm Health",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Mangere Community Health Cntr",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Maternity",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "MC9120  Boulcott Hospital Stg 2",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Pasifika Med",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Pukekohe Hosp Prep Room (J03710)",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "Pukekohe Hospital Clinic Rms 19",
+      "hospitalId": "18"
+    },
+    {
+      "rawAreaText": "S.Cross Wairau Theatres",
+      "hospitalId": "18"
+    }
+  ],
+  "messages": [],
+  "stdout": "rawAreaText\thospitalId\nCardio ICU\t5\nMedical Blue\t5\nextra curtain for Bay 8/9\t8\nSO0007567\t9\nExtra endoscopy curtain\t11\n20\t12\nGastro Unit swap\t12\nICU 5 x Med\t12\nICU, Lvl 3 swap\t12\nLevel 3 ICU\t12\nLvl 3 Orthopaedic Clinic\t12\nLvl 3 Orthopaedics\t12\nLvl 3 PACU\t12\nMAPU Replacements\t12\nMAPU Replacements Balance\t12\nNew HDU\t12\nNew Renal & Urology\t12\nPiko Ward\t12\nReplacement Curtains MAPU\t12\nRms 5 & 6\t12\nShinea Kelly, Heike Schoenfelder\t12\nSSR Lv3 2nd Stage recovery\t12\nTransit Lounge 2yr Change\t12\nWard 5 South replacements\t12\nWellington Hospital\t12\nWellington Hospital Gastro Unit\t12\nWRH 6 South\t12\nyear changeover\t13\n2-yr Curtain changeover\t16\nASSU\t16\nED\t16\nGalbraith Med/Mat [ward 21]\t16\nGalbraith Medical (Ward 21)\t16\nLVL 5 Gailbraith (A)\t16\nLVL 5 Gailbraith (B)\t16\nManukau Super Clinic\t16\nMaternity\t16\nMiddlemore Ward 4\t16\nMinimal Assist Unit\t16\nMonitored & Resus 1\t16\nMSSU\t16\nPaediatric Bed spaces\t16\nPaeds ED\t16\nPuke Delivery Rm 1 + H room blind\t16\nPuke Delivery Rm 2 + I room Blind\t16\nPukekohe\t16\nRadiology & CT\t16\nRadiology CT Area\t16\nRespite\t16\nRm 319\t16\nRoom 106 screen\t16\nSLED and WRA Triage\t16\nToto Ora Dialysis Unit\t16\nWard 21 Maternity\t16\nWard 21 Middlemore\t16\nWard 21 Replacement\t16\nWRA & Triage\t16\nZ Boy Rm\t16\n(J09727 )\t18\n(J09729)\t18\n(J9746) Bay of Islands Renal Unit\t18\n(Toi Whanau Health Onehunga)\t18\n/1 Toi Whanau Health\t18\n/JO9649\t18\nAllevia Epsom Day Stay (J09662)\t18\nBOI Renal Unit replacement\t18\nDargaville Hospital General Ward\t18\nFrazerhurst Swaps\t18\nHastings Health Ctr\t18\nJ09824  Wellington Hosp SPECT/CT\t18\nKakariki Hospital (J09712)\t18\nLong Stay Surgical\t18\nMangere Comm Health\t18\nMangere Community Health Cntr\t18\nMaternity\t18\nMC9120  Boulcott Hospital Stg 2\t18\nPasifika Med\t18\nPukekohe Hosp Prep Room (J03710)\t18\nPukekohe Hospital Clinic Rms 19\t18\nS.Cross Wairau Theatres\t18\n",
+  "stderr": "",
+  "execution_time_ms": 1616
+}

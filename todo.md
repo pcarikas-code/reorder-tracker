@@ -189,3 +189,4 @@
 - [x] Add graceful error message when renaming area to a name that already exists for the same hospital
 - [x] Fix sync issue - preserve existing areaId using COALESCE, removed auto-matching logic
 - [x] Implement suggested area matching for Pending Matches (match existing areas first, then suggest new area name)
+- [x] Update suggestion logic to format new area names according to naming convention (Where → What → Location → Sub-location)

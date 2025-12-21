@@ -251,7 +251,12 @@ export const appRouter = router({
           .filter(a => a.hospitalId === purchase.hospitalId)
           .map(a => ({ id: a.id, name: a.name, hospitalId: a.hospitalId }));
         
-        const suggestion = findBestAreaSuggestion(purchase.rawAreaText, hospitalAreas);
+        // Pass hospital name for better formatting of new area suggestions
+        const suggestion = findBestAreaSuggestion(
+          purchase.rawAreaText, 
+          hospitalAreas,
+          (purchase as any).hospitalName || ''
+        );
         suggestions[purchase.id] = suggestion;
       }
       
