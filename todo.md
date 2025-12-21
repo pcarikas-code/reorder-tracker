@@ -184,3 +184,5 @@
 - [x] Make SO-U order numbers clickable to link to Unleashed portal (Hospital Management, Pending Matches, Area Management)
 - [x] Fix clickable links on Reorder Status page (added unleashOrderGuid to AreaReorderStatus)
 - [x] Fix OrderLink URL - changed to use OrderNumber with au.unleashedsoftware.com domain (was using GUID with go.unleashedsoftware.com)
+- [x] Fix On Order status logic - now uses OrderStatus instead of missing invoiceDate
+- [x] Include all Unleashed open order statuses: Placed, Backordered, Parked, 0 To Order, 1 On Order, 2 Ready to Send, 3 To Install, 4 To Invoice

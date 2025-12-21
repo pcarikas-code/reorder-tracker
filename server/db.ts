@@ -492,21 +492,26 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
   const allPurchases = await db.select().from(purchases).orderBy(desc(purchases.orderDate));
   
   // Build two maps:
-  // 1. onOrderByArea: Areas that have a purchase without invoiceDate (On Order)
-  // 2. lastDeliveredByArea: Most recent delivered purchase (with invoiceDate) per area
+  // 1. onOrderByArea: Areas that have an open order (Placed or Backordered status)
+  // 2. lastDeliveredByArea: Most recent delivered purchase (Completed status) per area
   const onOrderByArea = new Map<number, typeof allPurchases[0]>();
   const lastDeliveredByArea = new Map<number, typeof allPurchases[0]>();
+  
+  // Open order statuses that indicate "On Order" (awaiting delivery)
+  // Any status other than 'Completed' means the order is still open
+  const openStatuses = ['Placed', 'Backordered', 'Parked', '0 To Order', '1 On Order', '2 Ready to Send', '3 To Install', '4 To Invoice'];
   
   for (const p of allPurchases) {
     if (!p.areaId || p.isExcluded) continue;
     
-    // Track On Order purchases (no invoiceDate)
-    if (!p.invoiceDate && !onOrderByArea.has(p.areaId)) {
+    // Track On Order purchases (open status: Placed or Backordered)
+    if (openStatuses.includes(p.orderStatus || '') && !onOrderByArea.has(p.areaId)) {
       onOrderByArea.set(p.areaId, p);
     }
     
-    // Track delivered purchases (with invoiceDate) - sorted by orderDate, so first one is most recent
-    if (p.invoiceDate && !lastDeliveredByArea.has(p.areaId)) {
+    // Track delivered purchases (Completed status) - sorted by orderDate, so first one is most recent
+    // Use invoiceDate if available, otherwise use orderDate for Completed orders
+    if (p.orderStatus === 'Completed' && !lastDeliveredByArea.has(p.areaId)) {
       lastDeliveredByArea.set(p.areaId, p);
     }
   }
@@ -557,10 +562,15 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
     }
 
     // No On Order purchase - use the last delivered order for reorder calculations
-    if (!lastDelivered || !lastDelivered.invoiceDate) continue;
+    if (!lastDelivered) continue;
+    
+    // Use invoiceDate for reorder calculations if available, otherwise fall back to orderDate
+    // (Some Completed orders may not have invoice records in Synchub)
+    const deliveryDate = lastDelivered.invoiceDate || lastDelivered.orderDate;
+    if (!deliveryDate) continue;
 
-    // Use invoiceDate for reorder calculations (when curtains were actually delivered)
-    const reorderDueDate = new Date(lastDelivered.invoiceDate.getTime() + twoYearsMs);
+    // Use delivery date for reorder calculations (when curtains were actually delivered)
+    const reorderDueDate = new Date(deliveryDate.getTime() + twoYearsMs);
     const timeDiff = reorderDueDate.getTime() - now.getTime();
     const daysUntilDue = Math.ceil(timeDiff / (24 * 60 * 60 * 1000));
 
@@ -583,7 +593,7 @@ export async function getAreaReorderStatuses(): Promise<AreaReorderStatus[]> {
       areaName: area.name,
       hospitalId: area.hospitalId,
       hospitalName: area.hospitalName,
-      lastPurchaseDate: lastDelivered.invoiceDate,
+      lastPurchaseDate: deliveryDate,
       lastOrderDate: lastDelivered.orderDate,
       orderNumber: null,
       unleashOrderGuid: null,
