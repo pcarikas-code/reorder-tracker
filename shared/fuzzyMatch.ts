@@ -434,6 +434,64 @@ export function formatNewAreaSuggestion(rawAreaText: string, hospitalName: strin
 }
 
 /**
+ * Clean raw area text for matching - remove PO numbers, hospital prefixes, etc.
+ */
+function cleanForMatching(rawText: string, hospitalName: string): string {
+  let text = rawText.trim();
+  
+  // Remove PO numbers (PO123456, PO-123456, P123456)
+  text = text.replace(/\bPO[-\s]?\d+\b/gi, '');
+  text = text.replace(/\bP\d{6,}\b/gi, '');
+  
+  // Remove common hospital location prefixes (these often appear in CustomerRef)
+  const commonPrefixes = [
+    'wellington', 'middlemore', 'whangarei', 'pukekohe', 'manukau', 'mangere',
+    'dargaville', 'wairau', 'tauranga', 'hamilton', 'thames', 'tokoroa',
+    'kenepuru', 'kapiti', 'hutt', 'porirua', 'palmerston', 'hastings',
+    'napier', 'gisborne', 'rotorua', 'taupo', 'whakatane', 'opotiki',
+    'nelson', 'blenheim', 'christchurch', 'timaru', 'dunedin', 'invercargill',
+    'queenstown', 'greymouth', 'hokitika', 'westport', 'ashburton', 'oamaru',
+    'alexandra', 'cromwell', 'wanaka', 'gore', 'balclutha', 'clutha',
+    'north shore', 'waitakere', 'auckland', 'taranaki', 'new plymouth',
+    'galbraith', 'epsom', 'onehunga', 'tamaki'
+  ];
+  
+  // Remove "[Location] Hospital -" patterns AND standalone location prefixes at start
+  for (const prefix of commonPrefixes) {
+    // Remove "Wellington Hospital -" style
+    const patternWithHospital = new RegExp(`\\b${prefix}\\s*(hospital|health)?\\s*[-:]\\s*`, 'gi');
+    text = text.replace(patternWithHospital, '');
+    // Also remove standalone prefix at start (e.g., "Wellington Minor Care Zone" -> "Minor Care Zone")
+    const patternStandalone = new RegExp(`^${prefix}\\s+`, 'gi');
+    text = text.replace(patternStandalone, '');
+  }
+  
+  // Remove hospital name prefix if present
+  if (hospitalName) {
+    // Extract key parts of hospital name for matching
+    const hospitalParts = hospitalName.toLowerCase()
+      .replace(/[-&]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .split(' ')
+      .filter(p => p.length > 2 && !['new', 'zealand', 'health', 'services', 'district', 'board', 'dhb'].includes(p));
+    
+    // Remove hospital name patterns from the text
+    for (const part of hospitalParts) {
+      const pattern = new RegExp(`\\b${part}\\s*(hospital|health)?\\s*[-:]?\\s*`, 'gi');
+      text = text.replace(pattern, '');
+    }
+  }
+  
+  // Remove common separators at the start
+  text = text.replace(/^\s*[-:]+\s*/, '');
+  
+  // Clean up whitespace
+  text = text.replace(/\s+/g, ' ').trim();
+  
+  return text;
+}
+
+/**
  * Find the best area suggestion for a given rawAreaText
  * @param rawAreaText - The area text extracted from CustomerRef
  * @param hospitalAreas - Existing areas for the hospital
@@ -451,11 +509,32 @@ export function findBestAreaSuggestion(
   
   const trimmedText = rawAreaText.trim();
   
+  // Clean the text for better matching
+  const cleanedText = cleanForMatching(trimmedText, hospitalName);
+  
   // Find best matching existing area
   let bestMatch: { area: ExistingArea; confidence: number } | null = null;
   
   for (const area of hospitalAreas) {
-    const confidence = calculateSimilarity(trimmedText, area.name);
+    // Also clean the area name to remove location prefixes for comparison
+    const cleanedAreaName = cleanForMatching(area.name, hospitalName);
+    
+    // Try multiple matching strategies:
+    // 1. Original text vs original area name
+    // 2. Cleaned text vs original area name  
+    // 3. Cleaned text vs cleaned area name
+    // 4. Original text vs cleaned area name
+    const confidenceOriginal = calculateSimilarity(trimmedText, area.name);
+    const confidenceCleanedVsOriginal = calculateSimilarity(cleanedText, area.name);
+    const confidenceCleanedVsCleaned = calculateSimilarity(cleanedText, cleanedAreaName);
+    const confidenceOriginalVsCleaned = calculateSimilarity(trimmedText, cleanedAreaName);
+    
+    const confidence = Math.max(
+      confidenceOriginal,
+      confidenceCleanedVsOriginal,
+      confidenceCleanedVsCleaned,
+      confidenceOriginalVsCleaned
+    );
     
     if (confidence >= CONFIDENCE_THRESHOLD) {
       if (!bestMatch || confidence > bestMatch.confidence) {

@@ -190,3 +190,4 @@
 - [x] Fix sync issue - preserve existing areaId using COALESCE, removed auto-matching logic
 - [x] Implement suggested area matching for Pending Matches (match existing areas first, then suggest new area name)
 - [x] Update suggestion logic to format new area names according to naming convention (Where → What → Location → Sub-location)
+- [x] Fix fuzzy matching: "Minor Care Zone" should match "Wellington Minor Care Zone" not "Wellington Gastro"
