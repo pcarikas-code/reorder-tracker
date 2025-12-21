@@ -188,3 +188,4 @@
 - [x] Include all Unleashed open order statuses: Placed, Backordered, Parked, 0 To Order, 1 On Order, 2 Ready to Send, 3 To Install, 4 To Invoice
 - [x] Add graceful error message when renaming area to a name that already exists for the same hospital
 - [x] Fix sync issue - preserve existing areaId using COALESCE, removed auto-matching logic
+- [x] Implement suggested area matching for Pending Matches (match existing areas first, then suggest new area name)

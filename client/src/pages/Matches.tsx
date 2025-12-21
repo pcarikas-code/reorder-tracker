@@ -6,15 +6,23 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Check, X, ChevronRight, Ban } from "lucide-react";
+import { AlertTriangle, Check, X, ChevronRight, Ban, Sparkles, Link as LinkIcon, Plus } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import { OrderLink } from "@/components/OrderLink";
+
+type Suggestion = {
+  type: 'existing' | 'new';
+  areaId?: number;
+  areaName: string;
+  confidence: number;
+} | null;
 
 export default function Matches() {
   const utils = trpc.useUtils();
   const { data: pendingMatches, isLoading } = trpc.matches.pending.useQuery();
   const { data: areas } = trpc.areas.list.useQuery();
+  const { data: suggestions } = trpc.matches.getSuggestions.useQuery();
 
   const [selectedMatch, setSelectedMatch] = useState<NonNullable<typeof pendingMatches>[number] | null>(null);
   const [areaInput, setAreaInput] = useState("");
@@ -28,6 +36,7 @@ export default function Matches() {
     onSuccess: () => {
       toast.success("Match confirmed");
       utils.matches.pending.invalidate();
+      utils.matches.getSuggestions.invalidate();
       utils.reorders.statuses.invalidate();
       if (goToNextAfterConfirm) {
         goToNextMatch();
@@ -42,6 +51,7 @@ export default function Matches() {
     onSuccess: () => {
       toast.success("New area created and matched");
       utils.matches.pending.invalidate();
+      utils.matches.getSuggestions.invalidate();
       utils.areas.list.invalidate();
       utils.reorders.statuses.invalidate();
       if (goToNextAfterConfirm) {
@@ -57,6 +67,7 @@ export default function Matches() {
     onSuccess: () => {
       toast.success("Order excluded - it won't appear again");
       utils.matches.pending.invalidate();
+      utils.matches.getSuggestions.invalidate();
       goToNextMatch();
     },
     onError: (error) => toast.error(`Failed: ${error.message}`),
@@ -85,6 +96,12 @@ export default function Matches() {
 
   // Determine if this will create a new area
   const isNewArea = areaInput.trim() && !exactMatch && filteredAreas.length === 0;
+
+  // Get suggestion for current match
+  const currentSuggestion = useMemo((): Suggestion => {
+    if (!selectedMatch || !suggestions) return null;
+    return suggestions[selectedMatch.id] || null;
+  }, [selectedMatch, suggestions]);
 
   const closeDialog = () => {
     setSelectedMatch(null);
@@ -120,7 +137,13 @@ export default function Matches() {
 
   const openDialog = (match: NonNullable<typeof pendingMatches>[number]) => {
     setSelectedMatch(match);
-    setAreaInput(match.rawAreaText || "");
+    // Pre-fill with suggestion if available
+    const suggestion = suggestions?.[match.id];
+    if (suggestion?.areaName) {
+      setAreaInput(suggestion.areaName);
+    } else {
+      setAreaInput(match.rawAreaText || "");
+    }
     setShowSuggestions(false);
     setHighlightedIndex(-1);
     // Focus input after dialog opens
@@ -131,6 +154,14 @@ export default function Matches() {
     setAreaInput(areaName);
     setShowSuggestions(false);
     setHighlightedIndex(-1);
+  };
+
+  // Apply suggestion to input
+  const applySuggestion = (suggestion: Suggestion) => {
+    if (suggestion?.areaName) {
+      setAreaInput(suggestion.areaName);
+      setShowSuggestions(false);
+    }
   };
 
   // Handle keyboard navigation in input
@@ -233,6 +264,14 @@ export default function Matches() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedMatch, showSuggestions, canConfirm, confirmMatch.isPending, createNewArea.isPending]);
 
+  // Get suggestion badge color based on confidence
+  const getSuggestionBadgeVariant = (suggestion: Suggestion): "default" | "secondary" | "outline" => {
+    if (!suggestion) return "outline";
+    if (suggestion.type === 'existing' && suggestion.confidence >= 80) return "default";
+    if (suggestion.type === 'existing' && suggestion.confidence >= 60) return "secondary";
+    return "outline";
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -263,54 +302,69 @@ export default function Matches() {
               </div>
             ) : (
               <div className="space-y-4">
-                {pendingMatches.map((match) => (
-                  <div key={match.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="space-y-1 flex-1 min-w-0">
-                      <div className="font-medium truncate">{match.rawAreaText || "No area text"}</div>
-                      <div className="text-sm text-muted-foreground space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-normal">
-                            {(match as any).hospitalName || 'Unknown Hospital'}
-                          </Badge>
-                          <OrderLink 
-                              orderNumber={(match as any).orderNumber || `#${match.purchaseId}`}
-                              unleashOrderGuid={(match as any).unleashOrderGuid}
-                              className="text-xs"
-                            />
-                          {(match as any).orderDate && (
-                            <span className="text-xs">
-                              {new Date((match as any).orderDate).toLocaleDateString()}
-                            </span>
+                {pendingMatches.map((match) => {
+                  const suggestion = suggestions?.[match.id];
+                  return (
+                    <div key={match.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <div className="font-medium truncate">{match.rawAreaText || "No area text"}</div>
+                        <div className="text-sm text-muted-foreground space-y-0.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="font-normal">
+                              {(match as any).hospitalName || 'Unknown Hospital'}
+                            </Badge>
+                            <OrderLink 
+                                orderNumber={(match as any).orderNumber || `#${match.purchaseId}`}
+                                unleashOrderGuid={(match as any).unleashOrderGuid}
+                                className="text-xs"
+                              />
+                            {(match as any).orderDate && (
+                              <span className="text-xs">
+                                {new Date((match as any).orderDate).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                          {/* Show suggestion inline */}
+                          {suggestion && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <Sparkles className="h-3 w-3 text-amber-500" />
+                              <span className="text-xs">
+                                {suggestion.type === 'existing' ? (
+                                  <span className="text-green-600">
+                                    Suggested: <strong>{suggestion.areaName}</strong> ({suggestion.confidence}% match)
+                                  </span>
+                                ) : (
+                                  <span className="text-blue-600">
+                                    Suggest creating: <strong>{suggestion.areaName}</strong>
+                                  </span>
+                                )}
+                              </span>
+                            </div>
                           )}
                         </div>
-                        {(match as any).customerRef && (
-                          <div className="text-xs text-muted-foreground/70 truncate max-w-md" title={(match as any).customerRef}>
-                            Ref: {(match as any).customerRef}
-                          </div>
-                        )}
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => excludeMatch.mutate({ purchaseId: match.id })}
+                          title="Exclude - this order won't appear in pending matches or reorder tracking"
+                          disabled={excludeMatch.isPending}
+                        >
+                          <Ban className="h-4 w-4 mr-1" />
+                          Exclude
+                        </Button>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => openDialog(match)}
+                        >
+                          Resolve
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex gap-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => excludeMatch.mutate({ purchaseId: match.id })}
-                        title="Exclude - this order won't appear in pending matches or reorder tracking"
-                        disabled={excludeMatch.isPending}
-                      >
-                        <Ban className="h-4 w-4 mr-1" />
-                        Exclude
-                      </Button>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => openDialog(match)}
-                      >
-                        Resolve
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -340,6 +394,55 @@ export default function Matches() {
                     className="text-xs"
                   />
                 </div>
+              </div>
+            )}
+
+            {/* Suggestion banner */}
+            {currentSuggestion && (
+              <div className={`p-3 border rounded-lg text-sm flex items-center justify-between ${
+                currentSuggestion.type === 'existing' 
+                  ? 'bg-green-50 border-green-200' 
+                  : 'bg-blue-50 border-blue-200'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <Sparkles className={`h-4 w-4 ${
+                    currentSuggestion.type === 'existing' ? 'text-green-600' : 'text-blue-600'
+                  }`} />
+                  <span>
+                    {currentSuggestion.type === 'existing' ? (
+                      <>
+                        <span className="text-green-700">Suggested match: </span>
+                        <strong className="text-green-800">{currentSuggestion.areaName}</strong>
+                        <Badge variant={getSuggestionBadgeVariant(currentSuggestion)} className="ml-2 text-xs">
+                          {currentSuggestion.confidence}% confidence
+                        </Badge>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-blue-700">No existing match found. Suggest creating: </span>
+                        <strong className="text-blue-800">{currentSuggestion.areaName}</strong>
+                      </>
+                    )}
+                  </span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => applySuggestion(currentSuggestion)}
+                  className={currentSuggestion.type === 'existing' ? 'text-green-700 hover:text-green-800' : 'text-blue-700 hover:text-blue-800'}
+                >
+                  {currentSuggestion.type === 'existing' ? (
+                    <>
+                      <LinkIcon className="h-3 w-3 mr-1" />
+                      Use
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-3 w-3 mr-1" />
+                      Use
+                    </>
+                  )}
+                </Button>
               </div>
             )}
 

@@ -229,6 +229,35 @@ export const appRouter = router({
     // Get all unmatched purchases (areaId IS NULL AND isExcluded = false)
     pending: protectedProcedure.query(async () => db.getUnmatchedPurchases()),
     
+    // Get area suggestions for unmatched purchases using fuzzy matching
+    getSuggestions: protectedProcedure.query(async () => {
+      const unmatched = await db.getUnmatchedPurchases();
+      const allAreas = await db.getAllAreas();
+      
+      // Import fuzzy matching utility
+      const { findBestAreaSuggestion } = await import('../shared/fuzzyMatch');
+      
+      // Generate suggestions for each unmatched purchase
+      const suggestions: Record<number, {
+        type: 'existing' | 'new';
+        areaId?: number;
+        areaName: string;
+        confidence: number;
+      } | null> = {};
+      
+      for (const purchase of unmatched) {
+        // Get areas for this hospital only
+        const hospitalAreas = allAreas
+          .filter(a => a.hospitalId === purchase.hospitalId)
+          .map(a => ({ id: a.id, name: a.name, hospitalId: a.hospitalId }));
+        
+        const suggestion = findBestAreaSuggestion(purchase.rawAreaText, hospitalAreas);
+        suggestions[purchase.id] = suggestion;
+      }
+      
+      return suggestions;
+    }),
+    
     // Link a purchase to an existing area
     confirm: protectedProcedure.input(z.object({ purchaseId: z.number(), areaId: z.number() })).mutation(async ({ input }) => {
       await db.updatePurchase(input.purchaseId, { areaId: input.areaId });
