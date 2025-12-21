@@ -186,3 +186,4 @@
 - [x] Fix OrderLink URL - changed to use OrderNumber with au.unleashedsoftware.com domain (was using GUID with go.unleashedsoftware.com)
 - [x] Fix On Order status logic - now uses OrderStatus instead of missing invoiceDate
 - [x] Include all Unleashed open order statuses: Placed, Backordered, Parked, 0 To Order, 1 On Order, 2 Ready to Send, 3 To Install, 4 To Invoice
+- [x] Add graceful error message when renaming area to a name that already exists for the same hospital

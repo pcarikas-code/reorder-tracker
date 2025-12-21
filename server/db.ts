@@ -814,10 +814,33 @@ export async function getExcludedPurchases() {
 }
 
 // Update area name
-export async function updateAreaName(areaId: number, newName: string): Promise<void> {
+export async function updateAreaName(areaId: number, newName: string): Promise<{ success: boolean; error?: string }> {
   const db = await getDb();
-  if (!db) return;
+  if (!db) return { success: false, error: 'Database not available' };
+  
+  // Get the current area to find its hospital
+  const [currentArea] = await db.select().from(areas).where(eq(areas.id, areaId));
+  if (!currentArea) {
+    return { success: false, error: 'Area not found' };
+  }
+  
+  // Check if an area with the new name already exists for this hospital
+  const [existingArea] = await db.select().from(areas)
+    .where(and(
+      eq(areas.hospitalId, currentArea.hospitalId),
+      eq(areas.name, newName),
+      sql`${areas.id} != ${areaId}`
+    ));
+  
+  if (existingArea) {
+    return { 
+      success: false, 
+      error: `An area named "${newName}" already exists for this hospital. Please use a different name or merge the areas.` 
+    };
+  }
+  
   await db.update(areas).set({ name: newName }).where(eq(areas.id, areaId));
+  return { success: true };
 }
 
 // Get purchases linked to an area with details

@@ -1,0 +1,20 @@
+{
+  "query": "SELECT id, name, hospitalId FROM areas WHERE id = 210038 OR name = 'Southern Cross Hamilton'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT id, name, hospitalId FROM areas WHERE id = 210038 OR name = 'Southern Cross Hamilton'",
+  "rows": [
+    {
+      "id": "210037",
+      "name": "Southern Cross Hamilton",
+      "hospitalId": "18"
+    },
+    {
+      "id": "210038",
+      "name": "SX Hamilton",
+      "hospitalId": "18"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\thospitalId\n210037\tSouthern Cross Hamilton\t18\n210038\tSX Hamilton\t18\n",
+  "stderr": "",
+  "execution_time_ms": 1592
+}

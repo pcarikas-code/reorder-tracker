@@ -2,6 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
 import * as synchub from "./synchub";
@@ -194,7 +195,13 @@ export const appRouter = router({
     byHospital: protectedProcedure.input(z.object({ hospitalId: z.number() })).query(async ({ input }) => db.getAreasByHospital(input.hospitalId)),
     create: protectedProcedure.input(z.object({ hospitalId: z.number(), name: z.string(), normalizedName: z.string().optional() })).mutation(async ({ input }) => db.createArea({ hospitalId: input.hospitalId, name: input.name, normalizedName: input.normalizedName })),
     update: protectedProcedure.input(z.object({ id: z.number(), name: z.string().optional(), normalizedName: z.string().optional(), isConfirmed: z.boolean().optional() })).mutation(async ({ input }) => { const { id, ...data } = input; await db.updateArea(id, data); return { success: true }; }),
-    rename: protectedProcedure.input(z.object({ areaId: z.number(), newName: z.string() })).mutation(async ({ input }) => { await db.updateAreaName(input.areaId, input.newName); return { success: true }; }),
+    rename: protectedProcedure.input(z.object({ areaId: z.number(), newName: z.string() })).mutation(async ({ input }) => {
+      const result = await db.updateAreaName(input.areaId, input.newName);
+      if (!result.success) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: result.error || 'Failed to rename area' });
+      }
+      return { success: true };
+    }),
 
     getPurchases: protectedProcedure.input(z.object({ areaId: z.number() })).query(async ({ input }) => db.getPurchasesForArea(input.areaId)),
     unlinkPurchase: protectedProcedure.input(z.object({ purchaseId: z.number() })).mutation(async ({ input }) => { await db.unlinkPurchaseFromArea(input.purchaseId); return { success: true }; }),

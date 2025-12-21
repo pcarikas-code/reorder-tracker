@@ -1,0 +1,19 @@
+{
+  "query": "SELECT * FROM areas WHERE id = 210038",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT * FROM areas WHERE id = 210038",
+  "rows": [
+    {
+      "id": "210038",
+      "hospitalId": "18",
+      "name": "SX Hamilton",
+      "normalizedName": "NULL",
+      "isConfirmed": "1",
+      "createdAt": "2025-12-19 01:32:12",
+      "updatedAt": "2025-12-19 01:32:12"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\thospitalId\tname\tnormalizedName\tisConfirmed\tcreatedAt\tupdatedAt\n210038\t18\tSX Hamilton\tNULL\t1\t2025-12-19 01:32:12\t2025-12-19 01:32:12\n",
+  "stderr": "",
+  "execution_time_ms": 1528
+}
