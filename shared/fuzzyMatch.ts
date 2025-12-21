@@ -2,10 +2,10 @@
  * Fuzzy matching utility for area name suggestions
  * 
  * Area Naming Convention:
- * 1. Where (town)
- * 2. What (department name or function)
- * 3. Location (building name or level or both)
- * 4. Sub-location (room number)
+ * 1. Where (facility name like "Children's Hospital", "Greenlane", OR city/town like "Wellington", "Kenepuru")
+ * 2. What (department name or function like "Piko Ward", "ED", "PACU")
+ * 3. Location (building name or level like "Lvl 4", "Building A")
+ * 4. Sub-location (room number like "Rm 5", "Rms 5 & 6")
  */
 
 // Levenshtein distance calculation
@@ -84,87 +84,153 @@ export interface ExistingArea {
 
 const CONFIDENCE_THRESHOLD = 60; // Minimum confidence to suggest an existing area
 
-// Known town/location prefixes (Where)
-const TOWN_PATTERNS = [
-  'wellington', 'middlemore', 'whangarei', 'pukekohe', 'manukau', 'mangere',
-  'dargaville', 'wairau', 'tauranga', 'hamilton', 'thames', 'tokoroa',
-  'kenepuru', 'kapiti', 'hutt', 'porirua', 'palmerston', 'hastings',
-  'napier', 'gisborne', 'rotorua', 'taupo', 'whakatane', 'opotiki',
-  'nelson', 'blenheim', 'christchurch', 'timaru', 'dunedin', 'invercargill',
-  'queenstown', 'greymouth', 'hokitika', 'westport', 'ashburton', 'oamaru',
-  'alexandra', 'cromwell', 'wanaka', 'gore', 'balclutha', 'clutha',
-  'north shore', 'waitakere', 'auckland', 'taranaki', 'new plymouth',
-  'waikato', 'bay of plenty', 'hawkes bay', 'tasman', 'marlborough',
-  'west coast', 'canterbury', 'otago', 'southland', 'northland',
-  'galbraith', 'puke', 'allevia', 'epsom', 'onehunga', 'tamaki',
-  'rhoda read', 'kakariki', 'toi whanau'
+// Known facility names (Where) - these are specific hospital/campus names
+// Priority: match these first before falling back to city/town names
+const FACILITY_PATTERNS = [
+  // Hospital campuses
+  "children's hospital", "childrens hospital",
+  "starship", "greenlane", "galbraith", "middlemore",
+  "hutt valley", "kenepuru", "kapiti", "waikanae",
+  "pukekohe", "manukau super clinic", "botany downs",
+  "papakura", "mangere", "north shore", "waitakere",
+  // Regional hospitals
+  "whangarei", "dargaville", "wairau", "tauranga", "hamilton",
+  "thames", "tokoroa", "rotorua", "taupo", "whakatane", "opotiki",
+  "gisborne", "napier", "hastings", "palmerston", "porirua",
+  "nelson", "blenheim", "christchurch", "timaru", "dunedin",
+  "invercargill", "queenstown", "greymouth", "hokitika", "westport",
+  "ashburton", "oamaru", "alexandra", "cromwell", "wanaka", "gore",
+  "balclutha", "clutha", "taranaki", "new plymouth",
+  // Specific facilities
+  "wrh", "wellington regional", "auckland city",
+  "mercy ascot", "epsom", "onehunga", "tamaki",
+  "rhoda read", "kakariki", "toi whanau", "canopy",
+];
+
+// City/town names that can be used as Where if no facility found
+const CITY_PATTERNS = [
+  'wellington', 'auckland', 'christchurch', 'hamilton', 'tauranga',
+  'dunedin', 'palmerston north', 'napier', 'hastings', 'nelson',
+  'rotorua', 'new plymouth', 'whangarei', 'invercargill', 'whanganui',
+  'gisborne', 'blenheim', 'timaru', 'pukekohe', 'taupo',
 ];
 
 // Known department/function keywords (What)
 const DEPARTMENT_PATTERNS = [
-  'ward', 'icu', 'ed', 'emergency', 'theatre', 'theatres', 'surgery', 'surgical',
-  'maternity', 'paediatric', 'pediatric', 'oncology', 'cardiology', 'cardiac',
-  'neurology', 'neurosurgery', 'orthopaedic', 'orthopedic', 'orthopaedics',
-  'radiology', 'ct', 'mri', 'xray', 'x-ray', 'imaging', 'ultrasound',
+  // Wards
+  'ward', 'piko ward', 'kowhai ward', 'heart ward', 'decant ward',
+  // Emergency/Acute
+  'ed', 'ced', 'emergency', 'adult ed', "children's ed", 'kids er',
+  'minor care zone', 'triage', 'resus', 'resuscitation', 'monitored',
+  'assu', 'mssu', 'sled', 'wra',
+  // Critical Care
+  'icu', 'hdu', 'ccu', 'nicu', 'picu', 'pacu', 'mapu', 'edou',
+  'critical care', 'intensive care', 'coronary care',
+  // Surgery/Theatre
+  'theatre', 'theatres', 'surgery', 'surgical', 'day stay', 'day surgical',
+  'ssr', 'holding bays', 'recovery', 'pre-op', 'preop', 'post-op', 'postop',
+  'anaesthetic bays', 'delivery suite',
+  // Specialties
+  'maternity', 'birthing', 'labour', 'labor', 'neonatal', 'special care',
+  'paediatric', 'pediatric', 'oncology', 'cardiology', 'cardiac',
+  'cardiothoracic', 'heart lung', 'stroke', 'neurology', 'neurosurgery',
+  'orthopaedic', 'orthopedic', 'orthopaedics', 'fracture', 'joint',
   'renal', 'dialysis', 'urology', 'gastro', 'gastroenterology',
   'respiratory', 'pulmonary', 'dermatology', 'ophthalmology', 'ent',
-  'dental', 'outpatient', 'outpatients', 'clinic', 'clinics', 'day stay',
-  'day unit', 'day care', 'short stay', 'long stay', 'recovery', 'pacu',
-  'pre-op', 'preop', 'post-op', 'postop', 'ssr', 'hdu', 'ccu', 'nicu', 'picu',
-  'assessment', 'triage', 'resus', 'resuscitation', 'monitored',
-  'medical', 'medicine', 'general', 'acute', 'rehab', 'rehabilitation',
-  'palliative', 'hospice', 'mental health', 'psychiatric', 'psych',
-  'community health', 'primary care', 'gp', 'super clinic', 'health centre',
-  'lounge', 'transit', 'reception', 'waiting', 'prep', 'preparation',
-  'delivery', 'labour', 'labor', 'birthing', 'neonatal', 'special care',
-  'intensive care', 'coronary', 'stroke', 'trauma', 'burns', 'plastics',
-  'vascular', 'thoracic', 'spinal', 'fracture', 'joint', 'endoscopy',
-  'colonoscopy', 'bronchoscopy', 'cath lab', 'angio', 'interventional',
-  'nuclear medicine', 'pet', 'spect', 'mammography', 'fluoroscopy',
+  'dental', 'vascular', 'thoracic', 'spinal', 'burns', 'plastics', 'trauma',
+  // Imaging/Diagnostics
+  'radiology', 'ct', 'ct scanning', 'mri', 'xray', 'x-ray', 'imaging',
+  'ultrasound', 'mammography', 'fluoroscopy', 'nuclear medicine',
+  'pet', 'spect', 'cath lab', 'angio', 'interventional',
+  // Procedures
+  'endoscopy', 'colonoscopy', 'bronchoscopy', 'consults', 'consult rooms',
+  'clinic', 'clinics', 'clinic rms', 'outpatient', 'outpatients',
+  // Rehab/Support
+  'rehab', 'rehabilitation', 'older persons', 'aged care', 'respite',
+  'mental health', 'psychiatric', 'psych', 'palliative', 'hospice',
   'physiotherapy', 'physio', 'occupational therapy', 'ot', 'speech therapy',
+  'gym room',
+  // Other areas
+  'lounge', 'transit lounge', 'reception', 'waiting', 'prep', 'preparation',
+  'admissions', 'discharge', 'district nurse', 'community health',
+  'primary care', 'gp', 'super clinic', 'health centre',
   'pharmacy', 'pathology', 'laboratory', 'lab', 'blood bank', 'transfusion',
   'infection control', 'sterilisation', 'sterile', 'cssd', 'supply',
-  'admin', 'administration', 'records', 'admissions', 'discharge',
-  'flexi', 'minimal assist', 'respite', 'lay-z boy', 'assu', 'mssu'
+  'admin', 'administration', 'records', 'staff changing',
+  'flexi', 'minimal assist', 'lay-z boy', 'sau', 'irw',
+  'ambulatory', 'assessment', 'adult assessment',
+  'inpatient', 'satellite', 'sliding doors',
 ];
 
 // Known location patterns (Location - building/level)
-const LOCATION_PATTERNS = [
-  /\blvl?\s*\d+/i,           // Lvl 3, Level 3, L3
-  /\blevel\s*\d+/i,          // Level 3
-  /\bfloor\s*\d+/i,          // Floor 3
-  /\bbuilding\s*[a-z0-9]+/i, // Building A, Building 1
-  /\bblock\s*[a-z0-9]+/i,    // Block A
-  /\bwing\s*[a-z0-9]+/i,     // Wing A
-  /\b[a-z]\s*wing/i,         // A Wing
-  /\bunit\s*\d+/i,           // Unit 1
-  /\bsouth\b/i,              // South
-  /\bnorth\b/i,              // North
-  /\beast\b/i,               // East
-  /\bwest\b/i,               // West
+const LOCATION_REGEX_PATTERNS = [
+  /\blvl\.?\s*\d+/i,           // Lvl 3, Lvl. 3
+  /\blevel\s*\d+/i,            // Level 3
+  /\bl\s*\d+\b/i,              // L3
+  /\bfloor\s*\d+/i,            // Floor 3
+  /\bbldg\.?\s*\d+/i,          // Bldg 4, Bldg. 4
+  /\bbuilding\s*[a-z0-9]+/i,   // Building A, Building 1
+  /\bblock\s*[a-z0-9]+/i,      // Block A
+  /\bwing\s*[a-z0-9]+/i,       // Wing A
+  /\b[a-z]\s*wing\b/i,         // A Wing
+  /\bunit\s*\d+/i,             // Unit 1
+  /\bsouth\b/i,                // South
+  /\bnorth\b/i,                // North
+  /\beast\b/i,                 // East
+  /\bwest\b/i,                 // West
+  /\b[a-z]\s*side\b/i,         // A Side, Right Side
+  /\bright\s*side/i,           // Right Side
+  /\bleft\s*side/i,            // Left Side
 ];
 
 // Known sub-location patterns (Sub-location - room numbers)
-const SUBLOCATION_PATTERNS = [
-  /\brms\.?\s*[\d&\s,]+/i,   // Rms 5 & 6 - must come before rm
-  /\brm\.?\s*\d+/i,          // Rm 5, Rm. 5
-  /\brooms?\s*[\d&\s,-]+/i,  // Rooms 5-6, Room 5, 6
-  /\broom\.?\s*\d+/i,        // Room 5
-  /\bbays?\s*[\d&\s,-]+/i,   // Bays 1-4
-  /\bbay\.?\s*\d+/i,         // Bay 5
-  /\bbeds?\s*[\d&\s,-]+/i,   // Beds 1-4
-  /\bbed\.?\s*\d+/i,         // Bed 5
-  /\bspaces?\s*[\d&\s,-]+/i, // Spaces 1-4
-  /\bspace\.?\s*\d+/i,       // Space 1
-  /\bcare\s*\d+/i,           // Care 3
-  /\b\d+\s*[-–]\s*\d+\b/,    // 1-6 (range)
+// These patterns should only match room references with specific numbers
+const SUBLOCATION_REGEX_PATTERNS = [
+  /\brms\.?\s*\d[\d&\s,and]*/i,   // Rms 5 & 6, Rms 2, 3 and SAU (must start with digit)
+  /\brm\.?\s*\d+/i,               // Rm 5, Rm. 5
+  /\brooms?\s*\d[\d&\s,-]*/i,     // Rooms 5-6, Room 5, 6 (must start with digit)
+  /\bbays?\s*[\d&\s,-]+/i,        // Bays 1-4
+  /\bbay\s*\d+/i,                 // Bay 5
+  /\bbeds?\s*[\d&\s,-]+/i,        // Beds 1-4
+  /\bbed\s*\d+/i,                 // Bed 5
+  /\bspaces?\s*[\d&\s,-]+/i,      // Spaces 1-4
+  /\bspace\s*\d+/i,               // Space 1
+  /\bcare\s*\d+/i,                // Care 3
+  /\bresus\s*[\d&\s,-]+/i,        // Resus 1-4, Resus 5 and 6
+  /\bchair\s*bays?\b/i,           // Chair Bays
+  /\bbed\s*spaces?\b/i,           // Bed Spaces
+];
+
+// Noise patterns to remove from raw text
+const NOISE_PATTERNS = [
+  /\b\d+\s*[-–]?\s*yr\s*(curtain\s*)?(changeover|change\s*over|replacement)s?\b/gi,
+  /\b\d+\s*[-–]?\s*year\s*(curtain\s*)?(changeover|change\s*over|replacement)s?\b/gi,
+  /\b(curtain\s*)?(changeover|change\s*over|replacement)s?\b/gi,
+  /\bcurtains?\b/gi,
+  /\b2yr\b/gi,
+  /\bchange\b/gi,
+  /\bnew\b/gi,
+  /\breplacements?\b/gi,
+  /\bscreens?\b/gi,
+  /\bPO[-\s]?\d+\b/gi,
+  /\bP\d{6,}\b/gi,
+  /\bCE\d+\b/gi,
+  /\b\d{6,}\b/g,                    // Long numbers (PO numbers without prefix)
+  /\b\d{2}\/\d{2}\/\d{2,4}\b/g,    // Dates
+  /\bacceptance\s*email\b/gi,
+  /\bemail\b/gi,
+  /\bbalance\s*of\s*(curtains?)?\b/gi,
+  /\bhw\b/gi,
+  /\bper\s+[a-z]+\s+[a-z]+\s+email\b/gi, // "Per Patricia Milne email"
+  /\b\d+\s*x\s*(med|lge|sml|small|medium|large)\b/gi, // "5 x Med"
+  /\+/g,                            // Plus signs between PO numbers
 ];
 
 /**
  * Parse rawAreaText and extract components according to naming convention
  */
 interface ParsedArea {
-  where: string | null;      // Town/hospital location
+  where: string | null;      // Facility name or city/town
   what: string | null;       // Department/function
   location: string | null;   // Building/level
   subLocation: string | null; // Room number
@@ -181,100 +247,106 @@ function parseAreaText(rawText: string, hospitalName: string): ParsedArea {
   };
   
   // First clean up noise patterns from the raw text
-  let text = rawText.trim()
-    .replace(/\b\d+\s*[-–]?\s*yr\s*(curtain\s*)?(changeover|change\s*over|replacement)s?\b/gi, '')
-    .replace(/\b\d+\s*[-–]?\s*year\s*(curtain\s*)?(changeover|change\s*over|replacement)s?\b/gi, '')
-    .replace(/\b(curtain\s*)?(changeover|change\s*over|replacement)s?\b/gi, '')
-    .replace(/\bcurtains?\b/gi, '')
-    .replace(/\b2yr\b/gi, '')
-    .replace(/\bchange\b/gi, '')
-    .replace(/\bnew\b/gi, '')
-    .replace(/\breplacements?\b/gi, '')
-    .replace(/\bscreen\b/gi, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  
-  // Extract sub-location (room numbers) first - they're usually at the end
-  for (const pattern of SUBLOCATION_PATTERNS) {
-    const match = text.match(pattern);
-    if (match) {
-      result.subLocation = match[0].trim();
-      text = text.replace(pattern, '').trim();
-    }
+  let text = rawText.trim();
+  for (const pattern of NOISE_PATTERNS) {
+    text = text.replace(pattern, ' ');
   }
+  text = text.replace(/\s*[-–]\s*/g, ' ').replace(/\s+/g, ' ').trim();
   
-  // Extract location (level/building)
-  for (const pattern of LOCATION_PATTERNS) {
-    const match = text.match(pattern);
-    if (match) {
-      if (!result.location) {
-        result.location = match[0].trim();
-      } else {
-        result.location = `${result.location} ${match[0].trim()}`;
-      }
-      text = text.replace(pattern, '').trim();
-    }
-  }
-  
-  // Check for town/location keywords
+  // Look for facility names (Where) FIRST - prioritize these over city names
   const lowerText = text.toLowerCase();
-  for (const town of TOWN_PATTERNS) {
-    if (lowerText.includes(town)) {
-      result.where = capitalizeWords(town);
-      // Don't remove from text - it might be part of the department name
+  for (const facility of FACILITY_PATTERNS) {
+    if (lowerText.includes(facility)) {
+      result.where = capitalizeWords(facility);
+      // Remove the facility name from text to avoid duplication
+      const facilityRegex = new RegExp(`\\b${escapeRegex(facility)}\\b`, 'gi');
+      text = text.replace(facilityRegex, ' ').replace(/\s+/g, ' ').trim();
       break;
     }
   }
   
-  // If no town found, try to extract from hospital name
+  // If a facility was found, also remove any city name prefix (e.g., "Wellington" before "Children's Hospital")
+  if (result.where) {
+    for (const city of CITY_PATTERNS) {
+      const cityRegex = new RegExp(`\\b${escapeRegex(city)}\\b`, 'gi');
+      text = text.replace(cityRegex, ' ').replace(/\s+/g, ' ').trim();
+    }
+  }
+  
+  // Remove "Hospital" suffix when preceded by a city name (e.g., "Wellington Hospital" -> just use the facility/dept)
+  text = text.replace(/\b(wellington|auckland|christchurch|hamilton|dunedin)\s+hospital\s*[-:]?\s*/gi, '');
+  
+  // Handle "Rooms" / "Clinic Rooms" - convert to abbreviation and keep as part of department
+  // "Clinic Rooms" -> "Clinic Rms"
+  // "Rooms Building 4 Level 1" -> "Rms" (keep Rms in department, Building/Level will be extracted as location)
+  text = text.replace(/\bclinic\s+rooms?\b/gi, 'Clinic Rms');
+  text = text.replace(/\brooms?(?=\s+(building|bldg|level|lvl|block|wing))/gi, 'Rms');
+  
+  // Extract sub-location (room numbers) - specific room numbers like "Rm 5", "Rms 5 & 6"
+  for (const pattern of SUBLOCATION_REGEX_PATTERNS) {
+    const match = text.match(pattern);
+    if (match) {
+      result.subLocation = match[0].trim();
+      text = text.replace(pattern, ' ').replace(/\s+/g, ' ').trim();
+      break; // Only take the first match
+    }
+  }
+  
+  // Extract location (level/building) - preserve order as they appear in original text
+  // First, find all matches with their positions
+  const locationMatches: Array<{match: string, index: number}> = [];
+  for (const pattern of LOCATION_REGEX_PATTERNS) {
+    const match = text.match(pattern);
+    if (match && match.index !== undefined) {
+      locationMatches.push({ match: match[0].trim(), index: match.index });
+    }
+  }
+  // Sort by position in text to preserve original order
+  locationMatches.sort((a, b) => a.index - b.index);
+  // Remove matches from text and collect parts
+  for (const lm of locationMatches) {
+    const pattern = new RegExp(escapeRegex(lm.match), 'i');
+    text = text.replace(pattern, ' ').replace(/\s+/g, ' ').trim();
+  }
+  if (locationMatches.length > 0) {
+    result.location = locationMatches.map(lm => lm.match).join(' ');
+  }
+  
+  // If no facility found from text, check hospital name for facility hints
   if (!result.where) {
     const hospitalLower = hospitalName.toLowerCase();
-    for (const town of TOWN_PATTERNS) {
-      if (hospitalLower.includes(town)) {
-        result.where = capitalizeWords(town);
+    for (const facility of FACILITY_PATTERNS) {
+      if (hospitalLower.includes(facility)) {
+        // Don't add city names from hospital name - only specific facilities
+        if (!CITY_PATTERNS.includes(facility)) {
+          result.where = capitalizeWords(facility);
+        }
         break;
       }
     }
   }
   
-  // Check for department keywords
-  const words = text.split(/\s+/);
-  const departmentWords: string[] = [];
-  
-  for (const word of words) {
-    const lowerWord = word.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (DEPARTMENT_PATTERNS.some(dept => {
-      if (typeof dept === 'string') {
-        return lowerWord === dept.replace(/[^a-z0-9]/g, '') || 
-               lowerWord.includes(dept.replace(/[^a-z0-9]/g, ''));
-      }
-      return false;
-    })) {
-      departmentWords.push(word);
-    } else if (word.length > 1 && !/^\d+$/.test(word)) {
-      // Include other meaningful words that aren't just numbers
-      departmentWords.push(word);
-    }
-  }
-  
-  if (departmentWords.length > 0) {
-    // Clean up the department words
-    let deptText = departmentWords.join(' ');
-    // Remove any remaining noise
-    deptText = deptText
-      .replace(/\b\d+\s*[-–]?\s*yr\b/gi, '')
-      .replace(/\bcurtains?\b/gi, '')
-      .replace(/\bchangeover\b/gi, '')
-      .replace(/\bchange\b/gi, '')
-      .replace(/\breplacements?\b/gi, '')
+  // The remaining text should be the department/function (What)
+  if (text.length > 0) {
+    // Clean up and set as department
+    let dept = text
+      .replace(/\s*[-–:]\s*/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
-    if (deptText.length > 0) {
-      result.what = deptText;
+    
+    if (dept.length > 0) {
+      result.what = dept;
     }
   }
   
   return result;
+}
+
+/**
+ * Escape special regex characters
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -287,78 +359,94 @@ function capitalizeWords(str: string): string {
 }
 
 /**
+ * Standardize common abbreviations
+ */
+function standardizeAbbreviations(text: string): string {
+  return text
+    // Medical unit abbreviations - must be uppercase
+    .replace(/\bIcu\b/g, 'ICU')
+    .replace(/\bEd\b/g, 'ED')
+    .replace(/\bCed\b/g, 'CED')
+    .replace(/\bHdu\b/g, 'HDU')
+    .replace(/\bCcu\b/g, 'CCU')
+    .replace(/\bNicu\b/g, 'NICU')
+    .replace(/\bPicu\b/g, 'PICU')
+    .replace(/\bPacu\b/g, 'PACU')
+    .replace(/\bMapu\b/g, 'MAPU')
+    .replace(/\bEdou\b/g, 'EDOU')
+    .replace(/\bSsr\b/g, 'SSR')
+    .replace(/\bSau\b/g, 'SAU')
+    .replace(/\bSapu\b/g, 'SAPU')
+    .replace(/\bAssu\b/g, 'ASSU')
+    .replace(/\bMssu\b/g, 'MSSU')
+    .replace(/\bIrw\b/g, 'IRW')
+    .replace(/\bWrh\b/g, 'WRH')
+    // Imaging abbreviations
+    .replace(/\bCt\b/g, 'CT')
+    .replace(/\bMri\b/g, 'MRI')
+    .replace(/\bEnt\b/g, 'ENT')
+    .replace(/\bPet\b/g, 'PET')
+    // Location abbreviations
+    .replace(/\bLvl\b/g, 'Lvl')
+    .replace(/\bBldg\b/g, 'Bldg')
+    .replace(/\bRm\b/g, 'Rm')
+    .replace(/\bRms\b/g, 'Rms')
+    // Other
+    .replace(/\bGp\b/g, 'GP')
+    .replace(/\bOt\b/g, 'OT');
+}
+
+/**
  * Format area name according to naming convention
  * Convention: Where What Location Sub-location
  */
 function formatAreaName(parsed: ParsedArea): string {
   const parts: string[] = [];
   
-  // Check if the What field already contains the town name
-  const whatLower = (parsed.what || '').toLowerCase();
-  const whereLower = (parsed.where || '').toLowerCase();
-  
-  // Add Where (town) only if it's not already in the What field
-  if (parsed.where && !whatLower.includes(whereLower)) {
+  // Add Where (facility name or city)
+  if (parsed.where) {
     parts.push(parsed.where);
   }
   
   // Add What (department) - this is the main identifier
   if (parsed.what) {
-    // Clean up the department name
-    let dept = parsed.what
-      .replace(/\s+/g, ' ')
-      .trim();
-    
-    // Capitalize properly
-    dept = capitalizeWords(dept);
-    
-    // Standardize common abbreviations
-    dept = dept
-      .replace(/\bIcu\b/g, 'ICU')
-      .replace(/\bEd\b/g, 'ED')
-      .replace(/\bHdu\b/g, 'HDU')
-      .replace(/\bCcu\b/g, 'CCU')
-      .replace(/\bNicu\b/g, 'NICU')
-      .replace(/\bPicu\b/g, 'PICU')
-      .replace(/\bPacu\b/g, 'PACU')
-      .replace(/\bSsr\b/g, 'SSR')
-      .replace(/\bCt\b/g, 'CT')
-      .replace(/\bMri\b/g, 'MRI')
-      .replace(/\bEnt\b/g, 'ENT')
-      .replace(/\bGp\b/g, 'GP')
-      .replace(/\bOt\b/g, 'OT')
-      .replace(/\bAssu\b/g, 'ASSU')
-      .replace(/\bMssu\b/g, 'MSSU');
-    
+    let dept = capitalizeWords(parsed.what);
+    dept = standardizeAbbreviations(dept);
     parts.push(dept);
   }
   
   // Add Location (level/building)
   if (parsed.location) {
     let loc = parsed.location
-      .replace(/\blvl\b/gi, 'Lvl')
-      .replace(/\blevel\b/gi, 'Level')
-      .replace(/\bfloor\b/gi, 'Floor')
-      .replace(/\bbuilding\b/gi, 'Building')
-      .replace(/\bblock\b/gi, 'Block')
-      .replace(/\bwing\b/gi, 'Wing')
-      .replace(/\bunit\b/gi, 'Unit');
+      .replace(/\blvl\.?\s*/gi, 'Lvl ')
+      .replace(/\blevel\s*/gi, 'Lvl ')
+      .replace(/\bl\s*(\d+)\b/gi, 'Lvl $1')
+      .replace(/\bfloor\s*/gi, 'Floor ')
+      .replace(/\bbldg\.?\s*/gi, 'Bldg ')
+      .replace(/\bbuilding\s*/gi, 'Bldg ')
+      .replace(/\bblock\s*/gi, 'Block ')
+      .replace(/\bwing\s*/gi, 'Wing ')
+      .replace(/\bunit\s*/gi, 'Unit ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    loc = capitalizeWords(loc);
     parts.push(loc);
   }
   
   // Add Sub-location (room number)
   if (parsed.subLocation) {
     let subLoc = parsed.subLocation
-      .replace(/\brms\.?\s*/gi, 'Rms ') // Must come before rm to avoid partial replacement
-      .replace(/\brm\.?\s*/gi, 'Rm ')
-      .replace(/\brooms?\s*/gi, 'Room ')
-      .replace(/\bbays?\s*/gi, 'Bay ')
-      .replace(/\bbay\.?\s*/gi, 'Bay ')
-      .replace(/\bbeds?\s*/gi, 'Bed ')
-      .replace(/\bbed\.?\s*/gi, 'Bed ')
+      .replace(/\brms\.?\s*/gi, 'Rms ')
+      .replace(/\brm\.?(?!s)\s*/gi, 'Rm ')  // Negative lookahead to not match 'rms'
+      .replace(/\brooms?\s*/gi, 'Rm ')
+      .replace(/\bbays?\s*/gi, 'Bays ')
+      .replace(/\bbeds?\s*/gi, 'Beds ')
+      .replace(/\bspaces?\s*/gi, 'Spaces ')
       .replace(/\bcare\s*/gi, 'Care ')
-      .replace(/\s+/g, ' '); // Clean up any double spaces
-    parts.push(subLoc.trim());
+      .replace(/\bresus\s*/gi, 'Resus ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    parts.push(subLoc);
   }
   
   // If we couldn't parse anything meaningful, return cleaned original
@@ -366,45 +454,35 @@ function formatAreaName(parsed: ParsedArea): string {
     return cleanAreaName(parsed.original);
   }
   
-  return parts.join(' ').replace(/\s+/g, ' ').trim();
+  let result = parts.join(' ').replace(/\s+/g, ' ').trim();
+  return standardizeAbbreviations(result);
 }
 
 /**
  * Clean up area name - remove noise but keep structure
  */
 function cleanAreaName(name: string): string {
-  let cleaned = name
-    // Remove common noise patterns - order matters!
-    .replace(/\b\d+\s*[-–]?\s*yr\s*(curtain\s*)?(changeover|change\s*over|replacement)s?\b/gi, '')
-    .replace(/\b\d+\s*[-–]?\s*year\s*(curtain\s*)?(changeover|change\s*over|replacement)s?\b/gi, '')
-    .replace(/\b(curtain\s*)?(changeover|change\s*over|replacement)s?\b/gi, '')
-    .replace(/\bcurtains?\b/gi, '')
-    .replace(/\bPO\s*\d+\b/gi, '')
-    .replace(/\bP\d{6,}\b/gi, '')
-    .replace(/\bCE\d+\b/gi, '')
-    .replace(/\b\d{2}\/\d{2}\/\d{2,4}\b/g, '') // Dates
-    .replace(/\bacceptance\s*email\b/gi, '')
-    .replace(/\bemail\b/gi, '')
-    .replace(/\bnew\b/gi, '')
-    .replace(/\bbalance\s*of\s*(curtains?)?\b/gi, '')
-    .replace(/\breplacements?\b/gi, '')
-    .replace(/\bscreen\b/gi, '')
-    .replace(/\bhw\b/gi, '') // HW = Hardware?
-    .replace(/\b2yr\b/gi, '') // 2yr without hyphen
-    .replace(/\bchange\b/gi, '') // standalone change
-    // Clean up punctuation and whitespace
+  let cleaned = name;
+  
+  // Apply noise patterns
+  for (const pattern of NOISE_PATTERNS) {
+    cleaned = cleaned.replace(pattern, ' ');
+  }
+  
+  // Clean up punctuation and whitespace
+  cleaned = cleaned
     .replace(/[,;:]+/g, ' ')
     .replace(/\s*[-–]\s*/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
   
-  // If nothing left after cleaning, return original cleaned of just whitespace
+  // If nothing left after cleaning, return empty string (not original noisy text)
   if (!cleaned || cleaned.length < 2) {
-    return name.trim();
+    return '';
   }
   
   // Capitalize properly
-  return cleaned
+  cleaned = cleaned
     .split(' ')
     .filter(word => word.length > 0)
     .map(word => {
@@ -414,6 +492,8 @@ function cleanAreaName(name: string): string {
       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     })
     .join(' ');
+  
+  return standardizeAbbreviations(cleaned);
 }
 
 /**
@@ -439,54 +519,39 @@ export function formatNewAreaSuggestion(rawAreaText: string, hospitalName: strin
 function cleanForMatching(rawText: string, hospitalName: string): string {
   let text = rawText.trim();
   
-  // Remove PO numbers (PO123456, PO-123456, P123456)
-  text = text.replace(/\bPO[-\s]?\d+\b/gi, '');
-  text = text.replace(/\bP\d{6,}\b/gi, '');
+  // Apply noise patterns
+  for (const pattern of NOISE_PATTERNS) {
+    text = text.replace(pattern, ' ');
+  }
   
-  // Remove common hospital location prefixes (these often appear in CustomerRef)
-  const commonPrefixes = [
-    'wellington', 'middlemore', 'whangarei', 'pukekohe', 'manukau', 'mangere',
-    'dargaville', 'wairau', 'tauranga', 'hamilton', 'thames', 'tokoroa',
-    'kenepuru', 'kapiti', 'hutt', 'porirua', 'palmerston', 'hastings',
-    'napier', 'gisborne', 'rotorua', 'taupo', 'whakatane', 'opotiki',
-    'nelson', 'blenheim', 'christchurch', 'timaru', 'dunedin', 'invercargill',
-    'queenstown', 'greymouth', 'hokitika', 'westport', 'ashburton', 'oamaru',
-    'alexandra', 'cromwell', 'wanaka', 'gore', 'balclutha', 'clutha',
-    'north shore', 'waitakere', 'auckland', 'taranaki', 'new plymouth',
-    'galbraith', 'epsom', 'onehunga', 'tamaki'
-  ];
+  // Remove "[City] Hospital -" patterns
+  text = text.replace(/\b(wellington|auckland|christchurch|hamilton|dunedin|middlemore|whangarei)\s*(hospital|health)?\s*[-:]\s*/gi, '');
   
-  // Remove "[Location] Hospital -" patterns AND standalone location prefixes at start
-  for (const prefix of commonPrefixes) {
-    // Remove "Wellington Hospital -" style
-    const patternWithHospital = new RegExp(`\\b${prefix}\\s*(hospital|health)?\\s*[-:]\\s*`, 'gi');
-    text = text.replace(patternWithHospital, '');
-    // Also remove standalone prefix at start (e.g., "Wellington Minor Care Zone" -> "Minor Care Zone")
-    const patternStandalone = new RegExp(`^${prefix}\\s+`, 'gi');
+  // Remove standalone city prefixes at start
+  for (const city of CITY_PATTERNS) {
+    const patternStandalone = new RegExp(`^${escapeRegex(city)}\\s+`, 'gi');
     text = text.replace(patternStandalone, '');
   }
   
-  // Remove hospital name prefix if present
+  // Remove hospital name parts if present
   if (hospitalName) {
-    // Extract key parts of hospital name for matching
     const hospitalParts = hospitalName.toLowerCase()
       .replace(/[-&]/g, ' ')
       .replace(/\s+/g, ' ')
       .split(' ')
-      .filter(p => p.length > 2 && !['new', 'zealand', 'health', 'services', 'district', 'board', 'dhb'].includes(p));
+      .filter(p => p.length > 2 && !['new', 'zealand', 'health', 'services', 'district', 'board', 'dhb', 'the'].includes(p));
     
-    // Remove hospital name patterns from the text
     for (const part of hospitalParts) {
-      const pattern = new RegExp(`\\b${part}\\s*(hospital|health)?\\s*[-:]?\\s*`, 'gi');
-      text = text.replace(pattern, '');
+      if (CITY_PATTERNS.includes(part)) {
+        // Remove city names followed by "Hospital" or separator
+        const pattern = new RegExp(`\\b${escapeRegex(part)}\\s*(hospital|health)?\\s*[-:]?\\s*`, 'gi');
+        text = text.replace(pattern, '');
+      }
     }
   }
   
-  // Remove common separators at the start
-  text = text.replace(/^\s*[-:]+\s*/, '');
-  
-  // Clean up whitespace
-  text = text.replace(/\s+/g, ' ').trim();
+  // Clean up separators and whitespace
+  text = text.replace(/^\s*[-:]+\s*/, '').replace(/\s+/g, ' ').trim();
   
   return text;
 }
@@ -567,27 +632,16 @@ export function findBestAreaSuggestion(
  * Get suggestions for multiple unmatched purchases
  */
 export function getSuggestionsForPurchases(
-  purchases: Array<{ id: number; rawAreaText: string | null; hospitalId: number; hospitalName?: string }>,
-  allAreas: ExistingArea[]
+  purchases: Array<{ id: number; rawAreaText: string | null; hospitalId: number }>,
+  areasByHospital: Map<number, ExistingArea[]>,
+  hospitalNames: Map<number, string>
 ): Map<number, AreaSuggestion | null> {
   const suggestions = new Map<number, AreaSuggestion | null>();
   
-  // Group areas by hospital for efficient lookup
-  const areasByHospital = new Map<number, ExistingArea[]>();
-  for (const area of allAreas) {
-    const hospitalAreas = areasByHospital.get(area.hospitalId) || [];
-    hospitalAreas.push(area);
-    areasByHospital.set(area.hospitalId, hospitalAreas);
-  }
-  
-  // Find suggestion for each purchase
   for (const purchase of purchases) {
     const hospitalAreas = areasByHospital.get(purchase.hospitalId) || [];
-    const suggestion = findBestAreaSuggestion(
-      purchase.rawAreaText, 
-      hospitalAreas,
-      purchase.hospitalName || ''
-    );
+    const hospitalName = hospitalNames.get(purchase.hospitalId) || '';
+    const suggestion = findBestAreaSuggestion(purchase.rawAreaText, hospitalAreas, hospitalName);
     suggestions.set(purchase.id, suggestion);
   }
   

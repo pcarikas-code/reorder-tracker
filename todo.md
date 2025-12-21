@@ -191,3 +191,4 @@
 - [x] Implement suggested area matching for Pending Matches (match existing areas first, then suggest new area name)
 - [x] Update suggestion logic to format new area names according to naming convention (Where → What → Location → Sub-location)
 - [x] Fix fuzzy matching: "Minor Care Zone" should match "Wellington Minor Care Zone" not "Wellington Gastro"
+- [x] Fix naming convention: Where = facility name (Children's Hospital), What = service (Piko Ward), Location = level/building (Level 4), Sub-location = room

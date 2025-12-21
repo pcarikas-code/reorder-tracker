@@ -99,9 +99,8 @@ describe('formatNewAreaSuggestion - Naming Convention', () => {
 
   it('should clean up changeover/replacement text', () => {
     const result = formatNewAreaSuggestion('2-yr Curtain changeover', 'Counties Manukau');
-    expect(result.toLowerCase()).not.toContain('changeover');
-    expect(result.toLowerCase()).not.toContain('curtain');
-    // The cleaned result should just be the town prefix since the rest is noise
+    // When all content is noise, result should be empty
+    expect(result).toBe('');
   });
 
   it('should format level/location properly', () => {
@@ -163,8 +162,8 @@ describe('formatNewAreaSuggestion - Naming Convention', () => {
   it('should handle complex area names with multiple components', () => {
     const result = formatNewAreaSuggestion('Wellington Hospital Gastro Unit', 'Capital & Coast Health');
     expect(result).toContain('Gastro');
-    // Should include Wellington as the town
-    expect(result.toLowerCase()).toContain('wellington');
+    // Wellington Hospital prefix should be stripped since it's just city + hospital
+    expect(result).toBe('Gastro Unit');
   });
 
   it('should handle orthopaedic clinic with level', () => {
@@ -207,5 +206,93 @@ describe('formatNewAreaSuggestion - Naming Convention', () => {
     const result = formatNewAreaSuggestion('Cardiac Care Lvl 1, Care 3', 'Waikato DHB');
     expect(result).toContain('Cardiac');
     expect(result).toContain('Care');
+  });
+});
+
+describe('formatNewAreaSuggestion - Naming Convention Hierarchy', () => {
+  // Area Naming Convention (hierarchical):
+  // 1. Where (facility name like "Children's Hospital" OR city/town like "Kenepuru")
+  // 2. What (department name or function like "Piko Ward", "ED", "PACU")
+  // 3. Location (building name or level like "Lvl 4", "Bldg A")
+  // 4. Sub-location (room number like "Rm 5", "Rms 5 & 6")
+
+  it('should extract facility name as Where and format correctly', () => {
+    const result = formatNewAreaSuggestion(
+      "296222 + 296654 + 296725 Wellington Children's Hospital Level 4 - Piko Ward",
+      'Capital & Coast Health New Zealand'
+    );
+    expect(result).toBe("Children's Hospital Piko Ward Lvl 4");
+  });
+
+  it('should strip city+hospital prefix when no facility name', () => {
+    const result = formatNewAreaSuggestion(
+      'Wellington Hospital Gastro Unit',
+      'Capital & Coast Health New Zealand'
+    );
+    expect(result).toBe('Gastro Unit');
+  });
+
+  it('should strip PO numbers and city+hospital prefix', () => {
+    const result = formatNewAreaSuggestion(
+      'PO293774 - Wellington Hospital - Minor Care Zone',
+      'Capital & Coast Health New Zealand'
+    );
+    expect(result).toBe('Minor Care Zone');
+  });
+
+  it('should keep facility name like Kenepuru', () => {
+    const result = formatNewAreaSuggestion(
+      'Kenepuru PACU',
+      'Capital & Coast Health New Zealand'
+    );
+    expect(result).toBe('Kenepuru PACU');
+  });
+
+  it('should handle Greenlane with Clinic Rooms and Building/Level', () => {
+    const result = formatNewAreaSuggestion(
+      'Greenlane Clinic Rooms Building 4 Level 1',
+      'Auckland - Health New Zealand'
+    );
+    expect(result).toBe('Greenlane Clinic Rms Bldg 4 Lvl 1');
+  });
+
+  it('should keep facility name like Middlemore with ward', () => {
+    const result = formatNewAreaSuggestion(
+      'Middlemore Ward 21',
+      'Counties Manukau - Health New Zealand'
+    );
+    expect(result).toBe('Middlemore Ward 21');
+  });
+
+  it('should reorder Level before department when Level comes first', () => {
+    const result = formatNewAreaSuggestion(
+      'Lvl 3 ICU',
+      'Capital & Coast Health New Zealand'
+    );
+    expect(result).toBe('ICU Lvl 3');
+  });
+
+  it('should clean noise like 2yr Change', () => {
+    const result = formatNewAreaSuggestion(
+      'Transit Lounge 2yr Change',
+      'Capital & Coast Health New Zealand'
+    );
+    expect(result).toBe('Transit Lounge');
+  });
+
+  it('should handle Hutt Valley as facility name', () => {
+    const result = formatNewAreaSuggestion(
+      'Hutt Valley PACU',
+      'Capital & Coast Health New Zealand'
+    );
+    expect(result).toBe('Hutt Valley PACU');
+  });
+
+  it('should handle Starship as facility name', () => {
+    const result = formatNewAreaSuggestion(
+      'Starship Heart Ward A',
+      'Auckland - Health New Zealand'
+    );
+    expect(result).toBe('Starship Heart Ward A');
   });
 });

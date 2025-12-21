@@ -1,0 +1,610 @@
+{
+  "query": "SELECT a.name as areaName, p.rawAreaText, p.customerRef, h.customerName as hospitalName\nFROM areas a\nJOIN purchases p ON p.areaId = a.id\nJOIN hospitals h ON a.hospitalId = h.id\nWHERE p.rawAreaText IS NOT NULL AND p.rawAreaText != ''\nORDER BY h.customerName, a.name\nLIMIT 100",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT a.name as areaName, p.rawAreaText, p.customerRef, h.customerName as hospitalName\nFROM areas a\nJOIN purchases p ON p.areaId = a.id\nJOIN hospitals h ON a.hospitalId = h.id\nWHERE p.rawAreaText IS NOT NULL AND p.rawAreaText != ''\nORDER BY h.customerName, a.name\nLIMIT 100",
+  "rows": [
+    {
+      "areaName": "Dr's on Riccarton",
+      "rawAreaText": "Dr's on Riccarton",
+      "customerRef": "Dr's on Riccarton",
+      "hospitalName": "About Interiors"
+    },
+    {
+      "areaName": "Dr's on Riccarton",
+      "rawAreaText": "Dr's on Riccarton",
+      "customerRef": "Dr's on Riccarton",
+      "hospitalName": "About Interiors"
+    },
+    {
+      "areaName": "AMU",
+      "rawAreaText": "89 Rebuild",
+      "customerRef": "6092-60-89 Rebuild - New AMU",
+      "hospitalName": "Allevia Hospitals"
+    },
+    {
+      "areaName": "CTU",
+      "rawAreaText": "CTU",
+      "customerRef": "074-40-56 - CTU - New Curtains",
+      "hospitalName": "Allevia Hospitals"
+    },
+    {
+      "areaName": "Mercy Ascot New Build",
+      "rawAreaText": "Mercy Ascot New Build",
+      "customerRef": "6092-60-19 - Mercy Ascot New Build",
+      "hospitalName": "Allevia Hospitals"
+    },
+    {
+      "areaName": "Temp AMU",
+      "rawAreaText": "Temp AMU Track & Curtains",
+      "customerRef": "PO 082-7-4804 - Temp AMU Track & Curtains",
+      "hospitalName": "Allevia Hospitals"
+    },
+    {
+      "areaName": "Adult ED",
+      "rawAreaText": "Adult ED",
+      "customerRef": "4114111 - Adult ED - Auckland Hospital",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "CED",
+      "rawAreaText": "CED",
+      "customerRef": "3985027 - CED 2-yr Changeover - Half Widths - Due Aug 2025 - A ",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "CED",
+      "rawAreaText": "Medium Width",
+      "customerRef": "3996878 - CED 2-yr Changeover - Medium Width - Due Aug 2025 - B",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "CED",
+      "rawAreaText": "CED",
+      "customerRef": "4031843 - CED 2-yr Changeover - Full Width + Installs - Due Aug 2025 - C",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "Children's ED",
+      "rawAreaText": "Children's ED",
+      "customerRef": "PO 3560122 - Children's ED - Full and Half Width Curtains",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "Children's ED",
+      "rawAreaText": "Medium Width",
+      "customerRef": "PO 3582373 - Children's ED - Medium Width",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "Greenlane Clinic Rms  Bldg 4 Lvl 1",
+      "rawAreaText": "Lvl 1 Bldg 4 Clinic Rms",
+      "customerRef": "PO3578953 - Greenlane - Lvl 1 Bldg 4 Clinic Rms",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "Greenlane Clinic Rms Lvl 11",
+      "rawAreaText": "Greenlane Lvl1 Clinic Rms",
+      "customerRef": "4024182 - Greenlane Lvl1 Clinic Rms",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "Older People's Health Gym Room Lvl 13",
+      "rawAreaText": "Gym Room Lvl 13",
+      "customerRef": "3968271 - Older People's Health - Gym Room Lvl 13",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "Pt Chevalier",
+      "rawAreaText": "Pt Chev Track & Curtain",
+      "customerRef": "PO3683794 - Pt Chev Track & Curtain",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "Starship Heart Ward A",
+      "rawAreaText": "Heart Ward A",
+      "customerRef": "PO3659452 - Starship - Heart Ward A",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "Starship Heart Ward B",
+      "rawAreaText": "Heart Ward B",
+      "customerRef": "PO 3676212 - Starship - Heart Ward B",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 48 Cardiothoracic ICU + HDU",
+      "rawAreaText": "Cardiothoracic ICU + HDU",
+      "customerRef": "PO 3765783 -Ward 48 - Cardiothoracic ICU + HDU",
+      "hospitalName": "Auckland - Health New Zealand"
+    },
+    {
+      "areaName": "Recovery",
+      "rawAreaText": "Recovery",
+      "customerRef": "PO 61718 - Recovery",
+      "hospitalName": "Bidwill Trust Hospital"
+    },
+    {
+      "areaName": "Whangarei Hosp Mental Health Unit",
+      "rawAreaText": "Whang Hosp Mental Health Unit",
+      "customerRef": "PO 0217 - Whang Hosp Mental Health Unit",
+      "hospitalName": "Blind Ideas - Northland"
+    },
+    {
+      "areaName": "Day Stay Theatres 4 and 5",
+      "rawAreaText": "New Theatres 4 & 5 Day Stay",
+      "customerRef": "FFETH25048 - New Theatres 4 & 5 Day Stay",
+      "hospitalName": "Boulcott Hospital"
+    },
+    {
+      "areaName": "PACU",
+      "rawAreaText": "PACU",
+      "customerRef": "PMG00056 - PACU 2 yr changeover",
+      "hospitalName": "Boulcott Hospital"
+    },
+    {
+      "areaName": "PACU",
+      "rawAreaText": "PACU",
+      "customerRef": "PACU - Additional Curtains - New Bays",
+      "hospitalName": "Boulcott Hospital"
+    },
+    {
+      "areaName": "PACU",
+      "rawAreaText": "PACU Replacements",
+      "customerRef": "PR00027 - PACU Replacements",
+      "hospitalName": "Boulcott Hospital"
+    },
+    {
+      "areaName": "Ward 1",
+      "rawAreaText": "Ward 1",
+      "customerRef": "Ward 1 - 2yr Replacements",
+      "hospitalName": "Boulcott Hospital"
+    },
+    {
+      "areaName": "Ormiston",
+      "rawAreaText": "Ormiston",
+      "customerRef": "Andrea Edwards acceptance email 03/02/25  Canopy Cancer Ctr - Ormiston",
+      "hospitalName": "Canopy Cancer Care"
+    },
+    {
+      "areaName": "Admissions",
+      "rawAreaText": "Admissions",
+      "customerRef": "PO 280065 - Admissions",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Children's Hospital",
+      "rawAreaText": "Children's Hospital",
+      "customerRef": "PO601732 - Children's Hospital",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Children's Hospital Lvl 2",
+      "rawAreaText": "Level 2",
+      "customerRef": "PO316298  Wellington Children's Hospital - Level 2",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "EB Orthopaedic Clinic Lvl 3",
+      "rawAreaText": "EB Level 3 Orthopaedic Clinic",
+      "customerRef": "360865 - EB Level 3 Orthopaedic Clinic",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "ED",
+      "rawAreaText": "ED",
+      "customerRef": "354770 - ED - 2 year Replacements",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "ED",
+      "rawAreaText": "ED",
+      "customerRef": "554655-21 - ED 2-Yr Replacements ",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "ED",
+      "rawAreaText": "ED",
+      "customerRef": "374493 - ED - Extra Dotty Curtains",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "ED X-Ray",
+      "rawAreaText": "ED X-Ray",
+      "customerRef": "357956 - ED X-Ray",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "EDOU",
+      "rawAreaText": "EDOU",
+      "customerRef": "PO 267406 - EDOU",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Gastro",
+      "rawAreaText": "Gastro",
+      "customerRef": "PO319609 - Gastro - 2 curtains",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Hutt Valley Day Surgical, Consult Rooms 2, 3 and SAU",
+      "rawAreaText": "Day Surgical, Consult Rooms2,3, and SAU  PO 3759818",
+      "customerRef": "Hutt Valley - Day Surgical, Consult Rooms2,3, and SAU  PO 3759818",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Hutt Valley District Nurse Clinic",
+      "rawAreaText": "District Nurse Clinic",
+      "customerRef": "3780012 - District Nurse Clinic - Hutt Valley",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Hutt Valley Older Persons and Rehab Services",
+      "rawAreaText": "Older Persons and Rehab Services (OPRS)",
+      "customerRef": "Hutt Valley - Older Persons and Rehab Services (OPRS)",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "ICU",
+      "rawAreaText": "ICU",
+      "customerRef": "290138 ICU",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "ICU",
+      "rawAreaText": "ICU 5 x Med",
+      "customerRef": "PO278235 - ICU 5 x Med",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "ICU",
+      "rawAreaText": "ICU",
+      "customerRef": "PO261539 - ICU ",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "ICU Level 3",
+      "rawAreaText": "Level 3 ICU",
+      "customerRef": "PO312748 - Level 3 ICU",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "ICU Lvl 3",
+      "rawAreaText": "ICU Lvl 3",
+      "customerRef": "PO324855 -  ICU Lvl 3",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "IRW Lvl 2",
+      "rawAreaText": "IRW Lvl 2",
+      "customerRef": "PO325147 IRW Lvl 2",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Kenepuru CT Scanner",
+      "rawAreaText": "Kenepuru CT Scanner",
+      "customerRef": "360715 - Kenepuru CT Scanner",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Kenepuru PACU",
+      "rawAreaText": "Kenepuru PACU",
+      "customerRef": "601065 - Kenepuru PACU",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Kenepuru SSR",
+      "rawAreaText": "Kenepuru SSR",
+      "customerRef": "PO601200: Kenepuru SSR",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Kowhai Ward",
+      "rawAreaText": "Kowhai Ward",
+      "customerRef": "296211 + 296694 + 296774 - Kowhai Ward",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "MAPU",
+      "rawAreaText": "MAPU",
+      "customerRef": "PO 612186 MAPU - 2 yr Replace",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "MAPU",
+      "rawAreaText": "MAPU",
+      "customerRef": "PO 277340 - MAPU",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "PACU",
+      "rawAreaText": "PACU",
+      "customerRef": "PO237701 - PACU - 2 yr Replacements",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "PACU",
+      "rawAreaText": "PACU",
+      "customerRef": "PO 266341PACU",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "PACU",
+      "rawAreaText": "PACU",
+      "customerRef": "PO 3759818 - Hutt Valley - PACU",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "PACU",
+      "rawAreaText": "PACU",
+      "customerRef": "378638 PACU - Window 14 Curtain",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "PACU",
+      "rawAreaText": "PACU",
+      "customerRef": "340353 - Kenepuru Hospital - PACU",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "PACU",
+      "rawAreaText": "PACU",
+      "customerRef": "Dup PO237701 - PACU - 2 yr Replacements",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "PACU Delivery Suite",
+      "rawAreaText": "PACU Delivery Suite + extra Dotties",
+      "customerRef": "PO319929 - PACU Delivery Suite + extra Dotties",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Radiology",
+      "rawAreaText": "Radiology",
+      "customerRef": "Wellington Hospital - Radiology - PO302618",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Radiology",
+      "rawAreaText": "Radiology",
+      "customerRef": "PO615222 Radiology",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Radiology Staff Changing Rm",
+      "rawAreaText": "Radiology Staff Changing Rm",
+      "customerRef": "PO242470 - Radiology Staff Changing Rm",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "SAPU chair bays",
+      "rawAreaText": "SAPU chair bays",
+      "customerRef": "378783 - SAPU chair bays - F-pod",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "SSR",
+      "rawAreaText": "SSR",
+      "customerRef": "340353 - Kenepuru Hospital - SSR",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "SSR",
+      "rawAreaText": "SSR",
+      "customerRef": "376885 SSR - Due Jan 2026",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "SSR Holding Bays",
+      "rawAreaText": "SSR Holding Bays",
+      "customerRef": "PO 261975 - SSR Holding Bays",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Transit Lounge",
+      "rawAreaText": "Transit Lounge",
+      "customerRef": "385808 - Transit Lounge - 2025 Reorder ",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Ward 5 South",
+      "rawAreaText": "Ward 5 South",
+      "customerRef": "PO 609185 Ward 5 South",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Ward 5 South",
+      "rawAreaText": "Ward 5 South",
+      "customerRef": "PO 608700 - Ward 5 South",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Wellington Gastro Ward 2",
+      "rawAreaText": "Wellington Gastro Ward",
+      "customerRef": "PO 319645 - Wellington Gastro Ward 2 yr replacements",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Wellington Hospital Gastro Unit",
+      "rawAreaText": "Wellington Hospital Gastro Unit",
+      "customerRef": "PO298790 - Wellington Hospital Gastro Unit - Option 1",
+      "hospitalName": "Capital & Coast Health New Zealand"
+    },
+    {
+      "areaName": "Recovery Bays",
+      "rawAreaText": "Recovery Bays",
+      "customerRef": "Recovery Bays - Jemma go-ahead email ",
+      "hospitalName": "Columba Surgical (Health Holdings)"
+    },
+    {
+      "areaName": "Botany Downs Maternity Unit",
+      "rawAreaText": "Botany Downs Maternity Unit",
+      "customerRef": "PO 2660439 (+4 others) CMDHB - Botany Downs Maternity Unit",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Kids ER",
+      "rawAreaText": "Kids ER",
+      "customerRef": "2395938 Kids ER",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Middlemore Ward 6",
+      "rawAreaText": "Middlemore Ward 6",
+      "customerRef": "2761012 -  Middlemore Ward 6",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "MSC Inpatient Dialysis",
+      "rawAreaText": "MSC Inpatient Dialysis",
+      "customerRef": "PO 2664327 - MSC Inpatient Dialysis",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Papakura Primary Birthing Unit",
+      "rawAreaText": "Papakura Primary Birthing Unit",
+      "customerRef": "PO 2758395 - Papakura Primary Birthing Unit",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Papakura Primary Birthing Unit 2",
+      "rawAreaText": "Papakura Primary Birthing Unit 2",
+      "customerRef": "2757335 Papakura Primary Birthing Unit 2",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Pukekohe Aged Care",
+      "rawAreaText": "Pukekohe Aged Care",
+      "customerRef": "2798598 - Pukekohe Aged Care - 2-yr Replacements",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Pukekohe Maternity Clinic Rms",
+      "rawAreaText": "Pukekohe Maternity Clinic Rms",
+      "customerRef": "Pukekohe Maternity Clinic Rms",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Radiology",
+      "rawAreaText": "Radiology",
+      "customerRef": "PO2571996 - Building 58 - Radiology 2-yr changeover",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Rito Dialysis",
+      "rawAreaText": "Rito Dialysis",
+      "customerRef": "PO2590523 - Rito Dialysis 2 yr Install",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Surgical Assessment",
+      "rawAreaText": "Surgical Assessment",
+      "customerRef": "2796749 - SAU - Surgical Assessment",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Toto Ora Dialysis A1",
+      "rawAreaText": "Toto Ora Dialysis A1",
+      "customerRef": "2605484 Toto Ora Dialysis A1 - C3 2yr Rep",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 10",
+      "rawAreaText": "Ward 10",
+      "customerRef": "2602139 Ward 10",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 10",
+      "rawAreaText": "Ward 10",
+      "customerRef": "2810728 - Ward 10 - 2 yr Replacements - due Oct '25",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 10",
+      "rawAreaText": "Ward 10",
+      "customerRef": "PO2677487 - Ward 10 - 15B Replacements + Spares",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 11",
+      "rawAreaText": "Ward 11",
+      "customerRef": "Ward 11",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 11",
+      "rawAreaText": "Ward 11",
+      "customerRef": "2802164 - Ward 11 - 2 yr Replacements",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 32 Gastro",
+      "rawAreaText": "Ward 32 Gastro",
+      "customerRef": "2502495 Ward 32 Gastro",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 33 East",
+      "rawAreaText": "Ward 33 East",
+      "customerRef": "2381504: Ward 33 East",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 33 North",
+      "rawAreaText": "Ward 33 North",
+      "customerRef": "PO2382762 Ward 33 North",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 5",
+      "rawAreaText": "Ward 5",
+      "customerRef": "2792643 - Ward 5-2 yr replacements (B)",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 5",
+      "rawAreaText": "Ward 5",
+      "customerRef": "2792501 - Ward 5- 2 yr replacements (C)",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 5",
+      "rawAreaText": "Ward 5",
+      "customerRef": "Ward 5 - Nikki Hickmott",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 5",
+      "rawAreaText": "Ward 5",
+      "customerRef": "2781408 - Ward 5- 2 yr replacements (A - partial)",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 6",
+      "rawAreaText": "Ward 6",
+      "customerRef": "2791492 - Balance of Curtains - 2-yr Changeover - Ward 6",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 7",
+      "rawAreaText": "Ward 7",
+      "customerRef": "2761037 Ward 7 - ChOv",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Ward 7",
+      "rawAreaText": "Ward 7",
+      "customerRef": "2555835 - Ward 7- Spares 2",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    },
+    {
+      "areaName": "Western Dialysis",
+      "rawAreaText": "Western Dialysis",
+      "customerRef": "PO 2663878 - Western Dialysis ",
+      "hospitalName": "Counties Manukau - Health New Zealand"
+    }
+  ],
+  "messages": [],
+  "stdout": "areaName\trawAreaText\tcustomerRef\thospitalName\nDr's on Riccarton\tDr's on Riccarton\tDr's on Riccarton\tAbout Interiors\nDr's on Riccarton\tDr's on Riccarton\tDr's on Riccarton\tAbout Interiors\nAMU\t89 Rebuild\t6092-60-89 Rebuild - New AMU\tAllevia Hospitals\nCTU\tCTU\t074-40-56 - CTU - New Curtains\tAllevia Hospitals\nMercy Ascot New Build\tMercy Ascot New Build\t6092-60-19 - Mercy Ascot New Build\tAllevia Hospitals\nTemp AMU\tTemp AMU Track & Curtains\tPO 082-7-4804 - Temp AMU Track & Curtains\tAllevia Hospitals\nAdult ED\tAdult ED\t4114111 - Adult ED - Auckland Hospital\tAuckland - Health New Zealand\nCED\tCED\t3985027 - CED 2-yr Changeover - Half Widths - Due Aug 2025 - A \tAuckland - Health New Zealand\nCED\tMedium Width\t3996878 - CED 2-yr Changeover - Medium Width - Due Aug 2025 - B\tAuckland - Health New Zealand\nCED\tCED\t4031843 - CED 2-yr Changeover - Full Width + Installs - Due Aug 2025 - C\tAuckland - Health New Zealand\nChildren's ED\tChildren's ED\tPO 3560122 - Children's ED - Full and Half Width Curtains\tAuckland - Health New Zealand\nChildren's ED\tMedium Width\tPO 3582373 - Children's ED - Medium Width\tAuckland - Health New Zealand\nGreenlane Clinic Rms  Bldg 4 Lvl 1\tLvl 1 Bldg 4 Clinic Rms\tPO3578953 - Greenlane - Lvl 1 Bldg 4 Clinic Rms\tAuckland - Health New Zealand\nGreenlane Clinic Rms Lvl 11\tGreenlane Lvl1 Clinic Rms\t4024182 - Greenlane Lvl1 Clinic Rms\tAuckland - Health New Zealand\nOlder People's Health Gym Room Lvl 13\tGym Room Lvl 13\t3968271 - Older People's Health - Gym Room Lvl 13\tAuckland - Health New Zealand\nPt Chevalier\tPt Chev Track & Curtain\tPO3683794 - Pt Chev Track & Curtain\tAuckland - Health New Zealand\nStarship Heart Ward A\tHeart Ward A\tPO3659452 - Starship - Heart Ward A\tAuckland - Health New Zealand\nStarship Heart Ward B\tHeart Ward B\tPO 3676212 - Starship - Heart Ward B\tAuckland - Health New Zealand\nWard 48 Cardiothoracic ICU + HDU\tCardiothoracic ICU + HDU\tPO 3765783 -Ward 48 - Cardiothoracic ICU + HDU\tAuckland - Health New Zealand\nRecovery\tRecovery\tPO 61718 - Recovery\tBidwill Trust Hospital\nWhangarei Hosp Mental Health Unit\tWhang Hosp Mental Health Unit\tPO 0217 - Whang Hosp Mental Health Unit\tBlind Ideas - Northland\nDay Stay Theatres 4 and 5\tNew Theatres 4 & 5 Day Stay\tFFETH25048 - New Theatres 4 & 5 Day Stay\tBoulcott Hospital\nPACU\tPACU\tPMG00056 - PACU 2 yr changeover\tBoulcott Hospital\nPACU\tPACU\tPACU - Additional Curtains - New Bays\tBoulcott Hospital\nPACU\tPACU Replacements\tPR00027 - PACU Replacements\tBoulcott Hospital\nWard 1\tWard 1\tWard 1 - 2yr Replacements\tBoulcott Hospital\nOrmiston\tOrmiston\tAndrea Edwards acceptance email 03/02/25  Canopy Cancer Ctr - Ormiston\tCanopy Cancer Care\nAdmissions\tAdmissions\tPO 280065 - Admissions\tCapital & Coast Health New Zealand\nChildren's Hospital\tChildren's Hospital\tPO601732 - Children's Hospital\tCapital & Coast Health New Zealand\nChildren's Hospital Lvl 2\tLevel 2\tPO316298  Wellington Children's Hospital - Level 2\tCapital & Coast Health New Zealand\nEB Orthopaedic Clinic Lvl 3\tEB Level 3 Orthopaedic Clinic\t360865 - EB Level 3 Orthopaedic Clinic\tCapital & Coast Health New Zealand\nED\tED\t354770 - ED - 2 year Replacements\tCapital & Coast Health New Zealand\nED\tED\t554655-21 - ED 2-Yr Replacements \tCapital & Coast Health New Zealand\nED\tED\t374493 - ED - Extra Dotty Curtains\tCapital & Coast Health New Zealand\nED X-Ray\tED X-Ray\t357956 - ED X-Ray\tCapital & Coast Health New Zealand\nEDOU\tEDOU\tPO 267406 - EDOU\tCapital & Coast Health New Zealand\nGastro\tGastro\tPO319609 - Gastro - 2 curtains\tCapital & Coast Health New Zealand\nHutt Valley Day Surgical, Consult Rooms 2, 3 and SAU\tDay Surgical, Consult Rooms2,3, and SAU  PO 3759818\tHutt Valley - Day Surgical, Consult Rooms2,3, and SAU  PO 3759818\tCapital & Coast Health New Zealand\nHutt Valley District Nurse Clinic\tDistrict Nurse Clinic\t3780012 - District Nurse Clinic - Hutt Valley\tCapital & Coast Health New Zealand\nHutt Valley Older Persons and Rehab Services\tOlder Persons and Rehab Services (OPRS)\tHutt Valley - Older Persons and Rehab Services (OPRS)\tCapital & Coast Health New Zealand\nICU\tICU\t290138 ICU\tCapital & Coast Health New Zealand\nICU\tICU 5 x Med\tPO278235 - ICU 5 x Med\tCapital & Coast Health New Zealand\nICU\tICU\tPO261539 - ICU \tCapital & Coast Health New Zealand\nICU Level 3\tLevel 3 ICU\tPO312748 - Level 3 ICU\tCapital & Coast Health New Zealand\nICU Lvl 3\tICU Lvl 3\tPO324855 -  ICU Lvl 3\tCapital & Coast Health New Zealand\nIRW Lvl 2\tIRW Lvl 2\tPO325147 IRW Lvl 2\tCapital & Coast Health New Zealand\nKenepuru CT Scanner\tKenepuru CT Scanner\t360715 - Kenepuru CT Scanner\tCapital & Coast Health New Zealand\nKenepuru PACU\tKenepuru PACU\t601065 - Kenepuru PACU\tCapital & Coast Health New Zealand\nKenepuru SSR\tKenepuru SSR\tPO601200: Kenepuru SSR\tCapital & Coast Health New Zealand\nKowhai Ward\tKowhai Ward\t296211 + 296694 + 296774 - Kowhai Ward\tCapital & Coast Health New Zealand\nMAPU\tMAPU\tPO 612186 MAPU - 2 yr Replace\tCapital & Coast Health New Zealand\nMAPU\tMAPU\tPO 277340 - MAPU\tCapital & Coast Health New Zealand\nPACU\tPACU\tPO237701 - PACU - 2 yr Replacements\tCapital & Coast Health New Zealand\nPACU\tPACU\tPO 266341PACU\tCapital & Coast Health New Zealand\nPACU\tPACU\tPO 3759818 - Hutt Valley - PACU\tCapital & Coast Health New Zealand\nPACU\tPACU\t378638 PACU - Window 14 Curtain\tCapital & Coast Health New Zealand\nPACU\tPACU\t340353 - Kenepuru Hospital - PACU\tCapital & Coast Health New Zealand\nPACU\tPACU\tDup PO237701 - PACU - 2 yr Replacements\tCapital & Coast Health New Zealand\nPACU Delivery Suite\tPACU Delivery Suite + extra Dotties\tPO319929 - PACU Delivery Suite + extra Dotties\tCapital & Coast Health New Zealand\nRadiology\tRadiology\tWellington Hospital - Radiology - PO302618\tCapital & Coast Health New Zealand\nRadiology\tRadiology\tPO615222 Radiology\tCapital & Coast Health New Zealand\nRadiology Staff Changing Rm\tRadiology Staff Changing Rm\tPO242470 - Radiology Staff Changing Rm\tCapital & Coast Health New Zealand\nSAPU chair bays\tSAPU chair bays\t378783 - SAPU chair bays - F-pod\tCapital & Coast Health New Zealand\nSSR\tSSR\t340353 - Kenepuru Hospital - SSR\tCapital & Coast Health New Zealand\nSSR\tSSR\t376885 SSR - Due Jan 2026\tCapital & Coast Health New Zealand\nSSR Holding Bays\tSSR Holding Bays\tPO 261975 - SSR Holding Bays\tCapital & Coast Health New Zealand\nTransit Lounge\tTransit Lounge\t385808 - Transit Lounge - 2025 Reorder \tCapital & Coast Health New Zealand\nWard 5 South\tWard 5 South\tPO 609185 Ward 5 South\tCapital & Coast Health New Zealand\nWard 5 South\tWard 5 South\tPO 608700 - Ward 5 South\tCapital & Coast Health New Zealand\nWellington Gastro Ward 2\tWellington Gastro Ward\tPO 319645 - Wellington Gastro Ward 2 yr replacements\tCapital & Coast Health New Zealand\nWellington Hospital Gastro Unit\tWellington Hospital Gastro Unit\tPO298790 - Wellington Hospital Gastro Unit - Option 1\tCapital & Coast Health New Zealand\nRecovery Bays\tRecovery Bays\tRecovery Bays - Jemma go-ahead email \tColumba Surgical (Health Holdings)\nBotany Downs Maternity Unit\tBotany Downs Maternity Unit\tPO 2660439 (+4 others) CMDHB - Botany Downs Maternity Unit\tCounties Manukau - Health New Zealand\nKids ER\tKids ER\t2395938 Kids ER\tCounties Manukau - Health New Zealand\nMiddlemore Ward 6\tMiddlemore Ward 6\t2761012 -  Middlemore Ward 6\tCounties Manukau - Health New Zealand\nMSC Inpatient Dialysis\tMSC Inpatient Dialysis\tPO 2664327 - MSC Inpatient Dialysis\tCounties Manukau - Health New Zealand\nPapakura Primary Birthing Unit\tPapakura Primary Birthing Unit\tPO 2758395 - Papakura Primary Birthing Unit\tCounties Manukau - Health New Zealand\nPapakura Primary Birthing Unit 2\tPapakura Primary Birthing Unit 2\t2757335 Papakura Primary Birthing Unit 2\tCounties Manukau - Health New Zealand\nPukekohe Aged Care\tPukekohe Aged Care\t2798598 - Pukekohe Aged Care - 2-yr Replacements\tCounties Manukau - Health New Zealand\nPukekohe Maternity Clinic Rms\tPukekohe Maternity Clinic Rms\tPukekohe Maternity Clinic Rms\tCounties Manukau - Health New Zealand\nRadiology\tRadiology\tPO2571996 - Building 58 - Radiology 2-yr changeover\tCounties Manukau - Health New Zealand\nRito Dialysis\tRito Dialysis\tPO2590523 - Rito Dialysis 2 yr Install\tCounties Manukau - Health New Zealand\nSurgical Assessment\tSurgical Assessment\t2796749 - SAU - Surgical Assessment\tCounties Manukau - Health New Zealand\nToto Ora Dialysis A1\tToto Ora Dialysis A1\t2605484 Toto Ora Dialysis A1 - C3 2yr Rep\tCounties Manukau - Health New Zealand\nWard 10\tWard 10\t2602139 Ward 10\tCounties Manukau - Health New Zealand\nWard 10\tWard 10\t2810728 - Ward 10 - 2 yr Replacements - due Oct '25\tCounties Manukau - Health New Zealand\nWard 10\tWard 10\tPO2677487 - Ward 10 - 15B Replacements + Spares\tCounties Manukau - Health New Zealand\nWard 11\tWard 11\tWard 11\tCounties Manukau - Health New Zealand\nWard 11\tWard 11\t2802164 - Ward 11 - 2 yr Replacements\tCounties Manukau - Health New Zealand\nWard 32 Gastro\tWard 32 Gastro\t2502495 Ward 32 Gastro\tCounties Manukau - Health New Zealand\nWard 33 East\tWard 33 East\t2381504: Ward 33 East\tCounties Manukau - Health New Zealand\nWard 33 North\tWard 33 North\tPO2382762 Ward 33 North\tCounties Manukau - Health New Zealand\nWard 5\tWard 5\t2792643 - Ward 5-2 yr replacements (B)\tCounties Manukau - Health New Zealand\nWard 5\tWard 5\t2792501 - Ward 5- 2 yr replacements (C)\tCounties Manukau - Health New Zealand\nWard 5\tWard 5\tWard 5 - Nikki Hickmott\tCounties Manukau - Health New Zealand\nWard 5\tWard 5\t2781408 - Ward 5- 2 yr replacements (A - partial)\tCounties Manukau - Health New Zealand\nWard 6\tWard 6\t2791492 - Balance of Curtains - 2-yr Changeover - Ward 6\tCounties Manukau - Health New Zealand\nWard 7\tWard 7\t2761037 Ward 7 - ChOv\tCounties Manukau - Health New Zealand\nWard 7\tWard 7\t2555835 - Ward 7- Spares 2\tCounties Manukau - Health New Zealand\nWestern Dialysis\tWestern Dialysis\tPO 2663878 - Western Dialysis \tCounties Manukau - Health New Zealand\n",
+  "stderr": "",
+  "execution_time_ms": 1694
+}
