@@ -260,7 +260,10 @@ export async function batchUpsertPurchases(purchaseList: InsertPurchase[]): Prom
         set: {
           orderDate: sql`VALUES(orderDate)`,
           invoiceDate: sql`VALUES(invoiceDate)`,
-          areaId: sql`VALUES(areaId)`,
+          // Preserve existing areaId if already set (manual matches), only update if:
+          // 1. Current areaId is NULL (not yet matched), AND
+          // 2. New areaId is NOT NULL (sync found a match)
+          areaId: sql`COALESCE(purchases.areaId, VALUES(areaId))`,
           customerRef: sql`VALUES(customerRef)`,
           rawAreaText: sql`VALUES(rawAreaText)`,
           orderStatus: sql`VALUES(orderStatus)`,

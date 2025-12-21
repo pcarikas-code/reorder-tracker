@@ -52,8 +52,7 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     const allHospitals = await db.getAllHospitals();
     const hospitalMap = new Map<string, number>();
     for (const h of allHospitals) hospitalMap.set(h.unleashGuid, h.id);
-    const allAreas = await db.getAllAreas();
-    console.log(`[Sync ${syncLogId}] Reference data: ${allHospitals.length} hospitals, ${allAreas.length} areas`);
+    console.log(`[Sync ${syncLogId}] Reference data: ${allHospitals.length} hospitals`);
     
     // Check for cancellation
     if (await checkSyncCancelled(syncLogId)) {
@@ -86,28 +85,22 @@ async function runSyncInBackground(syncLogId: number, sinceDate?: Date): Promise
     const purchasesToUpsert: Parameters<typeof db.batchUpsertPurchases>[0] = [];
     
     let skippedNoHospital = 0;
-    let skippedNoRawArea = 0;
     let skippedNoEndurocide = 0;
-    let matchedToArea = 0;
     for (const order of orders) {
       // Skip orders that don't have any Endurocide products
       if (!ordersWithEndurocide.has(order.Guid.toLowerCase())) { skippedNoEndurocide++; continue; }
       
       const hospitalId = hospitalMap.get(order.CustomerGuid);
       if (!hospitalId) { skippedNoHospital++; continue; }
+      
+      // Extract area text from CustomerRef for display purposes only
+      // Area matching is done manually through the Pending Matches page
       const rawAreaText = synchub.parseCustomerRef(order.CustomerRef);
-      let areaId: number | undefined;
-      if (rawAreaText) {
-        const directMatch = allAreas.find(a => a.hospitalId === hospitalId && (a.name.toLowerCase() === rawAreaText.toLowerCase() || a.normalizedName?.toLowerCase() === rawAreaText.toLowerCase()));
-        if (directMatch) { areaId = directMatch.id; matchedToArea++; }
-
-      } else {
-        skippedNoRawArea++;
-      }
-      purchasesToUpsert.push({ unleashOrderGuid: order.Guid, orderNumber: order.OrderNumber, orderDate: order.OrderDate, invoiceDate: order.InvoiceDate || null, hospitalId, areaId, customerRef: order.CustomerRef, rawAreaText, orderStatus: order.OrderStatus });
+      
+      // Don't set areaId during sync - preserve existing manual matches via COALESCE in batchUpsertPurchases
+      purchasesToUpsert.push({ unleashOrderGuid: order.Guid, orderNumber: order.OrderNumber, orderDate: order.OrderDate, invoiceDate: order.InvoiceDate || null, hospitalId, areaId: undefined, customerRef: order.CustomerRef, rawAreaText, orderStatus: order.OrderStatus });
     }
-    const unmatchedCount = purchasesToUpsert.filter(p => !p.areaId && p.rawAreaText).length;
-    console.log(`[Sync ${syncLogId}] Order processing: ${skippedNoEndurocide} skipped (no Endurocide products), ${skippedNoHospital} skipped (no hospital), ${skippedNoRawArea} skipped (no area text), ${matchedToArea} matched to existing areas, ${unmatchedCount} need matching`);
+    console.log(`[Sync ${syncLogId}] Order processing: ${skippedNoEndurocide} skipped (no Endurocide products), ${skippedNoHospital} skipped (no hospital), ${purchasesToUpsert.length} orders to process`);
     
     // Check for cancellation
     if (await checkSyncCancelled(syncLogId)) {
