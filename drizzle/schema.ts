@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean, json, uniqueIndex } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean, json, uniqueIndex, index } from "drizzle-orm/mysql-core";
 
 // Core user table backing auth flow
 export const users = mysqlTable("users", {
@@ -40,6 +40,7 @@ export const areas = mysqlTable("areas", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({
   uniqueHospitalArea: uniqueIndex("unique_hospital_area").on(table.hospitalId, table.name),
+  hospitalIdx: index("idx_areas_hospital").on(table.hospitalId),
 }));
 
 export type Area = typeof areas.$inferSelect;
@@ -75,7 +76,13 @@ export const purchases = mysqlTable("purchases", {
   excludeReason: varchar("excludeReason", { length: 255 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  hospitalIdx: index("idx_purchases_hospital").on(table.hospitalId),
+  areaIdx: index("idx_purchases_area").on(table.areaId),
+  hospitalAreaIdx: index("idx_purchases_hospital_area").on(table.hospitalId, table.areaId),
+  orderDateIdx: index("idx_purchases_order_date").on(table.orderDate),
+  invoiceDateIdx: index("idx_purchases_invoice_date").on(table.invoiceDate),
+}));
 
 export type Purchase = typeof purchases.$inferSelect;
 export type InsertPurchase = typeof purchases.$inferInsert;
@@ -97,6 +104,8 @@ export const purchaseLines = mysqlTable("purchaseLines", {
 }, (table) => ({
   // Unique constraint to prevent duplicate lines - use line GUID which is unique per line
   uniquePurchaseLine: uniqueIndex("unique_purchase_line").on(table.purchaseId, table.unleashLineGuid),
+  purchaseIdx: index("idx_purchaselines_purchase").on(table.purchaseId),
+  productTypeIdx: index("idx_purchaselines_product_type").on(table.productType),
 }));
 
 export type PurchaseLine = typeof purchaseLines.$inferSelect;

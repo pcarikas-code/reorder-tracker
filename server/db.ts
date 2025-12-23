@@ -1062,77 +1062,75 @@ export async function getHospitalRegister(hospitalId: number): Promise<HospitalR
   const db = await getDb();
   if (!db) return [];
 
-  // Get all areas that have purchases for this hospital
-  // Note: We filter by purchase.hospitalId, not area.hospitalId, because
-  // areas might be shared across hospitals or have incorrect hospitalId
-  const areasWithPurchases = await db
+  // OPTIMIZED: Single query to get all purchases for this hospital with area info
+  const allPurchases = await db
     .select({
-      areaId: areas.id,
+      purchaseId: purchases.id,
+      areaId: purchases.areaId,
       areaName: areas.name,
+      orderDate: purchases.orderDate,
+      invoiceDate: purchases.invoiceDate,
+      orderNumber: purchases.orderNumber,
     })
-    .from(areas)
-    .innerJoin(purchases, eq(areas.id, purchases.areaId))
+    .from(purchases)
+    .innerJoin(areas, eq(purchases.areaId, areas.id))
     .where(eq(purchases.hospitalId, hospitalId))
-    .groupBy(areas.id, areas.name);
+    .orderBy(desc(purchases.invoiceDate), desc(purchases.orderDate));
 
-  if (areasWithPurchases.length === 0) return [];
+  if (allPurchases.length === 0) return [];
+
+  // Get all purchase IDs for bulk line query
+  const purchaseIds = allPurchases.map(p => p.purchaseId);
+
+  // OPTIMIZED: Single query to get all purchase lines
+  const allLines = await db
+    .select({
+      purchaseId: purchaseLines.purchaseId,
+      productCode: purchaseLines.productCode,
+      productType: purchaseLines.productType,
+    })
+    .from(purchaseLines)
+    .where(and(
+      inArray(purchaseLines.purchaseId, purchaseIds),
+      sql`${purchaseLines.productType} != 'other'`
+    ));
+
+  // Build lookup maps
+  const linesByPurchase = new Map<number, typeof allLines>();
+  for (const line of allLines) {
+    if (!linesByPurchase.has(line.purchaseId)) {
+      linesByPurchase.set(line.purchaseId, []);
+    }
+    linesByPurchase.get(line.purchaseId)!.push(line);
+  }
+
+  // Group purchases by area
+  const purchasesByArea = new Map<number, typeof allPurchases>();
+  for (const p of allPurchases) {
+    if (p.areaId === null) continue;
+    if (!purchasesByArea.has(p.areaId)) {
+      purchasesByArea.set(p.areaId, []);
+    }
+    purchasesByArea.get(p.areaId)!.push(p);
+  }
 
   const result: HospitalRegisterEntry[] = [];
 
-  for (const area of areasWithPurchases) {
-    // Get all purchases for this area AND this hospital, ordered by date (most recent first)
-    const areaPurchases = await db
-      .select({
-        purchaseId: purchases.id,
-        orderDate: purchases.orderDate,
-        invoiceDate: purchases.invoiceDate,
-        orderNumber: purchases.orderNumber,
-      })
-      .from(purchases)
-      .where(and(
-        eq(purchases.areaId, area.areaId),
-        eq(purchases.hospitalId, hospitalId)
-      ))
-      .orderBy(desc(purchases.invoiceDate), desc(purchases.orderDate));
-
-    if (areaPurchases.length === 0) continue;
-
-    // Get all purchase lines for these purchases
-    const purchaseIds = areaPurchases.map(p => p.purchaseId);
-    const lines = await db
-      .select({
-        purchaseId: purchaseLines.purchaseId,
-        productCode: purchaseLines.productCode,
-        productType: purchaseLines.productType,
-      })
-      .from(purchaseLines)
-      .where(and(
-        inArray(purchaseLines.purchaseId, purchaseIds),
-        sql`${purchaseLines.productType} != 'other'`
-      ));
-
-    // Find the most recent purchase with curtain lines
+  // Process each area
+  for (const [areaId, areaPurchases] of Array.from(purchasesByArea)) {
+    const areaName = areaPurchases[0].areaName;
     let lastColor = 'Unknown';
     let lastOrderDate: Date | null = null;
     let lastOrderNumber: string | null = null;
     const curtainTypes = new Set<'SC' | 'SMTC' | 'SLD'>();
 
-    // Group lines by purchase
-    const linesByPurchase = new Map<number, typeof lines>();
-    for (const line of lines) {
-      if (!linesByPurchase.has(line.purchaseId)) {
-        linesByPurchase.set(line.purchaseId, []);
-      }
-      linesByPurchase.get(line.purchaseId)!.push(line);
-    }
-
-    // Process purchases in order (most recent first)
+    // Process purchases in order (already sorted most recent first)
     for (const purchase of areaPurchases) {
-      const purchaseLines = linesByPurchase.get(purchase.purchaseId) || [];
-      if (purchaseLines.length === 0) continue;
+      const lines = linesByPurchase.get(purchase.purchaseId) || [];
+      if (lines.length === 0) continue;
 
-      // Get curtain types and colors from this purchase
-      for (const line of purchaseLines) {
+      // Get curtain types from this purchase
+      for (const line of lines) {
         const type = extractCurtainType(line.productCode || '');
         if (type !== 'Unknown') {
           curtainTypes.add(type);
@@ -1143,8 +1141,7 @@ export async function getHospitalRegister(hospitalId: number): Promise<HospitalR
       if (!lastOrderDate) {
         lastOrderDate = purchase.invoiceDate || purchase.orderDate;
         lastOrderNumber = purchase.orderNumber;
-        // Get color from first curtain line of most recent order
-        const firstLine = purchaseLines[0];
+        const firstLine = lines[0];
         if (firstLine?.productCode) {
           lastColor = extractColorFromSku(firstLine.productCode);
         }
@@ -1160,8 +1157,8 @@ export async function getHospitalRegister(hospitalId: number): Promise<HospitalR
     }
 
     result.push({
-      areaId: area.areaId,
-      areaName: area.areaName,
+      areaId,
+      areaName,
       curtainType,
       lastColor,
       lastOrderDate,
