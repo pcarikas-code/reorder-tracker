@@ -336,7 +336,7 @@ export default function HospitalRegister() {
 
       {/* Order History Dialog */}
       <Dialog open={!!selectedArea} onOpenChange={(open) => !open && setSelectedArea(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl w-[90vw] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <History className="h-5 w-5" />
@@ -378,10 +378,10 @@ export default function HospitalRegister() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Product</TableHead>
-                          <TableHead>Type</TableHead>
-                          <TableHead>Color</TableHead>
-                          <TableHead className="text-right">Qty</TableHead>
+                          <TableHead className="w-[45%]">Product</TableHead>
+                          <TableHead className="w-[15%]">Type</TableHead>
+                          <TableHead className="w-[25%]">Color</TableHead>
+                          <TableHead className="w-[15%] text-right">Qty</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -390,7 +390,7 @@ export default function HospitalRegister() {
                             <TableCell>
                               <div className="font-mono text-sm">{product.productCode}</div>
                               {product.productDescription && (
-                                <div className="text-xs text-muted-foreground">{product.productDescription}</div>
+                                <div className="text-xs text-muted-foreground truncate max-w-[400px]" title={product.productDescription}>{product.productDescription}</div>
                               )}
                             </TableCell>
                             <TableCell>

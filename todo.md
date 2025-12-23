@@ -199,3 +199,4 @@
 - [x] Fix color code mappings: mb=Medical Blue, la=Latte, pb=Pastel Blue, py=Pastel Yellow, gbkwh=Geometric Black on White, gbrla=Geometric Brown on Latte, ggowh=Geometric Gold on White, gmbpb=Geometric Medical Blue on Pastel Blue, sdwh=Simply Dotty on White, sdpb=Simply Dotty on Pastel Blue, sdpy=Simply Dotty on Pastel Yellow
 - [x] Add clickable area order history to Hospital Register page
 - [x] Optimize database queries and add indexes for better performance
+- [x] Fix Order History dialog width to fit all data columns
