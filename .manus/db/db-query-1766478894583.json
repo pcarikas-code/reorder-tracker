@@ -1,0 +1,16 @@
+{
+  "query": "SELECT \n  h.customerName,\n  COUNT(p.id) as total_purchases,\n  SUM(CASE WHEN p.areaId IS NOT NULL THEN 1 ELSE 0 END) as matched_purchases,\n  SUM(CASE WHEN p.areaId IS NULL THEN 1 ELSE 0 END) as unmatched_purchases\nFROM purchases p\nJOIN hospitals h ON p.hospitalId = h.id\nWHERE h.customerName LIKE '%Capital%'\nGROUP BY h.id, h.customerName",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT \n  h.customerName,\n  COUNT(p.id) as total_purchases,\n  SUM(CASE WHEN p.areaId IS NOT NULL THEN 1 ELSE 0 END) as matched_purchases,\n  SUM(CASE WHEN p.areaId IS NULL THEN 1 ELSE 0 END) as unmatched_purchases\nFROM purchases p\nJOIN hospitals h ON p.hospitalId = h.id\nWHERE h.customerName LIKE '%Capital%'\nGROUP BY h.id, h.customerName",
+  "rows": [
+    {
+      "customerName": "Capital & Coast Health New Zealand",
+      "total_purchases": "76",
+      "matched_purchases": "61",
+      "unmatched_purchases": "15"
+    }
+  ],
+  "messages": [],
+  "stdout": "customerName\ttotal_purchases\tmatched_purchases\tunmatched_purchases\nCapital & Coast Health New Zealand\t76\t61\t15\n",
+  "stderr": "",
+  "execution_time_ms": 1489
+}

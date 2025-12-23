@@ -10,6 +10,7 @@ import Matches from "./pages/Matches";
 import Sync from "./pages/Sync";
 import Areas from "./pages/Areas";
 import Hospitals from "./pages/Hospitals";
+import HospitalRegister from "./pages/HospitalRegister";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/sync" component={Sync} />
       <Route path="/areas" component={Areas} />
       <Route path="/hospitals" component={Hospitals} />
+      <Route path="/hospital-register" component={HospitalRegister} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

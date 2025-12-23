@@ -195,3 +195,4 @@
 - [x] Fix: Area extraction losing 'Minor Care Zone' from CustomerRef - rawAreaText only contains 'Wellington Hospital'
 - [x] Add forecast period selector (30, 60, 90, 120 days) to Stock Forecast page
 - [x] Ensure Export function uses selected forecast period in filename and exports filtered data (already implemented)
+- [x] Create Hospital Register page with areas, curtain types (SC/SMTC/SLD), and last color ordered

@@ -1,0 +1,70 @@
+{
+  "query": "SELECT \n  h.customerName,\n  COUNT(p.id) as total_purchases,\n  SUM(CASE WHEN p.areaId IS NOT NULL THEN 1 ELSE 0 END) as matched_purchases,\n  SUM(CASE WHEN p.areaId IS NULL THEN 1 ELSE 0 END) as unmatched_purchases\nFROM purchases p\nJOIN hospitals h ON p.hospitalId = h.id\nGROUP BY h.id, h.customerName\nORDER BY matched_purchases DESC\nLIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xdfM6hBeGk8i8i.5dbeac8a2102 --database DxAqoJ22pGdNTCdjRs8uzu --execute SELECT \n  h.customerName,\n  COUNT(p.id) as total_purchases,\n  SUM(CASE WHEN p.areaId IS NOT NULL THEN 1 ELSE 0 END) as matched_purchases,\n  SUM(CASE WHEN p.areaId IS NULL THEN 1 ELSE 0 END) as unmatched_purchases\nFROM purchases p\nJOIN hospitals h ON p.hospitalId = h.id\nGROUP BY h.id, h.customerName\nORDER BY matched_purchases DESC\nLIMIT 10",
+  "rows": [
+    {
+      "customerName": "Decor People (2024) Ltd.",
+      "total_purchases": "96",
+      "matched_purchases": "90",
+      "unmatched_purchases": "6"
+    },
+    {
+      "customerName": "Waikato Health New Zealand",
+      "total_purchases": "82",
+      "matched_purchases": "70",
+      "unmatched_purchases": "12"
+    },
+    {
+      "customerName": "Counties Manukau - Health New Zealand",
+      "total_purchases": "77",
+      "matched_purchases": "65",
+      "unmatched_purchases": "12"
+    },
+    {
+      "customerName": "Lakes - Health New Zealand",
+      "total_purchases": "81",
+      "matched_purchases": "65",
+      "unmatched_purchases": "16"
+    },
+    {
+      "customerName": "Capital & Coast Health New Zealand",
+      "total_purchases": "76",
+      "matched_purchases": "61",
+      "unmatched_purchases": "15"
+    },
+    {
+      "customerName": "Nelson Marlborough - Health New Zealand",
+      "total_purchases": "63",
+      "matched_purchases": "57",
+      "unmatched_purchases": "6"
+    },
+    {
+      "customerName": "Tamaki Health",
+      "total_purchases": "58",
+      "matched_purchases": "52",
+      "unmatched_purchases": "6"
+    },
+    {
+      "customerName": "Taranaki - Health New Zealand",
+      "total_purchases": "30",
+      "matched_purchases": "29",
+      "unmatched_purchases": "1"
+    },
+    {
+      "customerName": "SCDHB Health New Zealand",
+      "total_purchases": "29",
+      "matched_purchases": "26",
+      "unmatched_purchases": "3"
+    },
+    {
+      "customerName": "Mercy Hospital - Mount Eden",
+      "total_purchases": "18",
+      "matched_purchases": "14",
+      "unmatched_purchases": "4"
+    }
+  ],
+  "messages": [],
+  "stdout": "customerName\ttotal_purchases\tmatched_purchases\tunmatched_purchases\nDecor People (2024) Ltd.\t96\t90\t6\nWaikato Health New Zealand\t82\t70\t12\nCounties Manukau - Health New Zealand\t77\t65\t12\nLakes - Health New Zealand\t81\t65\t16\nCapital & Coast Health New Zealand\t76\t61\t15\nNelson Marlborough - Health New Zealand\t63\t57\t6\nTamaki Health\t58\t52\t6\nTaranaki - Health New Zealand\t30\t29\t1\nSCDHB Health New Zealand\t29\t26\t3\nMercy Hospital - Mount Eden\t18\t14\t4\n",
+  "stderr": "",
+  "execution_time_ms": 1591
+}

@@ -181,6 +181,7 @@ export const appRouter = router({
     list: protectedProcedure.query(async () => db.getAllHospitals()),
     get: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => db.getHospitalById(input.id)),
     getPurchases: protectedProcedure.input(z.object({ hospitalId: z.number() })).query(async ({ input }) => db.getPurchasesByHospitalWithArea(input.hospitalId)),
+    register: protectedProcedure.input(z.object({ hospitalId: z.number() })).query(async ({ input }) => db.getHospitalRegister(input.hospitalId)),
   }),
 
   areas: router({

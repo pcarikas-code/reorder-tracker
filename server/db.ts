@@ -1004,3 +1004,170 @@ export async function repairOrphanedPendingMatches(): Promise<{ repaired: number
   
   return { repaired: orphaned.length };
 }
+
+// Hospital Register - Get all areas for a hospital with curtain type and last color
+export interface HospitalRegisterEntry {
+  areaId: number;
+  areaName: string;
+  curtainType: 'SC' | 'SMTC' | 'SLD' | 'Mixed' | 'Unknown';
+  lastColor: string;
+  lastOrderDate: Date | null;
+  lastOrderNumber: string | null;
+  totalOrders: number;
+}
+
+// Color code mapping from SKU suffix to readable name
+const COLOR_CODES: Record<string, string> = {
+  'te': 'Teal',
+  'mb': 'Mid Blue',
+  'pb': 'Pale Blue',
+  'py': 'Pale Yellow',
+  'gy': 'Grey',
+  'la': 'Lavender',
+  'wh': 'White',
+  'ggowh': 'Golden Glow White',
+  'sdwh': 'Sand White',
+  'sdpb': 'Sand Pale Blue',
+  'gmbpb': 'GMB Pale Blue',
+};
+
+function extractColorFromSku(sku: string): string {
+  if (!sku) return 'Unknown';
+  const lowerSku = sku.toLowerCase();
+  
+  // Check for longer color codes first (5 chars, then 4 chars, then 2 chars)
+  for (const [code, name] of Object.entries(COLOR_CODES)) {
+    if (lowerSku.endsWith(code)) {
+      return name;
+    }
+  }
+  
+  // Fallback: extract last 2 characters
+  const lastTwo = lowerSku.slice(-2);
+  return COLOR_CODES[lastTwo] || lastTwo.toUpperCase();
+}
+
+function extractCurtainType(sku: string): 'SC' | 'SMTC' | 'SLD' | 'Unknown' {
+  if (!sku) return 'Unknown';
+  const lowerSku = sku.toLowerCase();
+  if (lowerSku.startsWith('sc-')) return 'SC';
+  if (lowerSku.startsWith('smtc-')) return 'SMTC';
+  if (lowerSku.startsWith('sld-')) return 'SLD';
+  return 'Unknown';
+}
+
+export async function getHospitalRegister(hospitalId: number): Promise<HospitalRegisterEntry[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Get all areas that have purchases for this hospital
+  // Note: We filter by purchase.hospitalId, not area.hospitalId, because
+  // areas might be shared across hospitals or have incorrect hospitalId
+  const areasWithPurchases = await db
+    .select({
+      areaId: areas.id,
+      areaName: areas.name,
+    })
+    .from(areas)
+    .innerJoin(purchases, eq(areas.id, purchases.areaId))
+    .where(eq(purchases.hospitalId, hospitalId))
+    .groupBy(areas.id, areas.name);
+
+  if (areasWithPurchases.length === 0) return [];
+
+  const result: HospitalRegisterEntry[] = [];
+
+  for (const area of areasWithPurchases) {
+    // Get all purchases for this area AND this hospital, ordered by date (most recent first)
+    const areaPurchases = await db
+      .select({
+        purchaseId: purchases.id,
+        orderDate: purchases.orderDate,
+        invoiceDate: purchases.invoiceDate,
+        orderNumber: purchases.orderNumber,
+      })
+      .from(purchases)
+      .where(and(
+        eq(purchases.areaId, area.areaId),
+        eq(purchases.hospitalId, hospitalId)
+      ))
+      .orderBy(desc(purchases.invoiceDate), desc(purchases.orderDate));
+
+    if (areaPurchases.length === 0) continue;
+
+    // Get all purchase lines for these purchases
+    const purchaseIds = areaPurchases.map(p => p.purchaseId);
+    const lines = await db
+      .select({
+        purchaseId: purchaseLines.purchaseId,
+        productCode: purchaseLines.productCode,
+        productType: purchaseLines.productType,
+      })
+      .from(purchaseLines)
+      .where(and(
+        inArray(purchaseLines.purchaseId, purchaseIds),
+        sql`${purchaseLines.productType} != 'other'`
+      ));
+
+    // Find the most recent purchase with curtain lines
+    let lastColor = 'Unknown';
+    let lastOrderDate: Date | null = null;
+    let lastOrderNumber: string | null = null;
+    const curtainTypes = new Set<'SC' | 'SMTC' | 'SLD'>();
+
+    // Group lines by purchase
+    const linesByPurchase = new Map<number, typeof lines>();
+    for (const line of lines) {
+      if (!linesByPurchase.has(line.purchaseId)) {
+        linesByPurchase.set(line.purchaseId, []);
+      }
+      linesByPurchase.get(line.purchaseId)!.push(line);
+    }
+
+    // Process purchases in order (most recent first)
+    for (const purchase of areaPurchases) {
+      const purchaseLines = linesByPurchase.get(purchase.purchaseId) || [];
+      if (purchaseLines.length === 0) continue;
+
+      // Get curtain types and colors from this purchase
+      for (const line of purchaseLines) {
+        const type = extractCurtainType(line.productCode || '');
+        if (type !== 'Unknown') {
+          curtainTypes.add(type);
+        }
+      }
+
+      // Set last order info from the most recent purchase with lines
+      if (!lastOrderDate) {
+        lastOrderDate = purchase.invoiceDate || purchase.orderDate;
+        lastOrderNumber = purchase.orderNumber;
+        // Get color from first curtain line of most recent order
+        const firstLine = purchaseLines[0];
+        if (firstLine?.productCode) {
+          lastColor = extractColorFromSku(firstLine.productCode);
+        }
+      }
+    }
+
+    // Determine curtain type
+    let curtainType: 'SC' | 'SMTC' | 'SLD' | 'Mixed' | 'Unknown' = 'Unknown';
+    if (curtainTypes.size === 1) {
+      curtainType = Array.from(curtainTypes)[0];
+    } else if (curtainTypes.size > 1) {
+      curtainType = 'Mixed';
+    }
+
+    result.push({
+      areaId: area.areaId,
+      areaName: area.areaName,
+      curtainType,
+      lastColor,
+      lastOrderDate,
+      lastOrderNumber,
+      totalOrders: areaPurchases.length,
+    });
+  }
+
+  // Sort by area name
+  return result.sort((a, b) => a.areaName.localeCompare(b.areaName));
+}
