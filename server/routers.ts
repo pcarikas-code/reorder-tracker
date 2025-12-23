@@ -208,19 +208,28 @@ export const appRouter = router({
   }),
 
   forecasts: router({
-    list: protectedProcedure.query(async () => db.getStockForecasts()),
-    byHospital: protectedProcedure.input(z.object({ hospitalId: z.number() })).query(async ({ input }) => { const all = await db.getStockForecasts(); return all.filter(f => f.hospitalId === input.hospitalId); }),
-    summary: protectedProcedure.query(async () => {
-      const forecasts = await db.getStockForecasts();
-      const summary: Record<string, { type: string; size: string; color: string; totalQuantity: number; areaCount: number }> = {};
-      for (const f of forecasts) {
-        const key = `${f.productType}-${f.productSize}-${f.productColor}`;
-        if (!summary[key]) summary[key] = { type: f.productType, size: f.productSize, color: f.productColor, totalQuantity: 0, areaCount: 0 };
-        summary[key].totalQuantity += f.expectedQuantity;
-        summary[key].areaCount += 1;
-      }
-      return Object.values(summary).sort((a, b) => b.totalQuantity - a.totalQuantity);
-    }),
+    list: protectedProcedure
+      .input(z.object({ forecastDays: z.number().min(1).max(365).optional() }).optional())
+      .query(async ({ input }) => db.getStockForecasts(input?.forecastDays ?? 90)),
+    byHospital: protectedProcedure
+      .input(z.object({ hospitalId: z.number(), forecastDays: z.number().min(1).max(365).optional() }))
+      .query(async ({ input }) => {
+        const all = await db.getStockForecasts(input.forecastDays ?? 90);
+        return all.filter(f => f.hospitalId === input.hospitalId);
+      }),
+    summary: protectedProcedure
+      .input(z.object({ forecastDays: z.number().min(1).max(365).optional() }).optional())
+      .query(async ({ input }) => {
+        const forecasts = await db.getStockForecasts(input?.forecastDays ?? 90);
+        const summary: Record<string, { type: string; size: string; color: string; totalQuantity: number; areaCount: number }> = {};
+        for (const f of forecasts) {
+          const key = `${f.productType}-${f.productSize}-${f.productColor}`;
+          if (!summary[key]) summary[key] = { type: f.productType, size: f.productSize, color: f.productColor, totalQuantity: 0, areaCount: 0 };
+          summary[key].totalQuantity += f.expectedQuantity;
+          summary[key].areaCount += 1;
+        }
+        return Object.values(summary).sort((a, b) => b.totalQuantity - a.totalQuantity);
+      }),
   }),
 
   // SIMPLIFIED: All operations now use purchaseId directly

@@ -6,16 +6,24 @@ import { Combobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, ChevronDown, ChevronRight } from "lucide-react";
+import { Search, Download, ChevronDown, ChevronRight, Calendar } from "lucide-react";
 import { useState, useMemo, Fragment } from "react";
 import { toast } from "sonner";
+
+const FORECAST_PERIODS = [
+  { value: 30, label: "30 Days" },
+  { value: 60, label: "60 Days" },
+  { value: 90, label: "90 Days" },
+  { value: 120, label: "120 Days" },
+];
 
 export default function Forecast() {
   const [searchTerm, setSearchTerm] = useState("");
   const [hospitalFilter, setHospitalFilter] = useState<string>("all");
   const [expandedSkus, setExpandedSkus] = useState<Set<string>>(new Set());
+  const [forecastDays, setForecastDays] = useState(90);
 
-  const { data: forecasts, isLoading } = trpc.forecasts.list.useQuery();
+  const { data: forecasts, isLoading } = trpc.forecasts.list.useQuery({ forecastDays });
   const { data: hospitals } = trpc.hospitals.list.useQuery();
 
   // Filter forecasts
@@ -100,7 +108,7 @@ export default function Forecast() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `stock-forecast-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `stock-forecast-${forecastDays}days-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success('Export downloaded');
@@ -119,11 +127,58 @@ export default function Forecast() {
           </Button>
         </div>
 
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Calendar className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Forecast Period</p>
+                  <p className="text-2xl font-bold">{forecastDays} Days</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Curtains Needed</p>
+                <p className="text-2xl font-bold">{totalQty.toLocaleString()}</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div>
+                <p className="text-sm text-muted-foreground">Areas Due for Reorder</p>
+                <p className="text-2xl font-bold">{totalAreas.toLocaleString()}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Filters */}
         <Card>
           <CardHeader className="pb-4"><CardTitle className="text-lg">Filter</CardTitle></CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-4">
+              {/* Forecast Period Selector */}
+              <div className="flex gap-1 p-1 bg-muted rounded-lg">
+                {FORECAST_PERIODS.map((period) => (
+                  <Button
+                    key={period.value}
+                    variant={forecastDays === period.value ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setForecastDays(period.value)}
+                    className="px-3"
+                  >
+                    {period.label}
+                  </Button>
+                ))}
+              </div>
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search by SKU, hospital, or area..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
@@ -154,7 +209,12 @@ export default function Forecast() {
             {isLoading ? (
               <div className="flex items-center justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
             ) : skuAggregates.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No forecast data available.</div>
+              <div className="text-center py-8 text-muted-foreground">
+                No forecast data for the next {forecastDays} days.
+                {forecastDays < 120 && (
+                  <p className="mt-2 text-sm">Try selecting a longer forecast period.</p>
+                )}
+              </div>
             ) : (
               <div className="rounded-md border">
                 <Table>

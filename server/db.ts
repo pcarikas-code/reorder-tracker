@@ -637,13 +637,15 @@ export interface StockForecast {
   expectedReorderDate: Date | null;
 }
 
-export async function getStockForecasts(): Promise<StockForecast[]> {
+export async function getStockForecasts(forecastDays: number = 90): Promise<StockForecast[]> {
   const db = await getDb();
   if (!db) return [];
 
   const allAreas = await getAllAreas();
   const forecasts: StockForecast[] = [];
   const twoYearsMs = 2 * 365 * 24 * 60 * 60 * 1000;
+  const now = new Date();
+  const forecastEndDate = new Date(now.getTime() + forecastDays * 24 * 60 * 60 * 1000);
 
   // Get all purchases and lines in bulk
   // Sort by invoiceDate first (for delivered orders), then orderDate - consistent with getAreaReorderStatuses
@@ -678,22 +680,27 @@ export async function getStockForecasts(): Promise<StockForecast[]> {
     );
 
     for (const line of curtainLines) {
-      forecasts.push({
-        hospitalId: area.hospitalId,
-        hospitalName: area.hospitalName,
-        areaId: area.id,
-        areaName: area.name,
-        productCode: line.productCode || 'unknown',
-        productDescription: line.productDescription || '',
-        productType: line.productType || 'other',
-        productSize: line.productSize || 'other',
-        productColor: line.productColor || 'Unknown',
-        expectedQuantity: Number(line.quantity),
-        // Use invoiceDate for reorder calculation (when curtains were delivered), fall back to orderDate
-        expectedReorderDate: lastPurchase.invoiceDate 
-          ? new Date(lastPurchase.invoiceDate.getTime() + twoYearsMs)
-          : new Date(lastPurchase.orderDate.getTime() + twoYearsMs),
-      });
+      // Calculate expected reorder date
+      const expectedReorderDate = lastPurchase.invoiceDate 
+        ? new Date(lastPurchase.invoiceDate.getTime() + twoYearsMs)
+        : new Date(lastPurchase.orderDate.getTime() + twoYearsMs);
+      
+      // Only include if reorder date is within the forecast period
+      if (expectedReorderDate <= forecastEndDate) {
+        forecasts.push({
+          hospitalId: area.hospitalId,
+          hospitalName: area.hospitalName,
+          areaId: area.id,
+          areaName: area.name,
+          productCode: line.productCode || 'unknown',
+          productDescription: line.productDescription || '',
+          productType: line.productType || 'other',
+          productSize: line.productSize || 'other',
+          productColor: line.productColor || 'Unknown',
+          expectedQuantity: Number(line.quantity),
+          expectedReorderDate,
+        });
+      }
     }
   }
 
