@@ -336,7 +336,7 @@ export default function HospitalRegister() {
 
       {/* Order History Dialog */}
       <Dialog open={!!selectedArea} onOpenChange={(open) => !open && setSelectedArea(null)}>
-        <DialogContent className="max-w-6xl w-[90vw] max-h-[80vh] overflow-y-auto">
+        <DialogContent className="!max-w-6xl !w-[90vw] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <History className="h-5 w-5" />
