@@ -200,3 +200,4 @@
 - [x] Add clickable area order history to Hospital Register page
 - [x] Optimize database queries and add indexes for better performance
 - [x] Fix Order History dialog width to fit all data columns
+- [x] Add printable PDF export for Hospital Register with hospital name and area register

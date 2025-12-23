@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Download, Building2, Palette, Layers, ExternalLink, History } from "lucide-react";
+import { Search, Download, Building2, Palette, Layers, ExternalLink, History, Printer } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
@@ -126,6 +126,103 @@ export default function HospitalRegister() {
     toast.success('Export downloaded');
   };
 
+  const handlePrintPDF = () => {
+    if (!filteredRegister.length || !selectedHospitalName) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast.error('Please allow popups to print');
+      return;
+    }
+
+    const currentDate = new Date().toLocaleDateString();
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Hospital Register - ${selectedHospitalName}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+          .header h1 { font-size: 24px; margin-bottom: 5px; }
+          .header h2 { font-size: 18px; color: #666; font-weight: normal; }
+          .header .date { font-size: 12px; color: #888; margin-top: 10px; }
+          .summary { display: flex; justify-content: center; gap: 30px; margin-bottom: 25px; padding: 15px; background: #f5f5f5; border-radius: 5px; }
+          .summary-item { text-align: center; }
+          .summary-item .label { font-size: 11px; color: #666; text-transform: uppercase; }
+          .summary-item .value { font-size: 20px; font-weight: bold; }
+          table { width: 100%; border-collapse: collapse; font-size: 11px; }
+          th { background: #333; color: white; padding: 10px 8px; text-align: left; font-weight: 600; }
+          td { padding: 8px; border-bottom: 1px solid #ddd; }
+          tr:nth-child(even) { background: #f9f9f9; }
+          .type-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+          .type-SC { background: #d1fae5; color: #065f46; }
+          .type-SMTC { background: #ede9fe; color: #5b21b6; }
+          .type-SLD { background: #ffedd5; color: #9a3412; }
+          .type-Mixed { background: #fce7f3; color: #9d174d; }
+          .color-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; background: #e5e7eb; }
+          @media print {
+            body { padding: 10px; }
+            .summary { break-inside: avoid; }
+            tr { break-inside: avoid; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Hospital Register</h1>
+          <h2>${selectedHospitalName}</h2>
+          <p class="date">Generated: ${currentDate}</p>
+        </div>
+        
+        <div class="summary">
+          <div class="summary-item"><div class="label">Total Areas</div><div class="value">${stats.total}</div></div>
+          <div class="summary-item"><div class="label">SC (Standard)</div><div class="value">${stats.sc}</div></div>
+          <div class="summary-item"><div class="label">SMTC (Mesh Top)</div><div class="value">${stats.smtc}</div></div>
+          <div class="summary-item"><div class="label">SLD (Long Drop)</div><div class="value">${stats.sld}</div></div>
+          <div class="summary-item"><div class="label">Mixed</div><div class="value">${stats.mixed}</div></div>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 35%">Area</th>
+              <th style="width: 12%">Type</th>
+              <th style="width: 20%">Last Color</th>
+              <th style="width: 13%">Last Order</th>
+              <th style="width: 12%">Order #</th>
+              <th style="width: 8%; text-align: right">Orders</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredRegister.map(entry => `
+              <tr>
+                <td>${entry.areaName}</td>
+                <td><span class="type-badge type-${entry.curtainType}">${entry.curtainType}</span></td>
+                <td><span class="color-badge">${entry.lastColor}</span></td>
+                <td>${entry.lastOrderDate ? new Date(entry.lastOrderDate).toLocaleDateString() : '-'}</td>
+                <td>${entry.lastOrderNumber || '-'}</td>
+                <td style="text-align: right">${entry.totalOrders}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    
+    // Wait for content to load then print
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+    
+    toast.success('Print dialog opened');
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -134,9 +231,14 @@ export default function HospitalRegister() {
             <h1 className="text-2xl font-bold tracking-tight">Hospital Register</h1>
             <p className="text-muted-foreground">Snapshot view of curtain types and colors by area</p>
           </div>
-          <Button variant="outline" onClick={handleExport} disabled={!filteredRegister.length}>
-            <Download className="h-4 w-4 mr-2" />Export
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handlePrintPDF} disabled={!filteredRegister.length}>
+              <Printer className="h-4 w-4 mr-2" />Print
+            </Button>
+            <Button variant="outline" onClick={handleExport} disabled={!filteredRegister.length}>
+              <Download className="h-4 w-4 mr-2" />Export
+            </Button>
+          </div>
         </div>
 
         {/* Hospital Selector */}
