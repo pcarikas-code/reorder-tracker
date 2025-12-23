@@ -152,9 +152,10 @@ export default function HospitalRegister() {
           .summary-item { text-align: center; }
           .summary-item .label { font-size: 11px; color: #666; text-transform: uppercase; }
           .summary-item .value { font-size: 20px; font-weight: bold; }
-          table { width: 100%; border-collapse: collapse; font-size: 11px; }
-          th { background: #333; color: white; padding: 10px 8px; text-align: left; font-weight: 600; }
-          td { padding: 8px; border-bottom: 1px solid #ddd; }
+          table { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
+          th { background: #333; color: white; padding: 10px 8px; text-align: left; font-weight: 600; white-space: nowrap; }
+          td { padding: 8px; border-bottom: 1px solid #ddd; overflow: hidden; text-overflow: ellipsis; }
+          td.nowrap { white-space: nowrap; }
           tr:nth-child(even) { background: #f9f9f9; }
           .type-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; }
           .type-SC { background: #d1fae5; color: #065f46; }
@@ -187,11 +188,11 @@ export default function HospitalRegister() {
         <table>
           <thead>
             <tr>
-              <th style="width: 35%">Area</th>
-              <th style="width: 12%">Type</th>
-              <th style="width: 20%">Last Color</th>
-              <th style="width: 13%">Last Order</th>
-              <th style="width: 12%">Order #</th>
+              <th style="width: 30%">Area</th>
+              <th style="width: 10%">Type</th>
+              <th style="width: 22%">Last Color</th>
+              <th style="width: 12%">Last Order</th>
+              <th style="width: 18%">Order #</th>
               <th style="width: 8%; text-align: right">Orders</th>
             </tr>
           </thead>
@@ -201,8 +202,8 @@ export default function HospitalRegister() {
                 <td>${entry.areaName}</td>
                 <td><span class="type-badge type-${entry.curtainType}">${entry.curtainType}</span></td>
                 <td><span class="color-badge">${entry.lastColor}</span></td>
-                <td>${entry.lastOrderDate ? new Date(entry.lastOrderDate).toLocaleDateString() : '-'}</td>
-                <td>${entry.lastOrderNumber || '-'}</td>
+                <td class="nowrap">${entry.lastOrderDate ? new Date(entry.lastOrderDate).toLocaleDateString() : '-'}</td>
+                <td class="nowrap">${entry.lastOrderNumber || '-'}</td>
                 <td style="text-align: right">${entry.totalOrders}</td>
               </tr>
             `).join('')}
