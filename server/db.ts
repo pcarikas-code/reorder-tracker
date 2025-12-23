@@ -1173,3 +1173,100 @@ export async function getHospitalRegister(hospitalId: number): Promise<HospitalR
   // Sort by area name
   return result.sort((a, b) => a.areaName.localeCompare(b.areaName));
 }
+
+// Area order history with detailed product information
+export interface AreaOrderHistoryEntry {
+  purchaseId: number;
+  orderNumber: string | null;
+  unleashOrderGuid: string | null;
+  orderDate: Date | null;
+  invoiceDate: Date | null;
+  customerRef: string | null;
+  products: {
+    productCode: string;
+    productDescription: string | null;
+    quantity: number;
+    curtainType: 'SC' | 'SMTC' | 'SLD' | 'Unknown';
+    color: string;
+  }[];
+  totalCurtains: number;
+}
+
+export async function getAreaOrderHistory(areaId: number, hospitalId: number): Promise<AreaOrderHistoryEntry[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Get all purchases for this area and hospital
+  const areaPurchases = await db
+    .select({
+      id: purchases.id,
+      orderNumber: purchases.orderNumber,
+      unleashOrderGuid: purchases.unleashOrderGuid,
+      orderDate: purchases.orderDate,
+      invoiceDate: purchases.invoiceDate,
+      customerRef: purchases.customerRef,
+    })
+    .from(purchases)
+    .where(and(
+      eq(purchases.areaId, areaId),
+      eq(purchases.hospitalId, hospitalId),
+      eq(purchases.isExcluded, false)
+    ))
+    .orderBy(desc(purchases.invoiceDate), desc(purchases.orderDate));
+
+  if (areaPurchases.length === 0) return [];
+
+  // Get all purchase lines for these purchases
+  const purchaseIds = areaPurchases.map(p => p.id);
+  const lines = await db
+    .select({
+      purchaseId: purchaseLines.purchaseId,
+      productCode: purchaseLines.productCode,
+      productDescription: purchaseLines.productDescription,
+      quantity: purchaseLines.quantity,
+      productType: purchaseLines.productType,
+    })
+    .from(purchaseLines)
+    .where(and(
+      inArray(purchaseLines.purchaseId, purchaseIds),
+      sql`${purchaseLines.productType} != 'other'`
+    ));
+
+  // Group lines by purchase
+  const linesByPurchase = new Map<number, typeof lines>();
+  for (const line of lines) {
+    if (!linesByPurchase.has(line.purchaseId)) {
+      linesByPurchase.set(line.purchaseId, []);
+    }
+    linesByPurchase.get(line.purchaseId)!.push(line);
+  }
+
+  // Build result
+  const result: AreaOrderHistoryEntry[] = [];
+  for (const purchase of areaPurchases) {
+    const purchaseLinesList = linesByPurchase.get(purchase.id) || [];
+    
+    const products = purchaseLinesList.map(line => ({
+      productCode: line.productCode || '',
+      productDescription: line.productDescription,
+      quantity: Number(line.quantity) || 0,
+      curtainType: extractCurtainType(line.productCode || ''),
+      color: extractColorFromSku(line.productCode || ''),
+    }));
+
+    const totalCurtains = products.reduce((sum, p) => sum + p.quantity, 0);
+
+    result.push({
+      purchaseId: purchase.id,
+      orderNumber: purchase.orderNumber,
+      unleashOrderGuid: purchase.unleashOrderGuid,
+      orderDate: purchase.orderDate,
+      invoiceDate: purchase.invoiceDate,
+      customerRef: purchase.customerRef,
+      products,
+      totalCurtains,
+    });
+  }
+
+  return result;
+}

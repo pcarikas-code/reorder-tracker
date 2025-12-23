@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, Building2, Palette, Layers } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, Download, Building2, Palette, Layers, ExternalLink, History } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 
@@ -14,16 +15,18 @@ import { toast } from "sonner";
 const getColorBadgeStyle = (color: string): string => {
   const colorMap: Record<string, string> = {
     'Teal': 'bg-teal-100 text-teal-800 border-teal-300',
-    'Mid Blue': 'bg-blue-100 text-blue-800 border-blue-300',
-    'Pale Blue': 'bg-sky-100 text-sky-800 border-sky-300',
-    'Pale Yellow': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+    'Medical Blue': 'bg-blue-100 text-blue-800 border-blue-300',
+    'Pastel Blue': 'bg-sky-100 text-sky-800 border-sky-300',
+    'Pastel Yellow': 'bg-yellow-100 text-yellow-800 border-yellow-300',
     'Grey': 'bg-gray-100 text-gray-800 border-gray-300',
-    'Lavender': 'bg-purple-100 text-purple-800 border-purple-300',
-    'White': 'bg-white text-gray-800 border-gray-300',
-    'Golden Glow White': 'bg-amber-50 text-amber-800 border-amber-300',
-    'Sand White': 'bg-orange-50 text-orange-800 border-orange-300',
-    'Sand Pale Blue': 'bg-cyan-50 text-cyan-800 border-cyan-300',
-    'GMB Pale Blue': 'bg-indigo-50 text-indigo-800 border-indigo-300',
+    'Latte': 'bg-amber-100 text-amber-800 border-amber-300',
+    'Geometric Black on White': 'bg-slate-100 text-slate-800 border-slate-300',
+    'Geometric Brown on Latte': 'bg-orange-100 text-orange-800 border-orange-300',
+    'Geometric Gold on White': 'bg-amber-50 text-amber-800 border-amber-300',
+    'Geometric Medical Blue on Pastel Blue': 'bg-indigo-100 text-indigo-800 border-indigo-300',
+    'Simply Dotty on White': 'bg-gray-50 text-gray-800 border-gray-300',
+    'Simply Dotty on Pastel Blue': 'bg-cyan-100 text-cyan-800 border-cyan-300',
+    'Simply Dotty on Pastel Yellow': 'bg-lime-100 text-lime-800 border-lime-300',
   };
   return colorMap[color] || 'bg-gray-100 text-gray-800 border-gray-300';
 };
@@ -39,15 +42,34 @@ const getCurtainTypeBadgeStyle = (type: string): string => {
   return typeMap[type] || 'bg-gray-100 text-gray-800 border-gray-300';
 };
 
+// Order link component
+const OrderLink = ({ orderNumber, unleashOrderGuid }: { orderNumber: string | null; unleashOrderGuid: string | null }) => {
+  if (!orderNumber) return <span className="text-muted-foreground">-</span>;
+  const url = `https://au.unleashedsoftware.com/v2/SalesOrders#/?OrderNumber=${encodeURIComponent(orderNumber)}`;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
+      {orderNumber}
+      <ExternalLink className="h-3 w-3" />
+    </a>
+  );
+};
+
 export default function HospitalRegister() {
   const [selectedHospital, setSelectedHospital] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [selectedArea, setSelectedArea] = useState<{ areaId: number; areaName: string } | null>(null);
 
   const { data: hospitals } = trpc.hospitals.list.useQuery();
   const { data: register, isLoading } = trpc.hospitals.register.useQuery(
     { hospitalId: parseInt(selectedHospital) },
     { enabled: !!selectedHospital && selectedHospital !== "" }
+  );
+
+  // Fetch order history when an area is selected
+  const { data: orderHistory, isLoading: isLoadingHistory } = trpc.areas.getOrderHistory.useQuery(
+    { areaId: selectedArea?.areaId || 0, hospitalId: parseInt(selectedHospital) },
+    { enabled: !!selectedArea && !!selectedHospital }
   );
 
   // Get selected hospital name
@@ -256,8 +278,17 @@ export default function HospitalRegister() {
                       </TableHeader>
                       <TableBody>
                         {filteredRegister.map((entry) => (
-                          <TableRow key={entry.areaId}>
-                            <TableCell className="font-medium">{entry.areaName}</TableCell>
+                          <TableRow 
+                            key={entry.areaId} 
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => setSelectedArea({ areaId: entry.areaId, areaName: entry.areaName })}
+                          >
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-2">
+                                {entry.areaName}
+                                <History className="h-3 w-3 text-muted-foreground" />
+                              </div>
+                            </TableCell>
                             <TableCell>
                               <Badge variant="outline" className={getCurtainTypeBadgeStyle(entry.curtainType)}>
                                 {entry.curtainType}
@@ -302,6 +333,88 @@ export default function HospitalRegister() {
           </Card>
         )}
       </div>
+
+      {/* Order History Dialog */}
+      <Dialog open={!!selectedArea} onOpenChange={(open) => !open && setSelectedArea(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Order History: {selectedArea?.areaName}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {isLoadingHistory ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : !orderHistory || orderHistory.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No order history found for this area.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {orderHistory.map((order) => (
+                <Card key={order.purchaseId}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <OrderLink orderNumber={order.orderNumber} unleashOrderGuid={order.unleashOrderGuid} />
+                        <span className="text-sm text-muted-foreground">
+                          {order.invoiceDate 
+                            ? `Invoiced: ${new Date(order.invoiceDate).toLocaleDateString()}`
+                            : order.orderDate 
+                              ? `Ordered: ${new Date(order.orderDate).toLocaleDateString()}`
+                              : 'No date'}
+                        </span>
+                      </div>
+                      <Badge variant="secondary">{order.totalCurtains} curtains</Badge>
+                    </div>
+                    {order.customerRef && (
+                      <p className="text-xs text-muted-foreground mt-1">Ref: {order.customerRef}</p>
+                    )}
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Product</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Color</TableHead>
+                          <TableHead className="text-right">Qty</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {order.products.map((product, idx) => (
+                          <TableRow key={idx}>
+                            <TableCell>
+                              <div className="font-mono text-sm">{product.productCode}</div>
+                              {product.productDescription && (
+                                <div className="text-xs text-muted-foreground">{product.productDescription}</div>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={getCurtainTypeBadgeStyle(product.curtainType)}>
+                                {product.curtainType}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={getColorBadgeStyle(product.color)}>
+                                {product.color}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right font-medium">{product.quantity}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
