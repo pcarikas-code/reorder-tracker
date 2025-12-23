@@ -1019,16 +1019,18 @@ export interface HospitalRegisterEntry {
 // Color code mapping from SKU suffix to readable name
 const COLOR_CODES: Record<string, string> = {
   'te': 'Teal',
-  'mb': 'Mid Blue',
-  'pb': 'Pale Blue',
-  'py': 'Pale Yellow',
+  'mb': 'Medical Blue',
+  'pb': 'Pastel Blue',
+  'py': 'Pastel Yellow',
   'gy': 'Grey',
-  'la': 'Lavender',
-  'wh': 'White',
-  'ggowh': 'Golden Glow White',
-  'sdwh': 'Sand White',
-  'sdpb': 'Sand Pale Blue',
-  'gmbpb': 'GMB Pale Blue',
+  'la': 'Latte',
+  'gbkwh': 'Geometric Black on White',
+  'gbrla': 'Geometric Brown on Latte',
+  'ggowh': 'Geometric Gold on White',
+  'gmbpb': 'Geometric Medical Blue on Pastel Blue',
+  'sdwh': 'Simply Dotty on White',
+  'sdpb': 'Simply Dotty on Pastel Blue',
+  'sdpy': 'Simply Dotty on Pastel Yellow',
 };
 
 function extractColorFromSku(sku: string): string {

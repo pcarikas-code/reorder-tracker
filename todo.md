@@ -196,3 +196,4 @@
 - [x] Add forecast period selector (30, 60, 90, 120 days) to Stock Forecast page
 - [x] Ensure Export function uses selected forecast period in filename and exports filtered data (already implemented)
 - [x] Create Hospital Register page with areas, curtain types (SC/SMTC/SLD), and last color ordered
+- [x] Fix color code mappings: mb=Medical Blue, la=Latte, pb=Pastel Blue, py=Pastel Yellow, gbkwh=Geometric Black on White, gbrla=Geometric Brown on Latte, ggowh=Geometric Gold on White, gmbpb=Geometric Medical Blue on Pastel Blue, sdwh=Simply Dotty on White, sdpb=Simply Dotty on Pastel Blue, sdpy=Simply Dotty on Pastel Yellow
